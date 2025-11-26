@@ -1,0 +1,293 @@
+.game-config {
+  position: fixed;
+  left: 2rem;
+  top: 6rem;
+  width: 260px;
+  background: rgba(26, 26, 26, 0.95);
+  border: 2px solid rgba(100, 108, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.game-config.collapsed {
+  width: 55px;
+}
+
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 2px solid rgba(100, 108, 255, 0.2);
+}
+
+.game-config.collapsed .config-header {
+  padding: 0.875rem;
+  border-bottom: none;
+  justify-content: center;
+}
+
+.config-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #646cff;
+  margin: 0;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+.game-config.collapsed .config-title {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.toggle-button {
+  background: rgba(100, 108, 255, 0.2);
+  border: 1px solid #646cff;
+  color: #646cff;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.toggle-button:hover {
+  background: rgba(100, 108, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.config-content {
+  padding: 1.25rem;
+  max-height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
+
+.config-group {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.config-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.config-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-label-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.config-input {
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border: 2px solid rgba(100, 108, 255, 0.5);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+
+.config-input:hover {
+  border-color: #646cff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.config-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.config-hint {
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Mode Buttons */
+.mode-buttons-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.mode-button-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.mode-button-sidebar:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(100, 108, 255, 0.3);
+  transform: translateX(4px);
+}
+
+.mode-button-sidebar.active {
+  background: rgba(100, 108, 255, 0.2);
+  border-color: #646cff;
+  box-shadow: 0 0 15px rgba(100, 108, 255, 0.3);
+}
+
+.mode-button-sidebar .mode-icon {
+  font-size: 1.1rem;
+}
+
+.mode-button-sidebar .mode-name {
+  font-weight: 600;
+  color: #ddd;
+}
+
+/* Toggle Switch */
+.config-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.switch-container-sidebar {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.switch-input-sidebar {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider-sidebar {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: 0.4s;
+  border-radius: 28px;
+}
+
+.switch-slider-sidebar:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #888;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switch-input-sidebar:checked + .switch-slider-sidebar {
+  background-color: rgba(100, 108, 255, 0.3);
+  border-color: #646cff;
+}
+
+.switch-input-sidebar:checked + .switch-slider-sidebar:before {
+  transform: translateX(22px);
+  background-color: #646cff;
+}
+
+.switch-slider-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.switch-input-sidebar:checked + .switch-slider-sidebar:hover {
+  background-color: rgba(100, 108, 255, 0.4);
+}
+
+/* Scrollbar styling */
+.config-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.config-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.config-content::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.3);
+  border-radius: 3px;
+}
+
+.config-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.5);
+}
+
+/* Animation on mount */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.game-config {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .game-config {
+    left: 1rem;
+    top: 5rem;
+    width: 240px;
+  }
+  
+  .game-config.collapsed {
+    width: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-config {
+    display: none;
+  }
+}

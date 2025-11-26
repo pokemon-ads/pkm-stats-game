@@ -1,5 +1,6 @@
 import type { Pokemon, StatName } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
+import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
 
 interface PokemonCardProps {
   pokemon: Pokemon
@@ -14,6 +15,7 @@ interface PokemonCardProps {
     statName: StatName
     value: number
   }>
+  skipConfirmation: boolean
 }
 
 // Helper function to get the correct sprite (shiny or normal)
@@ -29,7 +31,8 @@ export const PokemonCard = ({
   onSelectStatName,
   onConfirmSelection,
   round,
-  selectedStats
+  selectedStats,
+  skipConfirmation
 }: PokemonCardProps) => {
   const getStatValue = (statName: StatName): number => {
     const stat = pokemon.stats.find(s => s.stat.name === statName)
@@ -41,12 +44,12 @@ export const PokemonCard = ({
     return selectedStats.find(s => s.statName === statName)
   }
 
-  const allStats: StatName[] = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed']
+  const allStats = [...STAT_ORDER] as StatName[]
 
   return (
     <div className="pokemon-card-game">
       <div className="round-indicator">
-        Manche {round} / 6
+        Manche {round} / {GAME_CONFIG.ROUNDS_PER_GAME}
       </div>
 
       <div className="pokemon-info">
@@ -150,7 +153,7 @@ export const PokemonCard = ({
         </div>
       </div>
 
-      {!statsRevealed && selectedStatName && (
+      {!statsRevealed && selectedStatName && !skipConfirmation && (
         <div className="modal-overlay" onClick={(e) => {
           if (e.target === e.currentTarget) {
             onSelectStatName(null as any)

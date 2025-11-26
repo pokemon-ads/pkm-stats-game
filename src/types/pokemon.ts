@@ -63,15 +63,21 @@ export interface GameState {
 }
 
 export interface FilterOptions {
-  region?: string
-  generation?: number
-  type?: string
+  generations?: number[]  // Changed to array for multiple selection
+  types?: string[]  // Changed to array for multiple selection
   legendary?: boolean
   mythical?: boolean
   mega?: boolean
   gigantamax?: boolean
   ultraBeast?: boolean
   legendsZA?: boolean
+  paradox?: boolean  // New: Paradox Pokemon filter
+  regionalForms?: ('alola' | 'galar' | 'hisui' | 'paldea')[]  // Changed to array for multiple selection
+  filterMode?: 'AND' | 'OR'  // Filter combination mode (AND = restrictive, OR = additive)
+  
+  // Legacy single-value support (for backward compatibility)
+  generation?: number
+  type?: string
   regionalForm?: 'alola' | 'galar' | 'hisui' | 'paldea'
 }
 
@@ -233,6 +239,40 @@ export const GIGANTAMAX_IDS = [
 // Ultra Beast Pokemon IDs (Gen 7)
 export const ULTRA_BEAST_IDS = [
   793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806
+]
+
+// Paradox Pokemon IDs (Gen 9)
+// Ancient Paradox (Past forms from Scarlet)
+export const PARADOX_ANCIENT_IDS = [
+  984, // Great Tusk (Donphan)
+  985, // Scream Tail (Jigglypuff)
+  986, // Brute Bonnet (Amoonguss)
+  987, // Flutter Mane (Misdreavus)
+  988, // Slither Wing (Volcarona)
+  989, // Sandy Shocks (Magneton)
+  1005, // Roaring Moon (Salamence)
+  1009, // Walking Wake (Suicune)
+  1010  // Gouging Fire (Entei)
+]
+
+// Future Paradox (Future forms from Violet)
+export const PARADOX_FUTURE_IDS = [
+  990, // Iron Treads (Donphan)
+  991, // Iron Bundle (Delibird)
+  992, // Iron Hands (Hariyama)
+  993, // Iron Jugulis (Hydreigon)
+  994, // Iron Moth (Volcarona)
+  995, // Iron Thorns (Tyranitar)
+  1006, // Iron Valiant (Gardevoir/Gallade)
+  1014, // Iron Leaves (Virizion)
+  1020, // Iron Boulder (Terrakion)
+  1021  // Iron Crown (Cobalion)
+]
+
+// All Paradox Pokemon IDs
+export const PARADOX_IDS = [
+  ...PARADOX_ANCIENT_IDS,
+  ...PARADOX_FUTURE_IDS
 ]
 
 // Legends Z-A Mega Evolution Pokemon (base forms)
