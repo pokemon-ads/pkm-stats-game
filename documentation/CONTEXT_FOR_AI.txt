@@ -1,0 +1,59 @@
+NOM DU PROJET
+PokeStats Challenge (pkStats)
+
+BUT DE L'APPLICATION
+Un jeu web educatif et ludique ou l'utilisateur doit deviner la statistique de base la plus elevee d'un Pokemon affiche aleatoirement. L'objectif est de tester et d'ameliorer ses connaissances sur les statistiques des Pokemon.
+
+STACK TECHNIQUE
+Frontend: React, Vite, TypeScript, CSS
+Backend: Node.js, Express, TypeScript, MongoDB (Mongoose)
+API Externe: PokeAPI (pokeapi-js-wrapper)
+
+FONCTIONNALITES IMPLEMENTEES
+
+1. BOUCLE DE JEU PRINCIPALE
+- Affichage d'un Pokemon aleatoire (image et nom).
+- Affichage des 6 statistiques (PV, Attaque, Defense, Attaque Spe, Defense Spe, Vitesse) masquees.
+- Interaction utilisateur : Clic sur une statistique pour deviner.
+- Validation : Revelation des valeurs reelles.
+- Feedback visuel : Vert pour une bonne reponse, Rouge pour une mauvaise.
+- Bouton pour passer au Pokemon suivant.
+
+2. SYSTEME DE FILTRES (AVANCE)
+- Generations : Selection multiple (Gen 1 a 9).
+- Types : Selection multiple (Feu, Eau, Plante, etc.).
+- Categories speciales :
+  - Legendaires
+  - Fabuleux (Mythical)
+  - Mega-evolutions
+  - Gigamax
+  - Ultra-Chimeres
+  - Paradoxes (Passe et Futur)
+  - Legendes Z-A (Source de donnees externe via fichier JSON local)
+- Formes Regionales : Alola, Galar, Hisui, Paldea.
+- Modes de filtrage :
+  - Restrictif (AND) : Le Pokemon doit correspondre a TOUS les criteres selectionnes.
+  - Additif (OR) : Le Pokemon doit correspondre a AU MOINS UN des criteres.
+
+3. CONFIGURATION ET PARAMETRES
+- Mode Rapide : Selection directe sans demande de confirmation.
+- Bonus Shiny : Option pour doubler les points ou modifier l'affichage si le Pokemon est shiny (logique en cours).
+- Gestion des Shiny : Possibilite d'afficher les stats normales meme pour les sprites shiny.
+
+4. ARCHITECTURE ET DONNEES
+- Service Pokemon : Centralise les appels a PokeAPI.
+- Service de Donnees Externes : Architecture extensible pour importer des Pokemon non presents dans l'API (ex: za.json pour Legendes Z-A).
+- Mise en cache : Les donnees des types et des Pokemon sont mises en cache pour la performance.
+
+5. BACKEND (EN COURS DE DEVELOPPEMENT)
+- Structure MVC (Model-View-Controller).
+- Authentification : Inscription, Connexion (JWT).
+- Base de donnees : Modeles User et Score.
+- Leaderboard : API prevue pour les classements mondiaux et par pays.
+
+STRUCTURE DES FICHIERS CLES
+- src/services/pokemon.service.ts : Logique principale de recuperation des donnees.
+- src/services/external/ : Gestion des sources de donnees locales (JSON).
+- src/utils/pokemonFilters.ts : Logique complexe de filtrage des pools d'ID Pokemon.
+- src/hooks/usePokeGame.ts : Hook principal gerant l'etat du jeu.
+- backend/ : Dossier contenant toute la logique serveur (API, DB).

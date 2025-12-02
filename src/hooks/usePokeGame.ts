@@ -1,41 +1,40 @@
 import { useState, useCallback } from "react";
-import * as PokeAPI from "pokeapi-js-wrapper";
 import type {
   GameState,
   Pokemon,
   StatName,
   FilterOptions,
-  PokemonSpecies,
-} from "../types/pokemon";
-import {
-  GENERATIONS,
-  LEGENDARY_IDS,
-  MYTHICAL_IDS,
-  MEGA_EVOLUTION_IDS,
-  GIGANTAMAX_IDS,
-  ULTRA_BEAST_IDS,
-  LEGENDS_ZA_MEGA_IDS,
-  PARADOX_IDS,
-  MEGA_FORMS,
-  GIGANTAMAX_FORMS,
-  ALOLA_FORM_IDS,
-  GALAR_FORM_IDS,
-  HISUI_FORM_IDS,
-  PALDEA_FORM_IDS,
-  REGIONAL_FORMS,
 } from "../types/pokemon";
 import {
   GAME_CONFIG,
-  POKEMON_CONFIG,
-  STORAGE_KEYS,
   STAT_ORDER,
   GAME_PHASES,
-  FILTER_MODES,
 } from "../config/constants";
-
-const P = new PokeAPI.Pokedex();
+import { pokemonService } from "../services/pokemon.service";
+import { useGameSettings } from "./useGameSettings";
+import { usePokemonPool } from "./usePokemonPool";
 
 export const usePokeGame = () => {
+  // --- Sub-hooks ---
+  const {
+    skipConfirmation,
+    shinyBonus,
+    updateSkipConfirmation,
+    updateShinyBonus,
+    setSkipConfirmation,
+  } = useGameSettings();
+
+  const {
+    filters,
+    setFilters,
+    pokemonPool,
+    isGeneratingPool,
+    updateFilterMode,
+    initializePool,
+    resetPool,
+  } = usePokemonPool();
+
+  // --- Game State ---
   const [gameState, setGameState] = useState<GameState>({
     phase: GAME_PHASES.SETUP,
     targetTotal: GAME_CONFIG.DEFAULT_TARGET_TOTAL,
@@ -47,315 +46,9 @@ export const usePokeGame = () => {
     statsRevealed: false,
   });
 
-  const [filters, setFilters] = useState<FilterOptions>({});
-  const [pokemonPool, setPokemonPool] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
-  const [skipConfirmation, setSkipConfirmation] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKIP_CONFIRMATION);
-    return saved === "true";
-  });
-  const [shinyBonus, setShinyBonus] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SHINY_BONUS);
-    return saved === "true";
-  });
 
-  // Generate Pokemon pool based on filters
-  const generatePokemonPool = useCallback(
-    async (filterOptions: FilterOptions) => {
-      const filterMode = filterOptions.filterMode || FILTER_MODES.AND;
-
-      // Base pool: All Pokemon (Gen 1-9) - we'll filter by generations in OR mode
-      let basePool: number[] = Array.from(
-        { length: POKEMON_CONFIG.TOTAL_POKEMON },
-        (_, i) => i + POKEMON_CONFIG.FIRST_POKEMON_ID
-      );
-
-      // In AND mode, apply generation as base pool restriction
-      if (filterMode === FILTER_MODES.AND) {
-        // Legacy single-value support
-        if (
-          filterOptions.generation &&
-          GENERATIONS[filterOptions.generation as keyof typeof GENERATIONS]
-        ) {
-          const generation =
-            GENERATIONS[filterOptions.generation as keyof typeof GENERATIONS];
-          basePool = Array.from(
-            { length: generation.range[1] - generation.range[0] + 1 },
-            (_, i) => generation.range[0] + i
-          );
-        }
-      }
-
-      if (filterMode === FILTER_MODES.OR) {
-        // OR mode: Union of all filters
-        const pools: number[][] = [];
-
-        // Generations filter (multiple selection)
-        if (filterOptions.generations && filterOptions.generations.length > 0) {
-          filterOptions.generations.forEach((genKey) => {
-            const generation = GENERATIONS[genKey as keyof typeof GENERATIONS];
-            if (generation) {
-              const genPool = Array.from(
-                { length: generation.range[1] - generation.range[0] + 1 },
-                (_, i) => generation.range[0] + i
-              );
-              pools.push(genPool);
-            }
-          });
-        }
-
-        // Types filter (multiple selection)
-        if (filterOptions.types && filterOptions.types.length > 0) {
-          for (const type of filterOptions.types) {
-            try {
-              const typeData = (await P.getTypeByName(type)) as any;
-              const typePokemonIds = typeData.pokemon
-                .map((p: any) => {
-                  const urlParts = p.pokemon.url.split("/");
-                  return parseInt(urlParts[urlParts.length - 2]);
-                })
-                .filter((id: number) => id <= POKEMON_CONFIG.TOTAL_POKEMON);
-              pools.push(typePokemonIds);
-            } catch (error) {
-              console.error(`Error fetching type data for ${type}:`, error);
-            }
-          }
-        }
-
-        // Legendary filter
-        if (filterOptions.legendary) {
-          pools.push(LEGENDARY_IDS);
-        }
-
-        // Mythical filter
-        if (filterOptions.mythical) {
-          pools.push(MYTHICAL_IDS);
-        }
-
-        // Mega evolution filter
-        if (filterOptions.mega) {
-          pools.push(MEGA_EVOLUTION_IDS);
-        }
-
-        // Gigantamax filter
-        if (filterOptions.gigantamax) {
-          pools.push(GIGANTAMAX_IDS);
-        }
-
-        // Ultra beast filter
-        if (filterOptions.ultraBeast) {
-          pools.push(ULTRA_BEAST_IDS);
-        }
-
-        // Legends Z-A mega filter
-        if (filterOptions.legendsZA) {
-          pools.push(LEGENDS_ZA_MEGA_IDS);
-        }
-
-        // Paradox filter
-        if (filterOptions.paradox) {
-          pools.push(PARADOX_IDS);
-        }
-
-        // Regional forms filter (multiple selection)
-        if (
-          filterOptions.regionalForms &&
-          filterOptions.regionalForms.length > 0
-        ) {
-          filterOptions.regionalForms.forEach((form) => {
-            const formIds = {
-              alola: ALOLA_FORM_IDS,
-              galar: GALAR_FORM_IDS,
-              hisui: HISUI_FORM_IDS,
-              paldea: PALDEA_FORM_IDS,
-            }[form];
-            if (formIds) {
-              pools.push(formIds);
-            }
-          });
-        }
-
-        // If no filters applied, return base pool
-        if (pools.length === 0) {
-          return basePool;
-        }
-
-        // Union: combine all pools and remove duplicates
-        const unionPool = [...new Set(pools.flat())];
-        return unionPool;
-      } else {
-        // AND mode: Intersection of all filters
-        let pool = [...basePool];
-
-        // Apply generations filter (multiple selection with union within category)
-        if (filterOptions.generations && filterOptions.generations.length > 0) {
-          const genPools: number[][] = [];
-          filterOptions.generations.forEach((genKey) => {
-            const generation = GENERATIONS[genKey as keyof typeof GENERATIONS];
-            if (generation) {
-              const genPool = Array.from(
-                { length: generation.range[1] - generation.range[0] + 1 },
-                (_, i) => generation.range[0] + i
-              );
-              genPools.push(genPool);
-            }
-          });
-          // Union of selected generations (Gen 1 OR Gen 2)
-          const genUnion = [...new Set(genPools.flat())];
-          pool = pool.filter((id) => genUnion.includes(id));
-        }
-
-        // Apply types filter (multiple selection with INTERSECTION - must have ALL selected types)
-        if (filterOptions.types && filterOptions.types.length > 0) {
-          for (const type of filterOptions.types) {
-            try {
-              const typeData = (await P.getTypeByName(type)) as any;
-              const typePokemonIds = typeData.pokemon
-                .map((p: any) => {
-                  const urlParts = p.pokemon.url.split("/");
-                  return parseInt(urlParts[urlParts.length - 2]);
-                })
-                .filter((id: number) => id <= POKEMON_CONFIG.TOTAL_POKEMON);
-
-              // Intersect: keep only Pokemon that have this type
-              pool = pool.filter((id) => typePokemonIds.includes(id));
-            } catch (error) {
-              console.error(`Error fetching type data for ${type}:`, error);
-            }
-          }
-        }
-
-        // Apply legendary filter
-        if (filterOptions.legendary) {
-          pool = pool.filter((id) => LEGENDARY_IDS.includes(id));
-        }
-
-        // Apply mythical filter
-        if (filterOptions.mythical) {
-          pool = pool.filter((id) => MYTHICAL_IDS.includes(id));
-        }
-
-        // Apply mega evolution filter
-        if (filterOptions.mega) {
-          pool = pool.filter((id) => MEGA_EVOLUTION_IDS.includes(id));
-        }
-
-        // Apply gigantamax filter
-        if (filterOptions.gigantamax) {
-          pool = pool.filter((id) => GIGANTAMAX_IDS.includes(id));
-        }
-
-        // Apply ultra beast filter
-        if (filterOptions.ultraBeast) {
-          pool = pool.filter((id) => ULTRA_BEAST_IDS.includes(id));
-        }
-
-        // Apply Legends Z-A mega filter
-        if (filterOptions.legendsZA) {
-          pool = pool.filter((id) => LEGENDS_ZA_MEGA_IDS.includes(id));
-        }
-
-        // Apply Paradox filter
-        if (filterOptions.paradox) {
-          pool = pool.filter((id) => PARADOX_IDS.includes(id));
-        }
-
-        // Apply regional forms filter (multiple selection with union)
-        if (
-          filterOptions.regionalForms &&
-          filterOptions.regionalForms.length > 0
-        ) {
-          const formPools: number[][] = [];
-          filterOptions.regionalForms.forEach((form) => {
-            const formIds = {
-              alola: ALOLA_FORM_IDS,
-              galar: GALAR_FORM_IDS,
-              hisui: HISUI_FORM_IDS,
-              paldea: PALDEA_FORM_IDS,
-            }[form];
-            if (formIds) {
-              formPools.push(formIds);
-            }
-          });
-          // Union of selected regional forms
-          const formUnion = [...new Set(formPools.flat())];
-          pool = pool.filter((id) => formUnion.includes(id));
-        }
-
-        return pool;
-      }
-    },
-    []
-  );
-
-  // Fetch special form (regional, mega evolution or gigantamax) if needed
-  const fetchPokemonForm = useCallback(
-    async (
-      baseId: number,
-      useMega: boolean,
-      useGigantamax: boolean,
-      regionalForms?: string[]
-    ): Promise<Pokemon> => {
-      // Priority: Regional Form > Gigantamax > Mega > Base form
-
-      // Try Regional forms if specified
-      if (regionalForms && regionalForms.length > 0) {
-        // Try each regional form in order
-        for (const form of regionalForms) {
-          if (REGIONAL_FORMS[form]) {
-            const formVariants = REGIONAL_FORMS[form][baseId];
-            if (formVariants && formVariants.length > 0) {
-              try {
-                // If multiple regional forms, pick one randomly
-                const formName =
-                  formVariants[Math.floor(Math.random() * formVariants.length)];
-                return (await P.getPokemonByName(formName)) as Pokemon;
-              } catch (error) {
-                console.error(
-                  `Error fetching ${form} form, trying next:`,
-                  error
-                );
-              }
-            }
-          }
-        }
-      }
-
-      // Try Gigantamax form
-      if (useGigantamax && GIGANTAMAX_FORMS[baseId]) {
-        try {
-          return (await P.getPokemonByName(
-            GIGANTAMAX_FORMS[baseId]
-          )) as Pokemon;
-        } catch (error) {
-          console.error(
-            "Error fetching Gigantamax form, trying base form:",
-            error
-          );
-          return (await P.getPokemonByName(baseId)) as Pokemon;
-        }
-      }
-
-      // Try Mega form
-      if (useMega && MEGA_FORMS[baseId]) {
-        // Get mega form(s)
-        const megaForms = MEGA_FORMS[baseId];
-        // If multiple mega forms, pick one randomly
-        const megaForm =
-          megaForms[Math.floor(Math.random() * megaForms.length)];
-
-        try {
-          return (await P.getPokemonByName(megaForm)) as Pokemon;
-        } catch (error) {
-          console.error("Error fetching mega form, using base form:", error);
-          return (await P.getPokemonByName(baseId)) as Pokemon;
-        }
-      }
-
-      return (await P.getPokemonByName(baseId)) as Pokemon;
-    },
-    []
-  );
+  // --- Actions ---
 
   // Start game with filters
   const startGame = useCallback(
@@ -365,9 +58,10 @@ export const usePokeGame = () => {
       skipConfirmationMode: boolean
     ) => {
       setLoading(true);
-      const pool = await generatePokemonPool(filterOptions);
-      setPokemonPool(pool);
-      setFilters(filterOptions);
+      
+      // Initialize pool via the sub-hook
+      await initializePool(filterOptions);
+      
       setSkipConfirmation(skipConfirmationMode);
 
       setGameState({
@@ -383,7 +77,7 @@ export const usePokeGame = () => {
 
       setLoading(false);
     },
-    [generatePokemonPool]
+    [initializePool, setSkipConfirmation]
   );
 
   // Draw a random Pokemon from the pool
@@ -398,12 +92,15 @@ export const usePokeGame = () => {
       try {
         const randomId =
           pokemonPool[Math.floor(Math.random() * pokemonPool.length)];
-        const pokemon = await fetchPokemonForm(
+        
+        const pokemon = await pokemonService.fetchPokemonWithForm(
           randomId,
-          !!(filters.mega || filters.legendsZA),
-          !!filters.gigantamax,
-          filters.regionalForms ||
-            (filters.regionalForm ? [filters.regionalForm] : undefined)
+          {
+            useMega: !!(filters.mega || filters.legendsZA),
+            useGigantamax: !!filters.gigantamax,
+            regionalForms: filters.regionalForms ||
+              (filters.regionalForm ? [filters.regionalForm] : undefined)
+          }
         );
 
         // Determine if this Pokemon is shiny
@@ -439,7 +136,6 @@ export const usePokeGame = () => {
     filters.gigantamax,
     filters.regionalForms,
     filters.regionalForm,
-    fetchPokemonForm,
   ]);
 
   // Select a stat (with or without confirmation based on preference)
@@ -569,12 +265,15 @@ export const usePokeGame = () => {
       selectedStatName: null,
       statsRevealed: false,
     });
-    setPokemonPool([]);
-    setFilters({});
-  }, []);
+    resetPool();
+  }, [resetPool]);
 
   // Restart game with same filters and target
   const restartWithSameFilters = useCallback(() => {
+    // We don't need to regenerate the pool if filters haven't changed
+    // But startGame calls initializePool which regenerates it.
+    // Optimization: We could pass the existing pool if we wanted, 
+    // but for now let's keep it simple and consistent with startGame signature.
     startGame(gameState.targetTotal, filters, skipConfirmation);
   }, [gameState.targetTotal, filters, skipConfirmation, startGame]);
 
@@ -612,29 +311,9 @@ export const usePokeGame = () => {
     }));
   }, []);
 
-  // Update filter mode during game
-  const updateFilterMode = useCallback((mode: "AND" | "OR") => {
-    setFilters((prev) => ({
-      ...prev,
-      filterMode: mode,
-    }));
-  }, []);
-
-  // Update skip confirmation preference
-  const updateSkipConfirmation = useCallback((value: boolean) => {
-    setSkipConfirmation(value);
-    localStorage.setItem(STORAGE_KEYS.SKIP_CONFIRMATION, value.toString());
-  }, []);
-
-  // Update shiny bonus preference
-  const updateShinyBonus = useCallback((value: boolean) => {
-    setShinyBonus(value);
-    localStorage.setItem(STORAGE_KEYS.SHINY_BONUS, value.toString());
-  }, []);
-
   return {
     gameState,
-    loading,
+    loading: loading || isGeneratingPool,
     filters,
     skipConfirmation,
     shinyBonus,

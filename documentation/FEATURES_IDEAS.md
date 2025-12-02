@@ -3,12 +3,6 @@
 
 ## 🎯 Filtres Manquants
 
-### 1. Filtre par Génération Spécifique
-- **Description** : Permettre de filtrer par génération (Gen 1, Gen 2, etc.) au lieu de par région
-- **Avantages** : Plus simple et intuitif pour certains joueurs
-- **Implémentation** : Similaire au filtre région actuel
-- **Difficulté** : ⭐ Facile
-
 ### 2. Filtre par Stade d'Évolution
 - **Options** :
   - Pokémon de base uniquement (Bulbizarre, Salamèche, Carapuce...)
@@ -37,16 +31,7 @@
 - **Avantages** : Permet d'ajuster la difficulté du jeu
 - **Difficulté** : ⭐⭐ Moyen (calcul des stats totales)
 
-### 5. Filtre par Formes Alternatives
-- **Options** :
-  - Formes d'Alola (Raichu-Alola, Exeggutor-Alola...)
-  - Formes de Galar (Ponyta-Galar, Zigzaton-Galar...)
-  - Formes de Paldea (Tauros-Paldea...)
-  - Formes de Hisui (Voltorbe-Hisui, Zorua-Hisui...)
-- **Avantages** : Découvrir les formes régionales
-- **Difficulté** : ⭐⭐⭐ Difficile (gestion des formes alternatives dans l'API)
 
----
 
 ## 🎮 Features de Gameplay
 
