@@ -3,7 +3,6 @@ import { usePokeGame } from './hooks/usePokeGame'
 import { GameSetup } from './components/GameSetup'
 import { PokemonCard } from './components/PokemonCard'
 import { GameResult } from './components/GameResult'
-import { ActiveFilters } from './components/ActiveFilters'
 import { GameConfig } from './components/GameConfig'
 import { GAME_CONFIG, GAME_PHASES } from './config/constants'
 import './App.css'
@@ -80,16 +79,68 @@ function App() {
 
       {gameState.phase === GAME_PHASES.PLAYING && (
         <>
-          <ActiveFilters filters={filters} targetTotal={gameState.targetTotal} />
       <div className="game-header">
         <h1>PokéStats Challenge</h1>
         <div className="game-progress">
           <div className="progress-info">
-            <span>Objectif : {gameState.targetTotal}</span>
-            <span>Stats sélectionnées : {gameState.selectedStats.length} / {GAME_CONFIG.ROUNDS_PER_GAME}</span>
+            <div className="info-item">
+              <span className="label">Objectif :</span>
+              <span className="value">{gameState.targetTotal}</span>
+            </div>
+            <div className="info-item filter-info-container">
+              <span className="label">Filtres :</span>
+              <span className="value">
+                {filters.generations && filters.generations.length > 0 ? `Gen ${filters.generations.join(', ')}` : 'Toutes Gen'}
+                {filters.types && filters.types.length > 0 ? ` • ${filters.types.length} Types` : ''}
+                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) ? ' • Spéciaux' : ''}
+                {filters.filterMode === 'AND' ? ' (Restrictif)' : ' (Additif)'}
+              </span>
+              
+              <div className="filter-tooltip">
+                <div className="tooltip-row">
+                  <span className="tooltip-label">Mode :</span>
+                  <span className="tooltip-value">{filters.filterMode === 'AND' ? 'Restrictif (ET)' : 'Additif (OU)'}</span>
+                </div>
+                <div className="tooltip-row">
+                  <span className="tooltip-label">Générations :</span>
+                  <span className="tooltip-value">{filters.generations && filters.generations.length > 0 ? filters.generations.join(', ') : 'Toutes'}</span>
+                </div>
+                {filters.types && filters.types.length > 0 && (
+                  <div className="tooltip-row">
+                    <span className="tooltip-label">Types :</span>
+                    <div className="tooltip-types">
+                      {filters.types.map(t => (
+                        <span key={t} className={`mini-type-tag type-${t}`}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) && (
+                  <div className="tooltip-row">
+                    <span className="tooltip-label">Spécial :</span>
+                    <span className="tooltip-value">
+                      {[
+                        filters.legendary && 'Légendaires',
+                        filters.mythical && 'Fabuleux',
+                        filters.ultraBeast && 'Ultra-Chimères',
+                        filters.paradox && 'Paradoxes',
+                        filters.mega && 'Méga',
+                        filters.gigantamax && 'Gigamax',
+                        filters.legendsZA && 'Légendes Z-A',
+                        filters.regionalForms && filters.regionalForms.length > 0 && `Formes (${filters.regionalForms.join(', ')})`
+                      ].filter(Boolean).join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="info-item">
+              <span className="label">Manche :</span>
+              <span className="value">{gameState.selectedStats.length} / {GAME_CONFIG.ROUNDS_PER_GAME}</span>
+            </div>
           </div>
           <div className="current-total">
-            Total actuel : {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
+            Total : {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
           </div>
         </div>
       </div>

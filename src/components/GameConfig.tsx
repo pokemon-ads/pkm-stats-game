@@ -14,12 +14,16 @@ export const GameConfig = ({
   onSkipConfirmationChange,
   onShinyBonusChange
 }: GameConfigProps) => {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <div className={`game-config ${isExpanded ? 'expanded' : 'collapsed'}`}>
       <div className="config-header" onClick={() => setIsExpanded(!isExpanded)}>
-        <h3 className="config-title">⚙️ Paramètres</h3>
+        {isExpanded ? (
+          <h3 className="config-title">⚙️ Paramètres</h3>
+        ) : (
+          <span className="config-icon">⚙️</span>
+        )}
         <button className="toggle-button" aria-label={isExpanded ? 'Réduire' : 'Agrandir'}>
           {isExpanded ? '◀' : '▶'}
         </button>

@@ -19,7 +19,7 @@ const getPokemonSprite = (pokemon: Pokemon): string => {
 
 export const GameResult = ({ gameState, totalStats, won, difference, onReset, onRestartWithSameFilters, onRestartWithAdjustedTarget }: GameResultProps) => {
   return (
-    <div className="game-result">
+    <div className="game-result-compact">
       <div className={`result-header-compact ${won ? 'victory' : 'defeat'}`}>
         <div className="result-title-row">
           <h1>{won ? '🎉 Victoire !' : '😢 Défaite'}</h1>
@@ -47,31 +47,29 @@ export const GameResult = ({ gameState, totalStats, won, difference, onReset, on
         </p>
       </div>
 
-      <div className="selected-stats-recap">
-        <h3>Récapitulatif de vos choix :</h3>
-        <div className="stats-list">
+      <div className="selected-stats-recap-compact">
+        <div className="stats-list-compact">
           {[...gameState.selectedStats]
             .sort((a, b) => STAT_ORDER.indexOf(a.statName) - STAT_ORDER.indexOf(b.statName))
             .map((selection, index) => (
-              <div key={index} className="stat-item">
-                <div className="stat-item-header">
-                  <span className="round-number">Manche {gameState.selectedStats.indexOf(selection) + 1}</span>
-                  <span className="pokemon-name">
-                    {selection.pokemon.name.charAt(0).toUpperCase() + selection.pokemon.name.slice(1)}
-                  </span>
-                </div>
-                <div className="stat-item-content">
+              <div key={index} className="stat-item-compact">
+                <div className="stat-item-content-compact">
                   <img
                     src={getPokemonSprite(selection.pokemon)}
                     alt={selection.pokemon.name}
-                    className="mini-sprite"
+                    className="mini-sprite-compact"
                   />
-                  <div className="stat-detail">
-                    <span className="stat-name">
-                      {STAT_LABELS[selection.statName]}
-                      {selection.pokemon.isShiny && <span className="shiny-indicator">✨</span>}
-                    </span>
-                    <span className="stat-value">{selection.value}</span>
+                  <div className="stat-detail-compact">
+                    <div className="pokemon-name-compact">
+                      {selection.pokemon.name.charAt(0).toUpperCase() + selection.pokemon.name.slice(1)}
+                    </div>
+                    <div className="stat-info-compact">
+                      <span className="stat-name-compact">
+                        {STAT_LABELS[selection.statName]}
+                        {selection.pokemon.isShiny && <span className="shiny-indicator">✨</span>}
+                      </span>
+                      <span className="stat-value-compact">{selection.value}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -79,31 +77,31 @@ export const GameResult = ({ gameState, totalStats, won, difference, onReset, on
         </div>
       </div>
 
-      <div className="result-buttons">
-        <button onClick={onRestartWithSameFilters} className="restart-same-button">
-          🔄 Rejouer (même objectif)
+      <div className="result-buttons-compact">
+        <button onClick={onRestartWithSameFilters} className="restart-same-button-compact">
+          🔄 Rejouer
         </button>
         {won ? (
           <>
-            <button onClick={() => onRestartWithAdjustedTarget(GAME_CONFIG.TARGET_STEP)} className="adjust-button adjust-up">
-              ⬆️ Rejouer (+{GAME_CONFIG.TARGET_STEP})
+            <button onClick={() => onRestartWithAdjustedTarget(GAME_CONFIG.TARGET_STEP)} className="adjust-button-compact adjust-up">
+              ⬆️ +{GAME_CONFIG.TARGET_STEP}
             </button>
-            <button onClick={() => onRestartWithAdjustedTarget(GAME_CONFIG.TARGET_STEP * 2)} className="adjust-button adjust-up">
-              ⬆️⬆️ Rejouer (+{GAME_CONFIG.TARGET_STEP * 2})
+            <button onClick={() => onRestartWithAdjustedTarget(GAME_CONFIG.TARGET_STEP * 2)} className="adjust-button-compact adjust-up">
+              ⬆️ +{GAME_CONFIG.TARGET_STEP * 2}
             </button>
           </>
         ) : (
           <>
-            <button onClick={() => onRestartWithAdjustedTarget(-GAME_CONFIG.TARGET_STEP)} className="adjust-button adjust-down">
-              ⬇️ Rejouer (-{GAME_CONFIG.TARGET_STEP})
+            <button onClick={() => onRestartWithAdjustedTarget(-GAME_CONFIG.TARGET_STEP)} className="adjust-button-compact adjust-down">
+              ⬇️ -{GAME_CONFIG.TARGET_STEP}
             </button>
-            <button onClick={() => onRestartWithAdjustedTarget(-GAME_CONFIG.TARGET_STEP * 2)} className="adjust-button adjust-down">
-              ⬇️⬇️ Rejouer (-{GAME_CONFIG.TARGET_STEP * 2})
+            <button onClick={() => onRestartWithAdjustedTarget(-GAME_CONFIG.TARGET_STEP * 2)} className="adjust-button-compact adjust-down">
+              ⬇️ -{GAME_CONFIG.TARGET_STEP * 2}
             </button>
           </>
         )}
-        <button onClick={onReset} className="reset-button">
-          ⚙️ Changer les filtres
+        <button onClick={onReset} className="reset-button-compact">
+          ⚙️ Config
         </button>
       </div>
     </div>

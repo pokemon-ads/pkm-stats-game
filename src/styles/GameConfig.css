@@ -30,6 +30,8 @@
   padding: 0.875rem;
   border-bottom: none;
   justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .config-title {
@@ -41,10 +43,18 @@
   transition: opacity 0.3s ease;
 }
 
+.config-icon {
+  font-size: 1.5rem;
+  animation: spin-slow 10s linear infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .game-config.collapsed .config-title {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
+  display: none;
 }
 
 .toggle-button {
