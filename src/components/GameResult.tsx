@@ -1,12 +1,16 @@
-import type { GameState, Pokemon, StatName } from '../types/pokemon'
+import { useEffect, useState, useRef } from 'react'
+import type { GameState, Pokemon, StatName, FilterOptions } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
+import { LeaderboardService, type Leaderboard as LeaderboardType } from '../services/LeaderboardService'
+import { Leaderboard } from './Leaderboard'
 
 interface GameResultProps {
   gameState: GameState
   totalStats: number
   won: boolean
   difference: number
+  filters: FilterOptions
   onReset: () => void
   onRestartWithSameFilters: () => void
   onRestartWithAdjustedTarget: (adjustment: number) => void
@@ -17,8 +21,34 @@ const getPokemonSprite = (pokemon: Pokemon): string => {
   return pokemon.isShiny ? pokemon.sprites.front_shiny : pokemon.sprites.front_default
 }
 
-export const GameResult = ({ gameState, totalStats, won, difference, onReset, onRestartWithSameFilters, onRestartWithAdjustedTarget }: GameResultProps) => {
+export const GameResult = ({ gameState, totalStats, won, difference, filters, onReset, onRestartWithSameFilters, onRestartWithAdjustedTarget }: GameResultProps) => {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardType | null>(null)
+  const scoreSavedRef = useRef(false)
+
+  const handleClearLeaderboard = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?')) {
+      LeaderboardService.clearLeaderboard(filters)
+      setLeaderboard(null)
+    }
+  }
+
+  useEffect(() => {
+    if (won) {
+      if (!scoreSavedRef.current) {
+        // Save score and get updated leaderboard
+        const updatedLeaderboard = LeaderboardService.saveScore(filters, totalStats, GAME_CONFIG.ROUNDS_PER_GAME)
+        setLeaderboard(updatedLeaderboard)
+        scoreSavedRef.current = true
+      }
+    } else {
+      // Just get existing leaderboard
+      const existingLeaderboard = LeaderboardService.getLeaderboard(filters)
+      setLeaderboard(existingLeaderboard)
+    }
+  }, [won, totalStats, filters])
+
   return (
+    <div className="game-result-container">
     <div className="game-result-compact">
       <div className={`result-header-compact ${won ? 'victory' : 'defeat'}`}>
         <div className="result-title-row">
@@ -104,6 +134,15 @@ export const GameResult = ({ gameState, totalStats, won, difference, onReset, on
           ⚙️ Config
         </button>
       </div>
+    </div>
+    
+    <div className="game-result-sidebar">
+      <Leaderboard
+        leaderboard={leaderboard}
+        currentScore={won ? totalStats : undefined}
+        onClear={handleClearLeaderboard}
+      />
+    </div>
     </div>
   )
 }

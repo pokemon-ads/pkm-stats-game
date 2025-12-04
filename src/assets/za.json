@@ -1,7 +1,10 @@
 [
   {
     "name": "Mega Barbaracle",
-    "types": ["Rock", "Fighting"],
+    "types": [
+      "Rock",
+      "Fighting"
+    ],
     "base_stats": {
       "hp": 72,
       "attack": 140,
@@ -10,11 +13,15 @@
       "sp_defense": 106,
       "speed": 88
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-golgopathe"
+    "art_url": "/za/689-m.png",
+    "art_url_shiny": "/za/shiny-689-m.png"
   },
   {
     "name": "Mega Chandelure",
-    "types": ["Ghost", "Fire"],
+    "types": [
+      "Ghost",
+      "Fire"
+    ],
     "base_stats": {
       "hp": 60,
       "attack": 75,
@@ -23,11 +30,15 @@
       "sp_defense": 110,
       "speed": 90
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-lugulabre"
+    "art_url": "/za/609-m.png",
+    "art_url_shiny": "/za/shiny-609-m.png"
   },
   {
     "name": "Mega Chesnaught",
-    "types": ["Grass", "Fighting"],
+    "types": [
+      "Grass",
+      "Fighting"
+    ],
     "base_stats": {
       "hp": 88,
       "attack": 137,
@@ -36,11 +47,15 @@
       "sp_defense": 115,
       "speed": 44
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-blindepique"
+    "art_url": "/za/652-m.png",
+    "art_url_shiny": "/za/shiny-652-m.png"
   },
   {
     "name": "Mega Clefable",
-    "types": ["Fairy", "Flying"],
+    "types": [
+      "Fairy",
+      "Flying"
+    ],
     "base_stats": {
       "hp": 95,
       "attack": 80,
@@ -49,12 +64,15 @@
       "sp_defense": 110,
       "speed": 70
     },
-    "art_url": "https://www.serebii.net/legendsz-a/pokemon/036-m.png",
-    "art_url_shiny": "https://www.serebii.net/Shiny/ZA/036-m.png"
+    "art_url": "/za/036-m.png",
+    "art_url_shiny": "/za/shiny-036-m.png"
   },
   {
     "name": "Mega Delphox",
-    "types": ["Fire", "Psychic"],
+    "types": [
+      "Fire",
+      "Psychic"
+    ],
     "base_stats": {
       "hp": 75,
       "attack": 69,
@@ -63,11 +81,15 @@
       "sp_defense": 125,
       "speed": 134
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-goupelin"
+    "art_url": "/za/655-m.png",
+    "art_url_shiny": "/za/shiny-655-m.png"
   },
   {
     "name": "Mega Dragalge",
-    "types": ["Poison", "Dragon"],
+    "types": [
+      "Poison",
+      "Dragon"
+    ],
     "base_stats": {
       "hp": 65,
       "attack": 85,
@@ -76,11 +98,15 @@
       "sp_defense": 163,
       "speed": 44
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-kravarech"
+    "art_url": "/za/691-m.png",
+    "art_url_shiny": "/za/shiny-691-m.png"
   },
   {
     "name": "Mega Dragonite",
-    "types": ["Dragon", "Flying"],
+    "types": [
+      "Dragon",
+      "Flying"
+    ],
     "base_stats": {
       "hp": 91,
       "attack": 124,
@@ -89,11 +115,15 @@
       "sp_defense": 125,
       "speed": 100
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-dracolosse"
+    "art_url": "/za/149-m.png",
+    "art_url_shiny": "/za/shiny-149-m.png"
   },
   {
     "name": "Mega Drampa",
-    "types": ["Normal", "Dragon"],
+    "types": [
+      "Normal",
+      "Dragon"
+    ],
     "base_stats": {
       "hp": 78,
       "attack": 85,
@@ -102,11 +132,14 @@
       "sp_defense": 116,
       "speed": 36
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-draieul"
+    "art_url": "/za/780-m.png",
+    "art_url_shiny": "/za/shiny-780-m.png"
   },
   {
     "name": "Mega Eelektross",
-    "types": ["Electric"],
+    "types": [
+      "Electric"
+    ],
     "base_stats": {
       "hp": 85,
       "attack": 145,
@@ -115,11 +148,15 @@
       "sp_defense": 90,
       "speed": 80
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-ohmassacre"
+    "art_url": "/za/604-m.png",
+    "art_url_shiny": "/za/shiny-604-m.png"
   },
   {
     "name": "Mega Emboar",
-    "types": ["Fire", "Fighting"],
+    "types": [
+      "Fire",
+      "Fighting"
+    ],
     "base_stats": {
       "hp": 110,
       "attack": 148,
@@ -128,11 +165,15 @@
       "sp_defense": 110,
       "speed": 75
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-roitiflam"
+    "art_url": "/za/500-m.png",
+    "art_url_shiny": "/za/shiny-500-m.png"
   },
   {
     "name": "Mega Excadrill",
-    "types": ["Ground", "Steel"],
+    "types": [
+      "Ground",
+      "Steel"
+    ],
     "base_stats": {
       "hp": 110,
       "attack": 165,
@@ -141,11 +182,14 @@
       "sp_defense": 65,
       "speed": 103
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-minotaupe"
+    "art_url": "/za/530-m.png",
+    "art_url_shiny": "/za/shiny-530-m.png"
   },
   {
     "name": "Mega Falinks",
-    "types": ["Fighting"],
+    "types": [
+      "Fighting"
+    ],
     "base_stats": {
       "hp": 65,
       "attack": 135,
@@ -154,11 +198,15 @@
       "sp_defense": 65,
       "speed": 100
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-hexadron"
+    "art_url": "/za/870-m.png",
+    "art_url_shiny": "/za/shiny-870-m.png"
   },
   {
     "name": "Mega Feraligatr",
-    "types": ["Water", "Dragon"],
+    "types": [
+      "Water",
+      "Dragon"
+    ],
     "base_stats": {
       "hp": 85,
       "attack": 160,
@@ -167,11 +215,15 @@
       "sp_defense": 93,
       "speed": 78
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-aligatueur"
+    "art_url": "/za/160-m.png",
+    "art_url_shiny": "/za/shiny-160-m.png"
   },
   {
     "name": "Mega Froslass",
-    "types": ["Ice", "Ghost"],
+    "types": [
+      "Ice",
+      "Ghost"
+    ],
     "base_stats": {
       "hp": 70,
       "attack": 80,
@@ -180,11 +232,15 @@
       "sp_defense": 100,
       "speed": 120
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-momartik"
+    "art_url": "/za/478-m.png",
+    "art_url_shiny": "/za/shiny-478-m.png"
   },
   {
     "name": "Mega Greninja",
-    "types": ["Water", "Dark"],
+    "types": [
+      "Water",
+      "Dark"
+    ],
     "base_stats": {
       "hp": 72,
       "attack": 125,
@@ -193,11 +249,15 @@
       "sp_defense": 81,
       "speed": 142
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-amphinobi"
+    "art_url": "/za/658-m.png",
+    "art_url_shiny": "/za/shiny-658-m.png"
   },
   {
     "name": "Mega Hawlucha",
-    "types": ["Fighting", "Flying"],
+    "types": [
+      "Fighting",
+      "Flying"
+    ],
     "base_stats": {
       "hp": 78,
       "attack": 137,
@@ -206,11 +266,15 @@
       "sp_defense": 93,
       "speed": 118
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-brutalibre"
+    "art_url": "/za/701-m.png",
+    "art_url_shiny": "/za/shiny-701-m.png"
   },
   {
     "name": "Mega Malamar",
-    "types": ["Dark", "Psychic"],
+    "types": [
+      "Dark",
+      "Psychic"
+    ],
     "base_stats": {
       "hp": 86,
       "attack": 102,
@@ -219,11 +283,15 @@
       "sp_defense": 120,
       "speed": 88
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-sepiatroce"
+    "art_url": "/za/687-m.png",
+    "art_url_shiny": "/za/shiny-687-m.png"
   },
   {
     "name": "Mega Meganium",
-    "types": ["Grass", "Fairy"],
+    "types": [
+      "Grass",
+      "Fairy"
+    ],
     "base_stats": {
       "hp": 80,
       "attack": 92,
@@ -232,11 +300,15 @@
       "sp_defense": 115,
       "speed": 80
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-meganium"
+    "art_url": "/za/154-m.png",
+    "art_url_shiny": "/za/shiny-154-m.png"
   },
   {
     "name": "Mega Pyroar",
-    "types": ["Fire", "Normal"],
+    "types": [
+      "Fire",
+      "Normal"
+    ],
     "base_stats": {
       "hp": 86,
       "attack": 88,
@@ -245,11 +317,14 @@
       "sp_defense": 86,
       "speed": 126
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-nemelios"
+    "art_url": "/za/668-m.png",
+    "art_url_shiny": "/za/shiny-668-m.png"
   },
   {
     "name": "Mega Eternal Floette",
-    "types": ["Fairy"],
+    "types": [
+      "Fairy"
+    ],
     "base_stats": {
       "hp": 74,
       "attack": 85,
@@ -258,11 +333,15 @@
       "sp_defense": 148,
       "speed": 102
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-floette"
+    "art_url": "/za/670-m.png",
+    "art_url_shiny": "/za/shiny-670-m.png"
   },
   {
     "name": "Mega Scolipede",
-    "types": ["Bug", "Poison"],
+    "types": [
+      "Bug",
+      "Poison"
+    ],
     "base_stats": {
       "hp": 60,
       "attack": 140,
@@ -271,11 +350,15 @@
       "sp_defense": 99,
       "speed": 62
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-brutapode"
+    "art_url": "/za/545-m.png",
+    "art_url_shiny": "/za/shiny-545-m.png"
   },
   {
     "name": "Mega Scrafty",
-    "types": ["Dark", "Fighting"],
+    "types": [
+      "Dark",
+      "Fighting"
+    ],
     "base_stats": {
       "hp": 65,
       "attack": 130,
@@ -284,11 +367,15 @@
       "sp_defense": 135,
       "speed": 68
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-baggaid"
+    "art_url": "/za/560-m.png",
+    "art_url_shiny": "/za/shiny-560-m.png"
   },
   {
     "name": "Mega Skarmory",
-    "types": ["Steel", "Flying"],
+    "types": [
+      "Steel",
+      "Flying"
+    ],
     "base_stats": {
       "hp": 65,
       "attack": 140,
@@ -297,11 +384,15 @@
       "sp_defense": 100,
       "speed": 110
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-airmure"
+    "art_url": "/za/227-m.png",
+    "art_url_shiny": "/za/shiny-227-m.png"
   },
   {
     "name": "Mega Starmie",
-    "types": ["Water", "Psychic"],
+    "types": [
+      "Water",
+      "Psychic"
+    ],
     "base_stats": {
       "hp": 60,
       "attack": 140,
@@ -310,11 +401,15 @@
       "sp_defense": 105,
       "speed": 120
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-staross"
+    "art_url": "/za/121-m.png",
+    "art_url_shiny": "/za/shiny-121-m.png"
   },
   {
     "name": "Mega Victreebel",
-    "types": ["Grass", "Poison"],
+    "types": [
+      "Grass",
+      "Poison"
+    ],
     "base_stats": {
       "hp": 80,
       "attack": 125,
@@ -323,12 +418,15 @@
       "sp_defense": 95,
       "speed": 70
     },
-    "art_url": "https://www.serebii.net/legendsz-a/pokemon/071-m.png",
-    "art_url_shiny": "https://www.serebii.net/Shiny/ZA/071-m.png"
+    "art_url": "/za/071-m.png",
+    "art_url_shiny": "/za/shiny-071-m.png"
   },
   {
     "name": "Mega Zygarde",
-    "types": ["Dragon", "Ground"],
+    "types": [
+      "Dragon",
+      "Ground"
+    ],
     "base_stats": {
       "hp": 216,
       "attack": 70,
@@ -337,6 +435,7 @@
       "sp_defense": 85,
       "speed": 100
     },
-    "art_url": "https://www.pokebip.com/pokedex/legendes-za/pokemon/mega-zygarde"
+    "art_url": "/za/718-m.png",
+    "art_url_shiny": "/za/shiny-718-m.png"
   }
 ]

@@ -14,6 +14,7 @@ interface ZAEntry {
     speed: number;
   };
   art_url: string;
+  art_url_shiny?: string;
 }
 
 export class LegendsZASource extends ExternalDataSource {
@@ -41,7 +42,7 @@ export class LegendsZASource extends ExternalDataSource {
         name: entry.name,
         sprites: {
           front_default: entry.art_url,
-          front_shiny: entry.art_url // No shiny sprite available in JSON
+          front_shiny: entry.art_url_shiny || entry.art_url
         },
         stats: [
           { base_stat: entry.base_stats.hp, stat: { name: 'hp' } },

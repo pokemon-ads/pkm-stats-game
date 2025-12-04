@@ -70,6 +70,7 @@ function App() {
             totalStats={result.totalStats}
             won={result.won}
             difference={result.difference}
+            filters={filters}
             onReset={resetGame}
             onRestartWithSameFilters={restartWithSameFilters}
             onRestartWithAdjustedTarget={restartWithAdjustedTarget}

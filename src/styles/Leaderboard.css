@@ -1,0 +1,122 @@
+.leaderboard-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.leaderboard-container.empty {
+  text-align: center;
+  opacity: 0.7;
+}
+
+.leaderboard-container h3 {
+  margin: 0 0 0.5rem 0;
+  color: #ffd700;
+  text-align: center;
+  font-size: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-filter-info {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboard-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px;
+  padding: 0.5rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.leaderboard-entry {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px;
+  padding: 0.75rem 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.leaderboard-entry:hover {
+  transform: translateX(5px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-entry.highlight {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.leaderboard-entry .rank {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.leaderboard-entry .score {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.leaderboard-entry .date {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .leaderboard-container {
+    margin: 2rem auto;
+  }
+}
+.clear-leaderboard-button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 8px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.clear-leaderboard-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+}
