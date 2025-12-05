@@ -31,7 +31,7 @@ export const Leaderboard = ({ leaderboard, currentScore, onClear }: LeaderboardP
           <span>Date</span>
         </div>
         
-        {leaderboard.entries.map((entry, index) => {
+        {leaderboard.entries.map((entry: any, index: any) => {
           const isCurrentScore = currentScore !== undefined && entry.score === currentScore && 
             new Date(entry.date).getTime() > Date.now() - 5000; // Simple check for "just added"
 

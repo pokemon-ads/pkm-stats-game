@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import type { GameState, Pokemon, StatName, FilterOptions } from '../types/pokemon'
+import type { GameState, Pokemon, FilterOptions } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
-import { LeaderboardService, type Leaderboard as LeaderboardType } from '../services/LeaderboardService'
 import { Leaderboard } from './Leaderboard'
+import { LeaderboardService, type Leaderboard as LeaderboardType } from '../services/LeaderboardService'
 
 interface GameResultProps {
   gameState: GameState

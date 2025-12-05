@@ -22,8 +22,6 @@ function App() {
     restartWithSameFilters,
     restartWithAdjustedTarget,
     calculateResult,
-    updateTargetTotal,
-    updateFilterMode,
     updateSkipConfirmation,
     updateShinyBonus
   } = usePokeGame()
