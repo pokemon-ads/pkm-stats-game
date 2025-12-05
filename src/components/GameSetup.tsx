@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { FilterOptions } from '../types/pokemon'
 import { GENERATIONS, POKEMON_TYPES } from '../types/pokemon'
 import {
@@ -15,6 +16,7 @@ interface GameSetupProps {
 }
 
 export const GameSetup = ({ onStart }: GameSetupProps) => {
+  const { t } = useTranslation()
   const [targetTotal, setTargetTotal] = useState<number>(GAME_CONFIG.DEFAULT_TARGET_TOTAL)
   const [selectedGenerations, setSelectedGenerations] = useState<number[]>([])
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
@@ -108,10 +110,10 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
   return (
     <div className="game-setup-dashboard">
       <div className="dashboard-header">
-        <h1>PokéStats Challenge</h1>
+        <h1>{t('setup.title')}</h1>
         <div className="quick-config">
           <div className="config-group">
-            <label>Objectif :</label>
+            <label>{t('setup.target')}</label>
             <input
               type="number"
               value={targetTotal}
@@ -123,19 +125,19 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
             />
           </div>
           <div className="config-group">
-            <label>Mode :</label>
+            <label>{t('setup.mode')}</label>
             <div className="toggle-switch-mode">
               <button
                 className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
                 onClick={() => setFilterMode('OR')}
-                title="Addition (OU)"
+                title={t('setup.addition')}
               >
                 ➕
               </button>
               <button
                 className={`mode-toggle ${filterMode === 'AND' ? 'active' : ''}`}
                 onClick={() => setFilterMode('AND')}
-                title="Restriction (ET)"
+                title={t('setup.restriction')}
               >
                 🔒
               </button>
@@ -147,7 +149,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
       <div className="dashboard-grid">
         {/* Column 1: Generations */}
         <div className="dashboard-panel generations-panel">
-          <h3>Générations</h3>
+          <h3>{t('setup.generations')}</h3>
           <div className="generations-grid-compact">
             {Object.entries(GENERATIONS).map(([key, gen]) => (
               <button
@@ -164,7 +166,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
 
         {/* Column 2: Types */}
         <div className="dashboard-panel types-panel">
-          <h3>Types</h3>
+          <h3>{t('setup.types')}</h3>
           <div className="types-grid-compact">
             {POKEMON_TYPES.map((type) => (
               <button
@@ -181,84 +183,84 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
 
         {/* Column 3: Extras */}
         <div className="dashboard-panel extras-panel">
-          <h3>Spécial</h3>
+          <h3>{t('setup.special')}</h3>
           <div className="extras-grid">
             <button
               className={`extra-chip ${legendaryOnly ? 'active' : ''}`}
               onClick={() => setLegendaryOnly(!legendaryOnly)}
             >
-              {CATEGORY_ICONS.LEGENDARY} Légendaires
+              {CATEGORY_ICONS.LEGENDARY} {t('setup.legendary')}
             </button>
             <button
               className={`extra-chip ${mythicalOnly ? 'active' : ''}`}
               onClick={() => setMythicalOnly(!mythicalOnly)}
             >
-              {CATEGORY_ICONS.MYTHICAL} Mythiques
+              {CATEGORY_ICONS.MYTHICAL} {t('setup.mythical')}
             </button>
             <button
               className={`extra-chip ${ultraBeastOnly ? 'active' : ''}`}
               onClick={() => setUltraBeastOnly(!ultraBeastOnly)}
             >
-              {CATEGORY_ICONS.ULTRA_BEAST} U-Chimères
+              {CATEGORY_ICONS.ULTRA_BEAST} {t('setup.ultraBeast')}
             </button>
             <button
               className={`extra-chip ${paradoxOnly ? 'active' : ''}`}
               onClick={() => setParadoxOnly(!paradoxOnly)}
             >
-              {CATEGORY_ICONS.PARADOX} Paradox
+              {CATEGORY_ICONS.PARADOX} {t('setup.paradox')}
             </button>
             <button
               className={`extra-chip ${megaOnly ? 'active' : ''}`}
               onClick={() => setMegaOnly(!megaOnly)}
             >
-              {CATEGORY_ICONS.MEGA} Méga
+              {CATEGORY_ICONS.MEGA} {t('setup.mega')}
             </button>
             <button
               className={`extra-chip ${gigantamaxOnly ? 'active' : ''}`}
               onClick={() => setGigantamaxOnly(!gigantamaxOnly)}
             >
-              {CATEGORY_ICONS.GIGANTAMAX} Gigamax
+              {CATEGORY_ICONS.GIGANTAMAX} {t('setup.gigantamax')}
             </button>
             <button
               className={`extra-chip ${legendsZAOnly ? 'active' : ''}`}
               onClick={() => setLegendsZAOnly(!legendsZAOnly)}
             >
-              {CATEGORY_ICONS.LEGENDS_ZA} Légendes Z-A
+              {CATEGORY_ICONS.LEGENDS_ZA} {t('setup.legendsZA')}
             </button>
           </div>
 
-          <h3 className="sub-header">Régional</h3>
+          <h3 className="sub-header">{t('setup.regional')}</h3>
           <div className="extras-grid">
             <button
               className={`extra-chip ${selectedRegionalForms.includes('alola') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('alola')}
             >
-              {REGIONAL_FORM_ICONS.alola} Alola
+              {REGIONAL_FORM_ICONS.alola} {t('setup.alola')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('galar') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('galar')}
             >
-              {REGIONAL_FORM_ICONS.galar} Galar
+              {REGIONAL_FORM_ICONS.galar} {t('setup.galar')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('hisui') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('hisui')}
             >
-              {REGIONAL_FORM_ICONS.hisui} Hisui
+              {REGIONAL_FORM_ICONS.hisui} {t('setup.hisui')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('paldea') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('paldea')}
             >
-              {REGIONAL_FORM_ICONS.paldea} Paldea
+              {REGIONAL_FORM_ICONS.paldea} {t('setup.paldea')}
             </button>
           </div>
         </div>
       </div>
 
       <button onClick={handleStart} className="start-button-dashboard">
-        🎮 JOUER
+        {t('setup.play')}
       </button>
     </div>
   )

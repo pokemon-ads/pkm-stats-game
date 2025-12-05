@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import '../styles/GameConfig.css'
 
 interface GameConfigProps {
@@ -14,17 +15,18 @@ export const GameConfig = ({
   onSkipConfirmationChange,
   onShinyBonusChange
 }: GameConfigProps) => {
+  const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <div className={`game-config ${isExpanded ? 'expanded' : 'collapsed'}`}>
       <div className="config-header" onClick={() => setIsExpanded(!isExpanded)}>
         {isExpanded ? (
-          <h3 className="config-title">⚙️ Paramètres</h3>
+          <h3 className="config-title">{t('config.title')}</h3>
         ) : (
           <span className="config-icon">⚙️</span>
         )}
-        <button className="toggle-button" aria-label={isExpanded ? 'Réduire' : 'Agrandir'}>
+        <button className="toggle-button" aria-label={isExpanded ? t('config.collapse') : t('config.expand')}>
           {isExpanded ? '◀' : '▶'}
         </button>
       </div>
@@ -33,7 +35,7 @@ export const GameConfig = ({
         <div className="config-content">
           <div className="config-group">
             <div className="config-toggle-row">
-              <span className="config-label-text">⚡ Mode rapide</span>
+              <span className="config-label-text">{t('config.fastMode')}</span>
               <label className="switch-container-sidebar">
                 <input
                   type="checkbox"
@@ -45,13 +47,13 @@ export const GameConfig = ({
               </label>
             </div>
             <p className="config-hint">
-              {skipConfirmation ? '⚡ Sélection directe sans confirmation' : '✓ Confirmation avant validation'}
+              {skipConfirmation ? t('config.fastModeHintOn') : t('config.fastModeHintOff')}
             </p>
           </div>
 
           <div className="config-group">
             <div className="config-toggle-row">
-              <span className="config-label-text">✨ Bonus Shiny x2</span>
+              <span className="config-label-text">{t('config.shinyBonus')}</span>
               <label className="switch-container-sidebar">
                 <input
                   type="checkbox"
@@ -63,7 +65,7 @@ export const GameConfig = ({
               </label>
             </div>
             <p className="config-hint">
-              {shinyBonus ? '✨ Stats des shiny doublées' : '⭕ Stats normales pour les shiny'}
+              {shinyBonus ? t('config.shinyBonusHintOn') : t('config.shinyBonusHintOff')}
             </p>
           </div>
         </div>

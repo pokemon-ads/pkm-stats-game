@@ -1,0 +1,47 @@
+.language-switcher {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: transform 0.2s, opacity 0.2s;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+.lang-btn.active {
+  opacity: 1;
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .language-switcher {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+  }
+
+  .lang-btn {
+    font-size: 1.2rem;
+  }
+}

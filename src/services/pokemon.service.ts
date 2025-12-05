@@ -12,11 +12,13 @@ class PokemonService {
   private P: any;
   private typeCache: Map<string, number[]>;
   private pokemonCache: Map<string | number, Pokemon>;
+  private speciesCache: Map<string | number, any>;
 
   constructor() {
     this.P = new PokeAPI.Pokedex();
     this.typeCache = new Map();
     this.pokemonCache = new Map();
+    this.speciesCache = new Map();
   }
 
   /**
@@ -67,6 +69,37 @@ class PokemonService {
 
     try {
       const pokemon = (await this.P.getPokemonByName(idOrName)) as Pokemon;
+      
+      // Fetch species data to get localized names
+      if (pokemon.species && pokemon.species.url) {
+        try {
+          const speciesId = parseInt(pokemon.species.url.split('/').filter(Boolean).pop()!);
+          let speciesData;
+          
+          if (this.speciesCache.has(speciesId)) {
+            speciesData = this.speciesCache.get(speciesId);
+          } else {
+            speciesData = await this.P.getPokemonSpeciesByName(speciesId);
+            this.speciesCache.set(speciesId, speciesData);
+          }
+
+          const frName = speciesData.names.find((n: any) => n.language.name === 'fr')?.name;
+          const enName = speciesData.names.find((n: any) => n.language.name === 'en')?.name;
+
+          pokemon.names = {
+            fr: frName || pokemon.name,
+            en: enName || pokemon.name
+          };
+        } catch (e) {
+          console.warn(`Could not fetch species data for ${pokemon.name}`, e);
+          // Fallback to default name
+          pokemon.names = {
+            fr: pokemon.name,
+            en: pokemon.name
+          };
+        }
+      }
+
       this.pokemonCache.set(idOrName, pokemon);
       return pokemon;
     } catch (error) {

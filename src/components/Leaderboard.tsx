@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Leaderboard as LeaderboardType } from '../services/LeaderboardService';
 import '../styles/Leaderboard.css';
 
@@ -8,27 +9,29 @@ interface LeaderboardProps {
 }
 
 export const Leaderboard = ({ leaderboard, currentScore, onClear }: LeaderboardProps) => {
+  const { t } = useTranslation();
+
   if (!leaderboard || leaderboard.entries.length === 0) {
     return (
       <div className="leaderboard-container empty">
-        <h3>Classement</h3>
-        <p>Aucun score enregistré pour cette configuration.</p>
+        <h3>{t('leaderboard.title')}</h3>
+        <p>{t('leaderboard.empty')}</p>
       </div>
     );
   }
 
   return (
     <div className="leaderboard-container">
-      <h3>Classement</h3>
+      <h3>{t('leaderboard.title')}</h3>
       <div className="leaderboard-filter-info">
         <small>{leaderboard.filterDescription}</small>
       </div>
       
       <div className="leaderboard-list">
         <div className="leaderboard-header">
-          <span>Rang</span>
-          <span>Score</span>
-          <span>Date</span>
+          <span>{t('leaderboard.rank')}</span>
+          <span>{t('leaderboard.score')}</span>
+          <span>{t('leaderboard.date')}</span>
         </div>
         
         {leaderboard.entries.map((entry: any, index: any) => {
@@ -52,7 +55,7 @@ export const Leaderboard = ({ leaderboard, currentScore, onClear }: LeaderboardP
       
       {onClear && (
         <button onClick={onClear} className="clear-leaderboard-button">
-          🗑️ Effacer le classement
+          {t('leaderboard.clear')}
         </button>
       )}
     </div>
