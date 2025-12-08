@@ -20,7 +20,7 @@ export const GAME_CONFIG = {
   ROUNDS_PER_GAME: 6,
   
   // Shiny Pokemon probability (1 in X)
-  SHINY_PROBABILITY: 3,
+  SHINY_PROBABILITY: 128,
   
   // Shiny bonus multiplier
   SHINY_BONUS_MULTIPLIER: 2,

@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import type { FilterOptions } from '../types/pokemon';
 
 export interface LeaderboardEntry {
@@ -55,37 +56,37 @@ export class LeaderboardService {
     const parts: string[] = [];
 
     if (filters.generations && filters.generations.length > 0) {
-      parts.push(`Générations: ${filters.generations.join(', ')}`);
+      parts.push(`${i18n.t('tooltip.generations')} ${filters.generations.join(', ')}`);
     } else if (filters.generation) {
-      parts.push(`Génération ${filters.generation}`);
+      parts.push(`${i18n.t('gameProgress.gen', { generations: filters.generation })}`);
     }
 
     if (filters.types && filters.types.length > 0) {
-      parts.push(`Types: ${filters.types.join(', ')}`);
+      parts.push(`${i18n.t('tooltip.types')} ${filters.types.join(', ')}`);
     } else if (filters.type) {
-      parts.push(`Type: ${filters.type}`);
+      parts.push(`${i18n.t('tooltip.types')} ${filters.type}`);
     }
 
     const specials = [];
-    if (filters.legendary) specials.push('Légendaires');
-    if (filters.mythical) specials.push('Fabuleux');
-    if (filters.mega) specials.push('Méga-évolutions');
-    if (filters.gigantamax) specials.push('Gigamax');
-    if (filters.ultraBeast) specials.push('Ultra-Chimères');
-    if (filters.legendsZA) specials.push('Légendes Z-A');
-    if (filters.paradox) specials.push('Paradoxe');
+    if (filters.legendary) specials.push(i18n.t('tooltip.legendary'));
+    if (filters.mythical) specials.push(i18n.t('tooltip.mythical'));
+    if (filters.mega) specials.push(i18n.t('tooltip.mega'));
+    if (filters.gigantamax) specials.push(i18n.t('tooltip.gigantamax'));
+    if (filters.ultraBeast) specials.push(i18n.t('tooltip.ultraBeast'));
+    if (filters.legendsZA) specials.push(i18n.t('tooltip.legendsZA'));
+    if (filters.paradox) specials.push(i18n.t('tooltip.paradox'));
     
     if (filters.regionalForms && filters.regionalForms.length > 0) {
-      specials.push(`Formes: ${filters.regionalForms.join(', ')}`);
+      specials.push(i18n.t('tooltip.forms', { forms: filters.regionalForms.join(', ') }));
     } else if (filters.regionalForm) {
-      specials.push(`Forme: ${filters.regionalForm}`);
+      specials.push(i18n.t('tooltip.forms', { forms: filters.regionalForm }));
     }
 
     if (specials.length > 0) {
       parts.push(specials.join(', '));
     }
 
-    if (parts.length === 0) return 'Tous les Pokémon';
+    if (parts.length === 0) return i18n.t('gameProgress.allGen');
     return parts.join(' | ');
   }
 

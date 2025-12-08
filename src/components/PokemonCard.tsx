@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Pokemon, StatName } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
@@ -23,6 +24,13 @@ const getPokemonSprite = (pokemon: Pokemon): string => {
   return pokemon.isShiny ? pokemon.sprites.front_shiny : pokemon.sprites.front_default
 }
 
+const getPokemonName = (pokemon: Pokemon, language: string): string => {
+  if (pokemon.names) {
+    return language.startsWith('fr') ? pokemon.names.fr : pokemon.names.en;
+  }
+  return pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+}
+
 export const PokemonCard = ({
   pokemon,
   availableStats,
@@ -34,6 +42,8 @@ export const PokemonCard = ({
   selectedStats,
   skipConfirmation
 }: PokemonCardProps) => {
+  const { t, i18n } = useTranslation()
+
   const getStatValue = (statName: StatName): number => {
     const stat = pokemon.stats.find(s => s.stat.name === statName)
     return stat?.base_stat || 0
@@ -49,12 +59,12 @@ export const PokemonCard = ({
   return (
     <div className="pokemon-card-game">
       <div className="round-indicator">
-        Manche {round} / {GAME_CONFIG.ROUNDS_PER_GAME}
+        {t('gameProgress.round')} {round} / {GAME_CONFIG.ROUNDS_PER_GAME}
       </div>
 
       <div className="pokemon-info">
         <h2>
-          {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
+          {getPokemonName(pokemon, i18n.language)}
           {pokemon.isShiny && <span className="shiny-badge">✨ Shiny!</span>}
         </h2>
         <img
@@ -102,7 +112,7 @@ export const PokemonCard = ({
                     <div className="stat-with-sprite">
                       <img
                         src={getPokemonSprite(pokemonWithStat.pokemon)}
-                        alt={pokemonWithStat.pokemon.name}
+                        alt={getPokemonName(pokemonWithStat.pokemon, i18n.language)}
                         className="stat-sprite"
                       />
                       <span className="stat-value">{value}</span>
@@ -126,7 +136,7 @@ export const PokemonCard = ({
                     <div className="stat-with-sprite">
                       <img
                         src={getPokemonSprite(pokemonWithStat.pokemon)}
-                        alt={pokemonWithStat.pokemon.name}
+                        alt={getPokemonName(pokemonWithStat.pokemon, i18n.language)}
                         className="stat-sprite"
                       />
                       <span className="stat-value">{pokemonWithStat.value}</span>
@@ -172,7 +182,7 @@ export const PokemonCard = ({
                 ✕ Annuler
               </button>
               <button onClick={onConfirmSelection} className="confirm-button">
-                ✓ Confirmer
+                ✓ {t('pokemonCard.confirm')}
               </button>
             </div>
           </div>

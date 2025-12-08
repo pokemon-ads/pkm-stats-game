@@ -1,13 +1,16 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { usePokeGame } from './hooks/usePokeGame'
 import { GameSetup } from './components/GameSetup'
 import { PokemonCard } from './components/PokemonCard'
 import { GameResult } from './components/GameResult'
 import { GameConfig } from './components/GameConfig'
+import { LanguageSwitcher } from './components/LanguageSwitcher'
 import { GAME_CONFIG, GAME_PHASES } from './config/constants'
 import './App.css'
 
 function App() {
+  const { t } = useTranslation()
   const {
     gameState,
     loading,
@@ -45,7 +48,8 @@ function App() {
 
   return (
     <div className="app">
-      <button onClick={resetGame} className="home-button" title="Retour à l'accueil">
+      <LanguageSwitcher />
+      <button onClick={resetGame} className="home-button" title={t('app.homeButton')}>
         🏠 Home
       </button>
       
@@ -79,34 +83,34 @@ function App() {
       {gameState.phase === GAME_PHASES.PLAYING && (
         <>
       <div className="game-header">
-        <h1>PokéStats Challenge</h1>
+        <h1>{t('app.title')}</h1>
         <div className="game-progress">
           <div className="progress-info">
             <div className="info-item">
-              <span className="label">Objectif :</span>
+              <span className="label">{t('gameProgress.target')}</span>
               <span className="value">{gameState.targetTotal}</span>
             </div>
             <div className="info-item filter-info-container">
-              <span className="label">Filtres :</span>
+              <span className="label">{t('gameProgress.filters')}</span>
               <span className="value">
-                {filters.generations && filters.generations.length > 0 ? `Gen ${filters.generations.join(', ')}` : 'Toutes Gen'}
-                {filters.types && filters.types.length > 0 ? ` • ${filters.types.length} Types` : ''}
-                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) ? ' • Spéciaux' : ''}
-                {filters.filterMode === 'AND' ? ' (Restrictif)' : ' (Additif)'}
+                {filters.generations && filters.generations.length > 0 ? t('gameProgress.gen', { generations: filters.generations.join(', ') }) : t('gameProgress.allGen')}
+                {filters.types && filters.types.length > 0 ? ` ${t('gameProgress.types', { count: filters.types.length })}` : ''}
+                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) ? ` ${t('gameProgress.special')}` : ''}
+                {filters.filterMode === 'AND' ? ` ${t('gameProgress.restrictive')}` : ` ${t('gameProgress.additive')}`}
               </span>
               
               <div className="filter-tooltip">
                 <div className="tooltip-row">
-                  <span className="tooltip-label">Mode :</span>
-                  <span className="tooltip-value">{filters.filterMode === 'AND' ? 'Restrictif (ET)' : 'Additif (OU)'}</span>
+                  <span className="tooltip-label">{t('tooltip.mode')}</span>
+                  <span className="tooltip-value">{filters.filterMode === 'AND' ? t('tooltip.modeRestrictive') : t('tooltip.modeAdditive')}</span>
                 </div>
                 <div className="tooltip-row">
-                  <span className="tooltip-label">Générations :</span>
-                  <span className="tooltip-value">{filters.generations && filters.generations.length > 0 ? filters.generations.join(', ') : 'Toutes'}</span>
+                  <span className="tooltip-label">{t('tooltip.generations')}</span>
+                  <span className="tooltip-value">{filters.generations && filters.generations.length > 0 ? filters.generations.join(', ') : t('tooltip.all')}</span>
                 </div>
                 {filters.types && filters.types.length > 0 && (
                   <div className="tooltip-row">
-                    <span className="tooltip-label">Types :</span>
+                    <span className="tooltip-label">{t('tooltip.types')}</span>
                     <div className="tooltip-types">
                       {filters.types.map(t => (
                         <span key={t} className={`mini-type-tag type-${t}`}>{t}</span>
@@ -116,17 +120,17 @@ function App() {
                 )}
                 {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) && (
                   <div className="tooltip-row">
-                    <span className="tooltip-label">Spécial :</span>
+                    <span className="tooltip-label">{t('tooltip.special')}</span>
                     <span className="tooltip-value">
                       {[
-                        filters.legendary && 'Légendaires',
-                        filters.mythical && 'Fabuleux',
-                        filters.ultraBeast && 'Ultra-Chimères',
-                        filters.paradox && 'Paradoxes',
-                        filters.mega && 'Méga',
-                        filters.gigantamax && 'Gigamax',
-                        filters.legendsZA && 'Légendes Z-A',
-                        filters.regionalForms && filters.regionalForms.length > 0 && `Formes (${filters.regionalForms.join(', ')})`
+                        filters.legendary && t('tooltip.legendary'),
+                        filters.mythical && t('tooltip.mythical'),
+                        filters.ultraBeast && t('tooltip.ultraBeast'),
+                        filters.paradox && t('tooltip.paradox'),
+                        filters.mega && t('tooltip.mega'),
+                        filters.gigantamax && t('tooltip.gigantamax'),
+                        filters.legendsZA && t('tooltip.legendsZA'),
+                        filters.regionalForms && filters.regionalForms.length > 0 && t('tooltip.forms', { forms: filters.regionalForms.join(', ') })
                       ].filter(Boolean).join(', ')}
                     </span>
                   </div>
@@ -134,12 +138,12 @@ function App() {
               </div>
             </div>
             <div className="info-item">
-              <span className="label">Manche :</span>
+              <span className="label">{t('gameProgress.round')}</span>
               <span className="value">{gameState.selectedStats.length} / {GAME_CONFIG.ROUNDS_PER_GAME}</span>
             </div>
           </div>
           <div className="current-total">
-            Total : {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
+            {t('gameProgress.total')} {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
           </div>
         </div>
       </div>
@@ -147,7 +151,7 @@ function App() {
       {loading && (
         <div className="loading">
           <div className="pokeball-loader"></div>
-          <p>Tirage d'un Pokémon...</p>
+          <p>{t('app.loading')}</p>
         </div>
       )}
 
@@ -169,7 +173,7 @@ function App() {
                 skipConfirmation={skipConfirmation}
               />
               {gameState.statsRevealed && !gameState.currentPokemon && (
-                <p className="next-round-message">Prochain Pokémon dans quelques secondes...</p>
+                <p className="next-round-message">{t('app.nextRound')}</p>
               )}
             </>
           )}

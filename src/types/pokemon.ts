@@ -10,6 +10,10 @@ export interface PokemonStats {
 export interface Pokemon {
   id: number
   name: string
+  names?: {
+    en: string
+    fr: string
+  }
   sprites: {
     front_default: string
     front_shiny: string

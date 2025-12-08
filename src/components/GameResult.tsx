@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { GameState, Pokemon, FilterOptions } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
@@ -21,12 +22,20 @@ const getPokemonSprite = (pokemon: Pokemon): string => {
   return pokemon.isShiny ? pokemon.sprites.front_shiny : pokemon.sprites.front_default
 }
 
+const getPokemonName = (pokemon: Pokemon, language: string): string => {
+  if (pokemon.names) {
+    return language.startsWith('fr') ? pokemon.names.fr : pokemon.names.en;
+  }
+  return pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+}
+
 export const GameResult = ({ gameState, totalStats, won, difference, filters, onReset, onRestartWithSameFilters, onRestartWithAdjustedTarget }: GameResultProps) => {
+  const { t, i18n } = useTranslation()
   const [leaderboard, setLeaderboard] = useState<LeaderboardType | null>(null)
   const scoreSavedRef = useRef(false)
 
   const handleClearLeaderboard = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?')) {
+    if (window.confirm(t('result.confirmClear'))) {
       LeaderboardService.clearLeaderboard(filters)
       setLeaderboard(null)
     }
@@ -52,17 +61,17 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
     <div className="game-result-compact">
       <div className={`result-header-compact ${won ? 'victory' : 'defeat'}`}>
         <div className="result-title-row">
-          <h1>{won ? '🎉 Victoire !' : '😢 Défaite'}</h1>
+          <h1>{won ? t('result.victory') : t('result.defeat')}</h1>
           <div className="total-display-compact">
             <div className="stat-box-compact">
-              <span className="stat-label-compact">Votre total</span>
+              <span className="stat-label-compact">{t('result.yourTotal')}</span>
               <span className={`stat-number-compact ${won ? 'success' : 'failure'}`}>
                 {totalStats}
               </span>
             </div>
             <div className="stat-separator-compact">vs</div>
             <div className="stat-box-compact">
-              <span className="stat-label-compact">Objectif</span>
+              <span className="stat-label-compact">{t('result.target')}</span>
               <span className="stat-number-compact target">
                 {gameState.targetTotal}
               </span>
@@ -71,8 +80,8 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
         </div>
         <p className="result-message-compact">
           {won
-            ? `Vous avez dépassé l'objectif de ${difference} points !`
-            : `Il vous manquait ${Math.abs(difference)} points...`
+            ? t('result.wonMessage', { difference })
+            : t('result.lostMessage', { difference: Math.abs(difference) })
           }
         </p>
       </div>
@@ -86,12 +95,12 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
                 <div className="stat-item-content-compact">
                   <img
                     src={getPokemonSprite(selection.pokemon)}
-                    alt={selection.pokemon.name}
+                    alt={getPokemonName(selection.pokemon, i18n.language)}
                     className="mini-sprite-compact"
                   />
                   <div className="stat-detail-compact">
                     <div className="pokemon-name-compact">
-                      {selection.pokemon.name.charAt(0).toUpperCase() + selection.pokemon.name.slice(1)}
+                      {getPokemonName(selection.pokemon, i18n.language)}
                     </div>
                     <div className="stat-info-compact">
                       <span className="stat-name-compact">
@@ -109,7 +118,7 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
 
       <div className="result-buttons-compact">
         <button onClick={onRestartWithSameFilters} className="restart-same-button-compact">
-          🔄 Rejouer
+          {t('result.replay')}
         </button>
         {won ? (
           <>
@@ -131,7 +140,7 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
           </>
         )}
         <button onClick={onReset} className="reset-button-compact">
-          ⚙️ Config
+          {t('result.config')}
         </button>
       </div>
     </div>
