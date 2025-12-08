@@ -90,7 +90,10 @@
     "lostMessage": "You missed by {{difference}} points...",
     "replay": "🔄 Play Again",
     "config": "⚙️ Config",
-    "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?"
+    "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?",
+    "maxPossible": "Max Possible:",
+    "maxPossibleTooltip": "The highest possible score you could have achieved with these Pokémon.",
+    "optimalStrategy": "Optimal Strategy"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -129,7 +132,8 @@
     "confirmTitle": "Confirm your choice",
     "confirmText": "You selected:",
     "confirmHint": "Are you sure you want to choose this stat?",
-    "cancel": "✕ Cancel"
+    "cancel": "✕ Cancel",
+    "allStats": "All Stats"
   },
   "welcome": {
     "title": "Welcome!",

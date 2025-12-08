@@ -90,7 +90,10 @@
     "lostMessage": "Il vous manquait {{difference}} points...",
     "replay": "🔄 Rejouer",
     "config": "⚙️ Config",
-    "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?"
+    "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?",
+    "maxPossible": "Max Possible :",
+    "maxPossibleTooltip": "Le score le plus élevé que vous auriez pu obtenir avec ces Pokémon.",
+    "optimalStrategy": "Stratégie Optimale"
   },
   "leaderboard": {
     "title": "Classement",
@@ -129,7 +132,8 @@
     "confirmTitle": "Confirmer votre choix",
     "confirmText": "Vous avez sélectionné :",
     "confirmHint": "Êtes-vous sûr de vouloir choisir cette statistique ?",
-    "cancel": "✕ Annuler"
+    "cancel": "✕ Annuler",
+    "allStats": "Toutes les stats"
   },
   "welcome": {
     "title": "Bienvenue !",

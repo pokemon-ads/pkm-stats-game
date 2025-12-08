@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { GameState, Pokemon, FilterOptions } from '../types/pokemon'
+import type { GameState, Pokemon, FilterOptions, PokemonStats } from '../types/pokemon'
 import { STAT_LABELS } from '../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
 import { Leaderboard } from './Leaderboard'
@@ -33,6 +33,46 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
   const { t, i18n } = useTranslation()
   const [leaderboard, setLeaderboard] = useState<LeaderboardType | null>(null)
   const scoreSavedRef = useRef(false)
+
+  // Calculate theoretical max score using backtracking (Assignment Problem)
+  const maxPossibleResult = useMemo(() => {
+    const pokemons = gameState.selectedStats.map(s => s.pokemon)
+    const stats = STAT_ORDER
+    let maxScore = 0
+    let bestAssignment: { pokemonIndex: number, statName: string, value: number }[] = []
+    const usedStats = new Set<string>()
+    const currentAssignment: { pokemonIndex: number, statName: string, value: number }[] = []
+
+    function backtrack(pokemonIndex: number, currentScore: number) {
+      if (pokemonIndex === pokemons.length) {
+        if (currentScore > maxScore) {
+          maxScore = currentScore
+          bestAssignment = [...currentAssignment]
+        }
+        return
+      }
+
+      const pokemon = pokemons[pokemonIndex]
+      const multiplier = pokemon.isShiny ? 2 : 1
+
+      for (const statName of stats) {
+        if (!usedStats.has(statName)) {
+          const statValue = pokemon.stats.find(s => s.stat.name === statName)?.base_stat || 0
+          
+          usedStats.add(statName)
+          currentAssignment.push({ pokemonIndex, statName, value: statValue * multiplier })
+          
+          backtrack(pokemonIndex + 1, currentScore + (statValue * multiplier))
+          
+          currentAssignment.pop()
+          usedStats.delete(statName)
+        }
+      }
+    }
+
+    backtrack(0, 0)
+    return { score: maxScore, assignment: bestAssignment }
+  }, [gameState.selectedStats])
 
   const handleClearLeaderboard = () => {
     if (window.confirm(t('result.confirmClear'))) {
@@ -77,6 +117,29 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
               </span>
             </div>
           </div>
+          <div className="max-possible-score">
+            <span className="label">{t('result.maxPossible')}</span>
+            <span className="value">{maxPossibleResult.score}</span>
+            
+            <div className="max-score-tooltip">
+              <h5>{t('result.optimalStrategy')}</h5>
+              <p className="tooltip-desc">{t('result.maxPossibleTooltip')}</p>
+              <div className="strategy-list">
+                {maxPossibleResult.assignment
+                  .sort((a, b) => STAT_ORDER.indexOf(a.statName as keyof PokemonStats) - STAT_ORDER.indexOf(b.statName as keyof PokemonStats))
+                  .map((item, idx) => (
+                  <div key={idx} className="strategy-row">
+                    <span className="strategy-stat">{STAT_LABELS[item.statName as keyof PokemonStats]}</span>
+                    <span className="strategy-arrow">→</span>
+                    <span className="strategy-pokemon">
+                      {getPokemonName(gameState.selectedStats[item.pokemonIndex].pokemon, i18n.language)}
+                    </span>
+                    <span className="strategy-value">({item.value})</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
         <p className="result-message-compact">
           {won
@@ -108,6 +171,18 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
                         {selection.pokemon.isShiny && <span className="shiny-indicator">✨</span>}
                       </span>
                       <span className="stat-value-compact">{selection.value}</span>
+                    </div>
+                    
+                    <div className="all-stats-tooltip">
+                      <h5>{t('pokemonCard.allStats')}</h5>
+                      <div className="all-stats-grid">
+                        {selection.pokemon.stats.map((stat) => (
+                          <div key={stat.stat.name} className={`stat-row ${stat.base_stat === Math.max(...selection.pokemon.stats.map(s => s.base_stat)) ? 'max-stat' : ''}`}>
+                            <span className="stat-label">{STAT_LABELS[stat.stat.name]}</span>
+                            <span className="stat-val">{stat.base_stat * (selection.pokemon.isShiny ? 2 : 1)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
