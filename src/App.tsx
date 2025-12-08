@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePokeGame } from './hooks/usePokeGame'
 import { GameSetup } from './components/GameSetup'
@@ -12,6 +12,7 @@ import './App.css'
 
 function App() {
   const { t } = useTranslation()
+  const [showWelcome, setShowWelcome] = useState(false)
   const {
     gameState,
     loading,
@@ -49,18 +50,28 @@ function App() {
 
   return (
     <div className="app">
-      <WelcomePopup />
-      <LanguageSwitcher />
+      <WelcomePopup forceShow={showWelcome} onClose={() => setShowWelcome(false)} />
+      
+      <div className="top-controls">
+        <button
+          className="help-button"
+          onClick={() => setShowWelcome(true)}
+          title={t('app.help')}
+        >
+          ?
+        </button>
+        <GameConfig
+          skipConfirmation={skipConfirmation}
+          shinyBonus={shinyBonus}
+          onSkipConfirmationChange={updateSkipConfirmation}
+          onShinyBonusChange={updateShinyBonus}
+        />
+        <LanguageSwitcher />
+      </div>
+
       <button onClick={resetGame} className="home-button" title={t('app.homeButton')}>
         🏠 Home
       </button>
-      
-      <GameConfig
-        skipConfirmation={skipConfirmation}
-        shinyBonus={shinyBonus}
-        onSkipConfirmationChange={updateSkipConfirmation}
-        onShinyBonusChange={updateShinyBonus}
-      />
       
       {gameState.phase === GAME_PHASES.SETUP && (
         <GameSetup onStart={startGame} />

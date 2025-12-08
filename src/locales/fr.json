@@ -3,7 +3,8 @@
     "homeButton": "Retour à l'accueil",
     "title": "PokéStats Challenge",
     "loading": "Tirage d'un Pokémon...",
-    "nextRound": "Prochain Pokémon dans quelques secondes..."
+    "nextRound": "Prochain Pokémon dans quelques secondes...",
+    "help": "Aide"
   },
   "gameProgress": {
     "target": "Objectif :",
@@ -44,6 +45,9 @@
     "types": "Types",
     "special": "Spécial",
     "regional": "Régional",
+    "modeHelp": "Modes de jeu",
+    "modeHelpAdditive": "Additif (OU) : Les Pokémon correspondant à AU MOINS UN filtre sont inclus.",
+    "modeHelpRestrictive": "Restrictif (ET) : Les Pokémon doivent correspondre à TOUS les filtres sélectionnés.",
     "play": "🎮 JOUER",
     "legendary": "Légendaires",
     "mythical": "Mythiques",

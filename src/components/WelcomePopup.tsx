@@ -4,20 +4,33 @@ import '../styles/WelcomePopup.css'
 
 const STORAGE_KEY = 'pkm_stats_welcome_seen'
 
-export const WelcomePopup = () => {
+interface WelcomePopupProps {
+  forceShow?: boolean
+  onClose?: () => void
+}
+
+export const WelcomePopup = ({ forceShow, onClose }: WelcomePopupProps) => {
   const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    if (forceShow) {
+      setIsVisible(true)
+      return
+    }
+
     const hasSeenWelcome = localStorage.getItem(STORAGE_KEY)
     if (!hasSeenWelcome) {
       setIsVisible(true)
     }
-  }, [])
+  }, [forceShow])
 
   const handleClose = () => {
-    localStorage.setItem(STORAGE_KEY, 'true')
+    if (!forceShow) {
+      localStorage.setItem(STORAGE_KEY, 'true')
+    }
     setIsVisible(false)
+    onClose?.()
   }
 
   if (!isVisible) return null

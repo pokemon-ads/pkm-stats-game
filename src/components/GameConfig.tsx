@@ -19,20 +19,23 @@ export const GameConfig = ({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className={`game-config ${isExpanded ? 'expanded' : 'collapsed'}`}>
-      <div className="config-header" onClick={() => setIsExpanded(!isExpanded)}>
-        {isExpanded ? (
-          <h3 className="config-title">{t('config.title')}</h3>
-        ) : (
-          <span className="config-icon">⚙️</span>
-        )}
-        <button className="toggle-button" aria-label={isExpanded ? t('config.collapse') : t('config.expand')}>
-          {isExpanded ? '◀' : '▶'}
-        </button>
-      </div>
+    <div className="game-config-wrapper">
+      <div className={`game-config ${isExpanded ? 'expanded' : 'collapsed'}`}>
+        <div className="config-header" onClick={() => setIsExpanded(!isExpanded)} title={t('config.title')}>
+          {isExpanded ? (
+            <h3 className="config-title">{t('config.title')}</h3>
+          ) : (
+            <span className="config-icon">⚙️</span>
+          )}
+          {isExpanded && (
+            <button className="toggle-button" aria-label={t('config.collapse')}>
+              ◀
+            </button>
+          )}
+        </div>
 
-      {isExpanded && (
-        <div className="config-content">
+        {isExpanded && (
+          <div className="config-content">
           <div className="config-group">
             <div className="config-toggle-row">
               <span className="config-label-text">{t('config.fastMode')}</span>
@@ -67,9 +70,10 @@ export const GameConfig = ({
             <p className="config-hint">
               {shinyBonus ? t('config.shinyBonusHintOn') : t('config.shinyBonusHintOff')}
             </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

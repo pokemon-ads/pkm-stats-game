@@ -125,7 +125,17 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
             />
           </div>
           <div className="config-group">
-            <label>{t('setup.mode')}</label>
+            <div className="label-with-help">
+              <label>{t('setup.mode')}</label>
+              <div className="help-tooltip-container">
+                <span className="help-icon">?</span>
+                <div className="help-tooltip">
+                  <h4>{t('setup.modeHelp')}</h4>
+                  <p><strong>{t('setup.addition')}</strong>: {t('setup.modeHelpAdditive')}</p>
+                  <p><strong>{t('setup.restriction')}</strong>: {t('setup.modeHelpRestrictive')}</p>
+                </div>
+              </div>
+            </div>
             <div className="toggle-switch-mode">
               <button
                 className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
