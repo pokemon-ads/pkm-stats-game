@@ -57,6 +57,26 @@
     "hisui": "Hisui",
     "paldea": "Paldea"
   },
+  "types": {
+    "normal": "Normal",
+    "fire": "Feu",
+    "water": "Eau",
+    "electric": "Électrik",
+    "grass": "Plante",
+    "ice": "Glace",
+    "fighting": "Combat",
+    "poison": "Poison",
+    "ground": "Sol",
+    "flying": "Vol",
+    "psychic": "Psy",
+    "bug": "Insecte",
+    "rock": "Roche",
+    "ghost": "Spectre",
+    "dragon": "Dragon",
+    "steel": "Acier",
+    "dark": "Ténèbres",
+    "fairy": "Fée"
+  },
   "result": {
     "victory": "🎉 Victoire !",
     "defeat": "😢 Défaite",
@@ -106,5 +126,16 @@
     "confirmText": "Vous avez sélectionné :",
     "confirmHint": "Êtes-vous sûr de vouloir choisir cette statistique ?",
     "cancel": "✕ Annuler"
+  },
+  "welcome": {
+    "title": "Bienvenue !",
+    "intro": "Prêt à tester vos connaissances sur les statistiques des Pokémon ? Voici comment jouer :",
+    "step1Title": "Configurez votre partie",
+    "step1Desc": "Choisissez les générations, types et catégories de Pokémon avec lesquels vous voulez jouer.",
+    "step2Title": "Devinez la meilleure stat",
+    "step2Desc": "À chaque manche, un Pokémon apparaît. Devinez sa statistique la plus élevée (PV, Attaque, Vitesse...).",
+    "step3Title": "Atteignez l'objectif",
+    "step3Desc": "Cumulez les points de vos bonnes réponses pour atteindre l'objectif total fixé !",
+    "start": "C'est parti !"
   }
 }

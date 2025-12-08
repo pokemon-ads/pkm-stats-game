@@ -139,7 +139,7 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr 1fr;
+  grid-template-columns: 1.4fr 1fr;
   gap: 1.5rem;
   align-items: start;
 }
@@ -147,9 +147,17 @@
 .dashboard-panel {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-panel h3 {
@@ -172,7 +180,7 @@
 /* Generations Grid */
 .generations-grid-compact {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
   gap: 0.5rem;
 }
 
@@ -180,11 +188,11 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: all 0.2s;
 }
 
@@ -203,44 +211,39 @@
 /* Types Grid */
 .types-grid-compact {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
 }
 
 .type-chip {
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  opacity: 0.4;
-  filter: grayscale(1) brightness(0.7);
   padding: 0.5rem;
-  min-height: 60px;
-}
-
-.type-icon-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: capitalize;
 }
 
 .type-chip:hover {
-  opacity: 0.8;
-  transform: scale(1.1);
-  filter: grayscale(0.5) brightness(0.9);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #666;
+  color: #ddd;
 }
 
 .type-chip.active {
-  opacity: 1;
-  filter: grayscale(0) brightness(1);
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  font-weight: 800;
+  transform: scale(1.05);
 }
 
 /* Extras Grid */

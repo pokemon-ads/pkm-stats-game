@@ -147,41 +147,42 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
       </div>
 
       <div className="dashboard-grid">
-        {/* Column 1: Generations */}
-        <div className="dashboard-panel generations-panel">
-          <h3>{t('setup.generations')}</h3>
-          <div className="generations-grid-compact">
-            {Object.entries(GENERATIONS).map(([key, gen]) => (
-              <button
-                key={key}
-                className={`gen-chip ${selectedGenerations.includes(Number(key)) ? 'active' : ''}`}
-                onClick={() => toggleGeneration(Number(key))}
-                title={gen.name}
-              >
-                {key}
-              </button>
-            ))}
+        {/* Column 1: Generations & Types */}
+        <div className="dashboard-panel main-filters-panel">
+          <div className="panel-section">
+            <h3>{t('setup.generations')}</h3>
+            <div className="generations-grid-compact">
+              {Object.entries(GENERATIONS).map(([key, gen]) => (
+                <button
+                  key={key}
+                  className={`gen-chip ${selectedGenerations.includes(Number(key)) ? 'active' : ''}`}
+                  onClick={() => toggleGeneration(Number(key))}
+                  title={gen.name}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <h3>{t('setup.types')}</h3>
+            <div className="types-grid-compact">
+              {POKEMON_TYPES.map((type) => (
+                <button
+                  key={type}
+                  className={`type-chip ${selectedTypes.includes(type) ? `active type-${type}` : ''}`}
+                  onClick={() => toggleType(type)}
+                  title={t(`types.${type}`)}
+                >
+                  {t(`types.${type}`)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Column 2: Types */}
-        <div className="dashboard-panel types-panel">
-          <h3>{t('setup.types')}</h3>
-          <div className="types-grid-compact">
-            {POKEMON_TYPES.map((type) => (
-              <button
-                key={type}
-                className={`type-chip ${selectedTypes.includes(type) ? 'active' : ''}`}
-                onClick={() => toggleType(type)}
-                title={type.charAt(0).toUpperCase() + type.slice(1)}
-              >
-                <img src={TYPE_ICONS[type]} alt={type} className="type-icon-img" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Column 3: Extras */}
+        {/* Column 2: Extras */}
         <div className="dashboard-panel extras-panel">
           <h3>{t('setup.special')}</h3>
           <div className="extras-grid">

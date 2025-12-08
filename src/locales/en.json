@@ -57,6 +57,26 @@
     "hisui": "Hisui",
     "paldea": "Paldea"
   },
+  "types": {
+    "normal": "Normal",
+    "fire": "Fire",
+    "water": "Water",
+    "electric": "Electric",
+    "grass": "Grass",
+    "ice": "Ice",
+    "fighting": "Fighting",
+    "poison": "Poison",
+    "ground": "Ground",
+    "flying": "Flying",
+    "psychic": "Psychic",
+    "bug": "Bug",
+    "rock": "Rock",
+    "ghost": "Ghost",
+    "dragon": "Dragon",
+    "steel": "Steel",
+    "dark": "Dark",
+    "fairy": "Fairy"
+  },
   "result": {
     "victory": "🎉 Victory!",
     "defeat": "😢 Defeat",
@@ -106,5 +126,16 @@
     "confirmText": "You selected:",
     "confirmHint": "Are you sure you want to choose this stat?",
     "cancel": "✕ Cancel"
+  },
+  "welcome": {
+    "title": "Welcome!",
+    "intro": "Ready to test your knowledge of Pokémon stats? Here's how to play:",
+    "step1Title": "Configure your game",
+    "step1Desc": "Choose the generations, types, and categories of Pokémon you want to play with.",
+    "step2Title": "Guess the highest stat",
+    "step2Desc": "In each round, a Pokémon appears. Guess its highest stat (HP, Attack, Speed...).",
+    "step3Title": "Reach the target",
+    "step3Desc": "Accumulate points from your correct answers to reach the set total target!",
+    "start": "Let's go!"
   }
 }

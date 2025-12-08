@@ -6,6 +6,7 @@ import { PokemonCard } from './components/PokemonCard'
 import { GameResult } from './components/GameResult'
 import { GameConfig } from './components/GameConfig'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
+import { WelcomePopup } from './components/WelcomePopup'
 import { GAME_CONFIG, GAME_PHASES } from './config/constants'
 import './App.css'
 
@@ -48,6 +49,7 @@ function App() {
 
   return (
     <div className="app">
+      <WelcomePopup />
       <LanguageSwitcher />
       <button onClick={resetGame} className="home-button" title={t('app.homeButton')}>
         🏠 Home
