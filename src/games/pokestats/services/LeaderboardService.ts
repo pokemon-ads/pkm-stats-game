@@ -1,5 +1,5 @@
-import i18n from '../i18n';
-import type { FilterOptions } from '../types/pokemon';
+import i18n from '../../../i18n';
+import type { FilterOptions } from '../types/game';
 
 export interface LeaderboardEntry {
   score: number;

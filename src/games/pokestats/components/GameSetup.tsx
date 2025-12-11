@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { FilterOptions } from '../types/pokemon'
-import { GENERATIONS, POKEMON_TYPES } from '../types/pokemon'
+import type { FilterOptions } from '../types/game'
+import { GENERATIONS, POKEMON_TYPES } from '../../../types/pokemon'
 import {
   GAME_CONFIG,
   STORAGE_KEYS,
-  TYPE_ICONS,
   REGIONAL_FORM_ICONS,
   CATEGORY_ICONS
 } from '../config/constants'
@@ -104,8 +103,6 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
 
     onStart(targetTotal, filters, skipConfirmation)
   }
-
-  const hasSpecialFilters = legendaryOnly || mythicalOnly || ultraBeastOnly || paradoxOnly || megaOnly || gigantamaxOnly || legendsZAOnly || selectedRegionalForms.length > 0
 
   return (
     <div className="game-setup-dashboard">

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import type { Pokemon, StatName } from '../types/pokemon'
-import { STAT_LABELS } from '../types/pokemon'
+import type { Pokemon, StatName } from '../../../types/pokemon'
+import { STAT_LABELS } from '../../../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
 
 interface PokemonCardProps {

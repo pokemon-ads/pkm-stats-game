@@ -1,4 +1,12 @@
 {
+  "nav": {
+    "home": "Home",
+    "pokestats": "PokéStats",
+    "comingSoon": "Coming Soon..."
+  },
+  "home": {
+    "title": "Pokémon Mini-Games"
+  },
   "app": {
     "homeButton": "Back to Home",
     "title": "PokéStats Challenge",

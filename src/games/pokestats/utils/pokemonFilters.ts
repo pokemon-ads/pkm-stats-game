@@ -1,4 +1,4 @@
-import type { FilterOptions } from "../types/pokemon";
+import type { FilterOptions } from "../types/game";
 import {
   GENERATIONS,
   LEGENDARY_IDS,
@@ -12,10 +12,10 @@ import {
   GALAR_FORM_IDS,
   HISUI_FORM_IDS,
   PALDEA_FORM_IDS,
-} from "../types/pokemon";
+} from "../../../types/pokemon";
 import { POKEMON_CONFIG, FILTER_MODES } from "../config/constants";
-import { pokemonService } from "../services/pokemon.service";
-import { externalDataService } from "../services/external/ExternalDataService";
+import { pokemonService } from "../../../services/pokemon.service";
+import { externalDataService } from "../../../services/external/ExternalDataService";
 
 /**
  * Generates a pool of Pokemon IDs based on the provided filter options.
