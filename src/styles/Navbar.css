@@ -46,8 +46,8 @@
 }
 
 .nav-button.active {
-  color: #4ecdc4;
-  background: rgba(78, 205, 196, 0.1);
+  color: #ffb347;
+  background: rgba(255, 179, 71, 0.15);
 }
 
 .nav-button.disabled {

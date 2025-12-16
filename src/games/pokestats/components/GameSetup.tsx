@@ -27,7 +27,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
   const [gigantamaxOnly, setGigantamaxOnly] = useState(false)
   const [legendsZAOnly, setLegendsZAOnly] = useState(false)
   const [selectedRegionalForms, setSelectedRegionalForms] = useState<('alola' | 'galar' | 'hisui' | 'paldea')[]>([])
-  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('OR')
+  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('AND')
   const [skipConfirmation, setSkipConfirmation] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SKIP_CONFIRMATION)
     return saved === 'true'
@@ -109,8 +109,16 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
       <div className="dashboard-header">
         <h1>{t('setup.title')}</h1>
         <div className="quick-config">
-          <div className="config-group">
-            <label>{t('setup.target')}</label>
+          <label>{t('setup.target')}</label>
+          <div className="score-selector">
+            <button
+              className="score-adjust-btn decrease"
+              onClick={() => setTargetTotal(prev => Math.max(GAME_CONFIG.MIN_TARGET_TOTAL, prev - 50))}
+              title="-50"
+            >
+              <span className="arrow">◀</span>
+              <span className="value">-50</span>
+            </button>
             <input
               type="number"
               value={targetTotal}
@@ -118,37 +126,43 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               min={GAME_CONFIG.MIN_TARGET_TOTAL}
               max={GAME_CONFIG.MAX_TARGET_TOTAL}
               step={GAME_CONFIG.TARGET_STEP}
-              className="compact-input"
+              className="compact-input score-input"
             />
+            <button
+              className="score-adjust-btn increase"
+              onClick={() => setTargetTotal(prev => Math.min(GAME_CONFIG.MAX_TARGET_TOTAL, prev + 50))}
+              title="+50"
+            >
+              <span className="value">+50</span>
+              <span className="arrow">▶</span>
+            </button>
           </div>
-          <div className="config-group">
-            <div className="label-with-help">
-              <label>{t('setup.mode')}</label>
-              <div className="help-tooltip-container">
-                <span className="help-icon">?</span>
-                <div className="help-tooltip">
-                  <h4>{t('setup.modeHelp')}</h4>
-                  <p><strong>{t('setup.addition')}</strong>: {t('setup.modeHelpAdditive')}</p>
-                  <p><strong>{t('setup.restriction')}</strong>: {t('setup.modeHelpRestrictive')}</p>
-                </div>
+          <div className="label-with-help">
+            <label>{t('setup.mode')}</label>
+            <div className="help-tooltip-container">
+              <span className="help-icon">?</span>
+              <div className="help-tooltip">
+                <h4>{t('setup.modeHelp')}</h4>
+                <p><strong>{t('setup.addition')}</strong>: {t('setup.modeHelpAdditive')}</p>
+                <p><strong>{t('setup.restriction')}</strong>: {t('setup.modeHelpRestrictive')}</p>
               </div>
             </div>
-            <div className="toggle-switch-mode">
-              <button
-                className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
-                onClick={() => setFilterMode('OR')}
-                title={t('setup.addition')}
-              >
-                ➕
-              </button>
-              <button
-                className={`mode-toggle ${filterMode === 'AND' ? 'active' : ''}`}
-                onClick={() => setFilterMode('AND')}
-                title={t('setup.restriction')}
-              >
-                🔒
-              </button>
-            </div>
+          </div>
+          <div className="toggle-switch-mode">
+            <button
+              className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
+              onClick={() => setFilterMode('OR')}
+              title={t('setup.addition')}
+            >
+              ➕
+            </button>
+            <button
+              className={`mode-toggle ${filterMode === 'AND' ? 'active' : ''}`}
+              onClick={() => setFilterMode('AND')}
+              title={t('setup.restriction')}
+            >
+              🔒
+            </button>
           </div>
         </div>
       </div>

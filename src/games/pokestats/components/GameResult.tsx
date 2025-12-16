@@ -154,8 +154,21 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
         <div className="stats-list-compact">
           {[...gameState.selectedStats]
             .sort((a, b) => STAT_ORDER.indexOf(a.statName) - STAT_ORDER.indexOf(b.statName))
-            .map((selection, index) => (
-              <div key={index} className="stat-item-compact">
+            .map((selection, index) => {
+              // Check if this was the best stat for this Pokemon
+              const maxStatValue = Math.max(...selection.pokemon.stats.map(s => s.base_stat))
+              const isBestStat = selection.value === maxStatValue
+
+              return (
+              <div
+                key={index}
+                className="stat-item-compact"
+                style={isBestStat ? {
+                  background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.15) 100%)',
+                  borderColor: '#4caf50',
+                  boxShadow: '0 0 15px rgba(76, 175, 80, 0.2)'
+                } : {}}
+              >
                 <div className="stat-item-content-compact">
                   <img
                     src={getPokemonSprite(selection.pokemon)}
@@ -171,7 +184,12 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
                         {STAT_LABELS[selection.statName]}
                         {selection.pokemon.isShiny && <span className="shiny-indicator">✨</span>}
                       </span>
-                      <span className="stat-value-compact">{selection.value}</span>
+                      <span
+                        className="stat-value-compact"
+                        style={isBestStat ? { color: '#4caf50' } : {}}
+                      >
+                        {selection.value}
+                      </span>
                     </div>
                     
                     <div className="all-stats-tooltip">
@@ -188,7 +206,7 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
         </div>
       </div>
 

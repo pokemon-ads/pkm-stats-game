@@ -5,7 +5,19 @@
     "comingSoon": "Coming Soon..."
   },
   "home": {
-    "title": "Pokémon Mini-Games"
+    "title": "Pokémon Mini-Games",
+    "welcome": "Welcome, Trainer!",
+    "subtitle": "Ready to put your Pokémon knowledge to the test? Pick a game and show us what you've got!",
+    "gamesTitle": "Choose your adventure",
+    "popular": "Popular",
+    "pokestatsDesc": "Think you know your Pokémon stats? Guess which stat is the highest and prove you're a true expert!",
+    "featureStats": "Stats",
+    "featureLeaderboard": "Leaderboard",
+    "letsPlay": "Let's Play!",
+    "mysteryGame": "Mystery Game",
+    "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
+    "inDevelopment": "In development",
+    "footerText": "Made with ❤️ for Pokémon fans everywhere"
   },
   "app": {
     "homeButton": "Back to Home",

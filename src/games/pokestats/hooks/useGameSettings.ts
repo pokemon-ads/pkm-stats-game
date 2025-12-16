@@ -2,24 +2,18 @@ import { useState, useCallback } from "react";
 import { STORAGE_KEYS } from "../config/constants";
 
 export const useGameSettings = () => {
-  const [skipConfirmation, setSkipConfirmation] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKIP_CONFIRMATION);
-    return saved === "true";
-  });
-
-  const [shinyBonus, setShinyBonus] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SHINY_BONUS);
-    return saved === "true";
-  });
+  // Force skipConfirmation and shinyBonus to true as per requirements
+  const [skipConfirmation, setSkipConfirmation] = useState(true);
+  const [shinyBonus, setShinyBonus] = useState(true);
 
   const updateSkipConfirmation = useCallback((value: boolean) => {
-    setSkipConfirmation(value);
-    localStorage.setItem(STORAGE_KEYS.SKIP_CONFIRMATION, value.toString());
+    // No-op or force true
+    setSkipConfirmation(true);
   }, []);
 
   const updateShinyBonus = useCallback((value: boolean) => {
-    setShinyBonus(value);
-    localStorage.setItem(STORAGE_KEYS.SHINY_BONUS, value.toString());
+    // No-op or force true
+    setShinyBonus(true);
   }, []);
 
   return {

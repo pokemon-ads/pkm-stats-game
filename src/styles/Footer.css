@@ -1,0 +1,31 @@
+.app-footer {
+  width: 100%;
+  padding: 2rem 1rem;
+  text-align: center;
+  margin-top: auto;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.app-footer .footer-text {
+  color: #707080;
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+}
+
+.app-footer .footer-pokemon {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+.app-footer .footer-pokemon span {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  cursor: default;
+}
+
+.app-footer .footer-pokemon span:hover {
+  transform: scale(1.3) translateY(-4px);
+  opacity: 1;
+}

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { PokeStatsGame } from './games/pokestats'
 import { Navbar } from './components/Navbar'
 import { Home } from './components/Home'
+import { Footer } from './components/Footer'
 import './App.css'
 
 function App() {
@@ -9,10 +10,14 @@ function App() {
     <div className="app">
       <Navbar />
       
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/pokestats" element={<PokeStatsGame />} />
-      </Routes>
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/pokestats" element={<PokeStatsGame />} />
+        </Routes>
+      </main>
+      
+      <Footer />
     </div>
   )
 }

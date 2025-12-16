@@ -5,7 +5,19 @@
     "comingSoon": "Bientôt..."
   },
   "home": {
-    "title": "Mini-Jeux Pokémon"
+    "title": "Mini-Jeux Pokémon",
+    "welcome": "Bienvenue, Dresseur !",
+    "subtitle": "Prêt à tester tes connaissances Pokémon ? Choisis un jeu et montre-nous ce que tu sais faire !",
+    "gamesTitle": "Choisis ton aventure",
+    "popular": "Populaire",
+    "pokestatsDesc": "Tu penses connaître les stats de tes Pokémon ? Devine quelle stat est la plus haute et prouve que tu es un vrai expert !",
+    "featureStats": "Stats",
+    "featureLeaderboard": "Classement",
+    "letsPlay": "C'est parti !",
+    "mysteryGame": "Jeu Mystère",
+    "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
+    "inDevelopment": "En développement",
+    "footerText": "Fait avec ❤️ pour les fans de Pokémon du monde entier"
   },
   "app": {
     "homeButton": "Retour à l'accueil",

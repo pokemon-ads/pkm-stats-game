@@ -59,12 +59,6 @@ export const PokeStatsGame = () => {
         >
           ?
         </button>
-        <GameConfig
-          skipConfirmation={skipConfirmation}
-          shinyBonus={shinyBonus}
-          onSkipConfirmationChange={updateSkipConfirmation}
-          onShinyBonusChange={updateShinyBonus}
-        />
       </div>
 
       {gameState.phase === GAME_PHASES.SETUP && (
@@ -155,19 +149,12 @@ export const PokeStatsGame = () => {
         </div>
       </div>
 
-      {loading && (
-        <div className="loading">
-          <div className="pokeball-loader"></div>
-          <p>{t('app.loading')}</p>
-        </div>
-      )}
-
-          {!loading && (gameState.currentPokemon || (gameState.statsRevealed && gameState.selectedStats.length > 0)) && (
+          {(loading || gameState.currentPokemon || (gameState.statsRevealed && gameState.selectedStats.length > 0)) && (
             <>
               <PokemonCard
                 pokemon={gameState.statsRevealed && !gameState.currentPokemon
                   ? gameState.selectedStats[gameState.selectedStats.length - 1].pokemon
-                  : gameState.currentPokemon!}
+                  : gameState.currentPokemon}
                 availableStats={gameState.availableStats}
                 selectedStatName={gameState.statsRevealed && !gameState.currentPokemon
                   ? gameState.selectedStats[gameState.selectedStats.length - 1].statName
@@ -178,8 +165,9 @@ export const PokeStatsGame = () => {
                 round={gameState.currentRound}
                 selectedStats={gameState.selectedStats}
                 skipConfirmation={skipConfirmation}
+                isLoading={loading}
               />
-              {gameState.statsRevealed && !gameState.currentPokemon && (
+              {gameState.statsRevealed && !gameState.currentPokemon && !loading && (
                 <p className="next-round-message">{t('app.nextRound')}</p>
               )}
             </>
