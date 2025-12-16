@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { PokeStatsGame } from './games/pokestats'
+import { PokeQuizzGame } from './games/pokequizz'
 import { Navbar } from './components/Navbar'
 import { Home } from './components/Home'
 import { Footer } from './components/Footer'
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/pokestats" element={<PokeStatsGame />} />
+          <Route path="/pokequizz" element={<PokeQuizzGame />} />
         </Routes>
       </main>
       

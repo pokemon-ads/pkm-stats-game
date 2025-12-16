@@ -40,18 +40,24 @@ export const Home = () => {
             </button>
           </div>
           
-          <div className="game-card coming-soon-card">
+          <div className="game-card pokequizz-card" onClick={() => navigate('/pokequizz')}>
+            <div className="card-glow"></div>
             <div className="game-header">
-              <div className="game-icon-wrapper mystery">
-                <span className="game-icon">✨</span>
+              <div className="game-icon-wrapper">
+                <span className="game-icon">❓</span>
               </div>
+              <div className="game-badge new">{t('home.new')}</div>
             </div>
-            <h3 className="game-title">{t('home.mysteryGame')}</h3>
-            <p className="game-description">{t('home.comingSoonDesc')}</p>
-            <div className="coming-soon-badge">
-              <span className="pulse-dot"></span>
-              {t('home.inDevelopment')}
+            <h3 className="game-title">{t('nav.pokequizz')}</h3>
+            <p className="game-description">{t('home.pokequizzDesc')}</p>
+            <div className="game-features">
+              <span className="feature-tag">🧠 {t('home.featureKnowledge')}</span>
+              <span className="feature-tag">⚡ {t('home.featureSpeed')}</span>
             </div>
+            <button className="play-button">
+              <span className="button-text">{t('home.letsPlay')}</span>
+              <span className="button-arrow">→</span>
+            </button>
           </div>
         </div>
       </div>

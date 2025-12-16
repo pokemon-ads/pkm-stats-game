@@ -129,11 +129,6 @@ export const PokemonCard = ({
                 <div
                   key={statName}
                   className={`stat-card ${isChosen ? 'stat-chosen' : ''} ${isBestChoice ? 'stat-best-choice' : ''}`}
-                  style={isBestChoice ? {
-                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(129, 199, 132, 0.3) 100%)',
-                    borderColor: '#4caf50',
-                    boxShadow: '0 0 25px rgba(76, 175, 80, 0.4)'
-                  } : {}}
                 >
                   <span className="stat-name">{STAT_LABELS[statName]}</span>
                   {pokemonWithStat ? (
@@ -162,14 +157,9 @@ export const PokemonCard = ({
                 const isBestChoice = isBestStatForPokemon(pokemonWithStat.pokemon, statName)
                 return (
                   <div
-                    key={statName}
-                    className={`stat-card stat-chosen ${isBestChoice ? 'stat-best-choice' : ''}`}
-                    style={isBestChoice ? {
-                      background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(129, 199, 132, 0.3) 100%)',
-                      borderColor: '#4caf50',
-                      boxShadow: '0 0 25px rgba(76, 175, 80, 0.4)'
-                    } : {}}
-                  >
+                      key={statName}
+                      className={`stat-card stat-chosen ${isBestChoice ? 'stat-best-choice' : ''}`}
+                    >
                     <span className="stat-name">{STAT_LABELS[statName]}</span>
                     <div className="stat-with-sprite">
                       <img
@@ -192,11 +182,6 @@ export const PokemonCard = ({
                     onClick={() => onSelectStatName(statName)}
                     disabled={!isAvailable}
                     className={`stat-button-blind ${!isAvailable ? 'stat-disabled' : ''} ${isSelected ? 'stat-selected' : ''}`}
-                    style={isSelected ? {
-                      background: 'linear-gradient(135deg, rgba(255, 179, 71, 0.3) 0%, rgba(255, 107, 107, 0.3) 100%)',
-                      borderColor: '#ff6b6b',
-                      boxShadow: '0 0 20px rgba(255, 107, 107, 0.4)'
-                    } : {}}
                   >
                     <span className="stat-name">{STAT_LABELS[statName]}</span>
                     <span className="stat-mystery">?</span>

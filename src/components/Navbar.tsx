@@ -23,13 +23,12 @@ export const Navbar = () => {
           📊 {t('nav.pokestats')}
         </NavLink>
         
-        <button
-          className="nav-button disabled"
-          disabled
-          title={t('nav.comingSoon')}
+        <NavLink
+          to="/pokequizz"
+          className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
         >
-          🚧 {t('nav.comingSoon')}
-        </button>
+          ❓ {t('nav.pokequizz')}
+        </NavLink>
       </div>
       
       <div className="navbar-actions">

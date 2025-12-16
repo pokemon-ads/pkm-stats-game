@@ -1,0 +1,1 @@
+export { PokeQuizzGame } from './components/PokeQuizzGame';

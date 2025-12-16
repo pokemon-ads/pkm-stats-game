@@ -2,6 +2,7 @@
   "nav": {
     "home": "Home",
     "pokestats": "PokéStats",
+    "pokequizz": "PokéQuizz",
     "comingSoon": "Coming Soon..."
   },
   "home": {
@@ -10,9 +11,13 @@
     "subtitle": "Ready to put your Pokémon knowledge to the test? Pick a game and show us what you've got!",
     "gamesTitle": "Choose your adventure",
     "popular": "Popular",
+    "new": "New",
     "pokestatsDesc": "Think you know your Pokémon stats? Guess which stat is the highest and prove you're a true expert!",
+    "pokequizzDesc": "Who's that Pokémon? Test your knowledge by identifying Pokémon from their silhouettes!",
     "featureStats": "Stats",
     "featureLeaderboard": "Leaderboard",
+    "featureKnowledge": "Knowledge",
+    "featureSpeed": "Speed",
     "letsPlay": "Let's Play!",
     "mysteryGame": "Mystery Game",
     "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
@@ -165,5 +170,29 @@
     "step3Title": "Reach the target",
     "step3Desc": "Accumulate points from your correct answers to reach the set total target!",
     "start": "Let's go!"
+  },
+  "settings": {
+    "title": "Settings",
+    "generation": "Generation",
+    "allGenerations": "All Generations",
+    "difficulty": "Difficulty",
+    "sound": "Sound"
+  },
+  "stats": {
+    "title": "Statistics",
+    "currentStreak": "Current Streak",
+    "bestStreak": "Best Streak",
+    "successRate": "Accuracy",
+    "lastTime": "Last Time",
+    "averageTime": "Avg Time",
+    "total": "Total Found"
+  },
+  "quizz": {
+    "question": "Who's that Pokémon?",
+    "correct": "Correct!",
+    "wrong": "Too bad!",
+    "placeholder": "Enter Pokémon name...",
+    "giveUp": "I don't know!",
+    "playCry": "Play Cry"
   }
 }

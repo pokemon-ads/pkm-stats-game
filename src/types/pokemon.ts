@@ -18,6 +18,10 @@ export interface Pokemon {
     front_default: string
     front_shiny: string
   }
+  cries: {
+    latest: string
+    legacy: string
+  }
   stats: Array<{
     base_stat: number
     stat: {

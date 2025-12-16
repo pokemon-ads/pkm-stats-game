@@ -2,6 +2,7 @@
   "nav": {
     "home": "Accueil",
     "pokestats": "PokéStats",
+    "pokequizz": "PokéQuizz",
     "comingSoon": "Bientôt..."
   },
   "home": {
@@ -10,9 +11,13 @@
     "subtitle": "Prêt à tester tes connaissances Pokémon ? Choisis un jeu et montre-nous ce que tu sais faire !",
     "gamesTitle": "Choisis ton aventure",
     "popular": "Populaire",
+    "new": "Nouveau",
     "pokestatsDesc": "Tu penses connaître les stats de tes Pokémon ? Devine quelle stat est la plus haute et prouve que tu es un vrai expert !",
+    "pokequizzDesc": "Quel est ce Pokémon ? Teste tes connaissances en identifiant les Pokémon à partir de leur silhouette !",
     "featureStats": "Stats",
     "featureLeaderboard": "Classement",
+    "featureKnowledge": "Connaissance",
+    "featureSpeed": "Vitesse",
     "letsPlay": "C'est parti !",
     "mysteryGame": "Jeu Mystère",
     "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
@@ -165,5 +170,29 @@
     "step3Title": "Atteignez l'objectif",
     "step3Desc": "Cumulez les points de vos bonnes réponses pour atteindre l'objectif total fixé !",
     "start": "C'est parti !"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "generation": "Génération",
+    "allGenerations": "Toutes les générations",
+    "difficulty": "Difficulté",
+    "sound": "Son"
+  },
+  "stats": {
+    "title": "Statistiques",
+    "currentStreak": "Série actuelle",
+    "bestStreak": "Meilleure série",
+    "successRate": "Précision",
+    "lastTime": "Dernier temps",
+    "averageTime": "Temps moyen",
+    "total": "Total trouvé"
+  },
+  "quizz": {
+    "question": "Quel est ce Pokémon ?",
+    "correct": "Bravo !",
+    "wrong": "Dommage !",
+    "placeholder": "Entrez le nom du Pokémon...",
+    "giveUp": "Je ne sais pas !",
+    "playCry": "Écouter le cri"
   }
 }
