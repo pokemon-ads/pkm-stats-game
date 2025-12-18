@@ -1,23 +1,30 @@
+.game-config-wrapper {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  z-index: 100;
+}
+
 .game-config {
-  position: fixed;
-  left: 2rem;
-  top: 6rem;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 300px;
   background: #1a1a1a;
   border: 1px solid #444;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  z-index: 100;
   transition: width 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
   overflow: hidden;
 }
 
 .game-config.collapsed {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px; /* Make it round when collapsed */
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  border: none;
 }
 
 .config-header {
@@ -36,6 +43,7 @@
   border-bottom: none;
   justify-content: center;
   height: 100%;
+  background: transparent;
 }
 
 .config-title {
@@ -51,12 +59,7 @@
 
 .config-icon {
   font-size: 1.5rem;
-  animation: spin-slow 10s linear infinite;
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  line-height: 1;
 }
 
 .game-config.collapsed .config-title {
@@ -285,9 +288,9 @@
 }
 
 /* Animation on mount */
-@keyframes slideInLeft {
+@keyframes slideInRight {
   from {
-    transform: translateX(-100%);
+    transform: translateX(100%);
     opacity: 0;
   }
   to {
@@ -297,45 +300,41 @@
 }
 
 .game-config {
-  animation: slideInLeft 0.3s ease-out;
+  animation: slideInRight 0.3s ease-out;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
   .game-config {
-    left: 1rem;
-    top: 5rem;
     width: 240px;
   }
   
   .game-config.collapsed {
-    width: 50px;
+    width: 48px;
   }
 }
 
 @media (max-width: 768px) {
   .game-config {
-    top: auto;
-    bottom: 1rem;
-    left: 1rem;
-    right: auto;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     overflow: hidden;
     transition: all 0.3s ease;
   }
 
   .game-config.expanded {
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
     width: 260px;
     height: auto;
     border-radius: 16px;
-    bottom: 4rem;
   }
 
   .game-config.collapsed {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
   }
 
   .game-config.collapsed .config-header {

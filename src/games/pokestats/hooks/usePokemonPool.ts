@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import type { FilterOptions } from "../types/pokemon";
-import { FILTER_MODES } from "../config/constants";
+import type { FilterOptions } from "../types/game";
 import { generatePokemonPool } from "../utils/pokemonFilters";
 
 export const usePokemonPool = () => {

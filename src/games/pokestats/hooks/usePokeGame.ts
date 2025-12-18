@@ -1,16 +1,18 @@
 import { useState, useCallback } from "react";
 import type {
-  GameState,
   Pokemon,
   StatName,
+} from "../../../types/pokemon";
+import type {
+  GameState,
   FilterOptions,
-} from "../types/pokemon";
+} from "../types/game";
 import {
   GAME_CONFIG,
   STAT_ORDER,
   GAME_PHASES,
 } from "../config/constants";
-import { pokemonService } from "../services/pokemon.service";
+import { pokemonService } from "../../../services/pokemon.service";
 import { useGameSettings } from "./useGameSettings";
 import { usePokemonPool } from "./usePokemonPool";
 

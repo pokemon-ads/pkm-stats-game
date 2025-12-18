@@ -1,0 +1,71 @@
+/* ===== POKEQUIZZ GAME - WARM & FRIENDLY DESIGN ===== */
+/* Secondary color: Purple/Violet (#9b59b6, #8e44ad) */
+
+.pokequizz-game {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  padding-top: 100px;
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(180deg,
+    rgba(155, 89, 182, 0.02) 0%,
+    rgba(142, 68, 173, 0.05) 50%,
+    rgba(155, 89, 182, 0.02) 100%
+  );
+}
+
+.pokequizz-sidebar {
+  background: linear-gradient(145deg,
+    rgba(45, 45, 60, 0.9) 0%,
+    rgba(35, 35, 50, 0.95) 100%
+  );
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgba(155, 89, 182, 0.15);
+  height: fit-content;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.pokequizz-sidebar:hover {
+  border-color: rgba(155, 89, 182, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.pokequizz-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .pokequizz-game {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    padding: 1rem;
+    padding-top: 80px;
+  }
+  
+  .pokequizz-sidebar {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .pokequizz-game {
+    gap: 1rem;
+    padding: 0.75rem;
+    padding-top: 70px;
+  }
+  
+  .pokequizz-sidebar {
+    padding: 1rem;
+  }
+}

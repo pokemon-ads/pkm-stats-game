@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import type { Pokemon, StatName } from '../types/pokemon'
-import { STAT_LABELS } from '../types/pokemon'
+import type { Pokemon, StatName } from '../../../types/pokemon'
+import { STAT_LABELS } from '../../../types/pokemon'
 import { STAT_ORDER, GAME_CONFIG } from '../config/constants'
 
 interface PokemonCardProps {
-  pokemon: Pokemon
+  pokemon: Pokemon | null
   availableStats: StatName[]
   selectedStatName: StatName | null
   statsRevealed: boolean
@@ -17,6 +17,7 @@ interface PokemonCardProps {
     value: number
   }>
   skipConfirmation: boolean
+  isLoading?: boolean
 }
 
 // Helper function to get the correct sprite (shiny or normal)
@@ -40,11 +41,13 @@ export const PokemonCard = ({
   onConfirmSelection,
   round,
   selectedStats,
-  skipConfirmation
+  skipConfirmation,
+  isLoading = false
 }: PokemonCardProps) => {
   const { t, i18n } = useTranslation()
 
   const getStatValue = (statName: StatName): number => {
+    if (!pokemon) return 0
     const stat = pokemon.stats.find(s => s.stat.name === statName)
     return stat?.base_stat || 0
   }
@@ -52,6 +55,16 @@ export const PokemonCard = ({
   // Find which Pokemon has each stat
   const getPokemonForStat = (statName: StatName) => {
     return selectedStats.find(s => s.statName === statName)
+  }
+
+  // Check if a stat is the best stat for a given Pokemon (among all stats)
+  const isBestStatForPokemon = (pkmn: Pokemon, statName: StatName): boolean => {
+    const chosenStatValue = pkmn.stats.find(s => s.stat.name === statName)?.base_stat || 0
+    
+    // Get the max value among all stats for this Pokemon
+    const maxStatValue = Math.max(...pkmn.stats.map(s => s.base_stat))
+    
+    return chosenStatValue === maxStatValue && maxStatValue > 0
   }
 
   const allStats = [...STAT_ORDER] as StatName[]
@@ -63,23 +76,32 @@ export const PokemonCard = ({
       </div>
 
       <div className="pokemon-info">
-        <h2>
-          {getPokemonName(pokemon, i18n.language)}
-          {pokemon.isShiny && <span className="shiny-badge">✨ Shiny!</span>}
-        </h2>
-        <img
-          src={getPokemonSprite(pokemon)}
-          alt={pokemon.name}
-          className="pokemon-sprite"
-        />
-        <p className="pokemon-number">#{pokemon.id}</p>
-        <div className="pokemon-types">
-          {pokemon.types.map((type, index) => (
-            <span key={index} className={`type-badge type-${type.type.name}`}>
-              {type.type.name}
-            </span>
-          ))}
-        </div>
+        {isLoading || !pokemon ? (
+          <div className="pokemon-loading">
+            <div className="pokeball-loader"></div>
+            <p>{t('app.loading')}</p>
+          </div>
+        ) : (
+          <>
+            <h2>
+              {getPokemonName(pokemon, i18n.language)}
+              {pokemon.isShiny && <span className="shiny-badge">✨ Shiny!</span>}
+            </h2>
+            <img
+              src={getPokemonSprite(pokemon)}
+              alt={pokemon.name}
+              className="pokemon-sprite"
+            />
+            <p className="pokemon-number">#{pokemon.id}</p>
+            <div className="pokemon-types">
+              {pokemon.types.map((type, index) => (
+                <span key={index} className={`type-badge type-${type.type.name}`}>
+                  {type.type.name}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="stats-selection-blind">
@@ -101,11 +123,12 @@ export const PokemonCard = ({
             if (statsRevealed) {
               // Revealed state: show actual values with Pokemon sprite for current round
               const isChosen = pokemonWithStat !== undefined
+              const isBestChoice = pokemonWithStat && isBestStatForPokemon(pokemonWithStat.pokemon, statName)
               
               return (
                 <div
                   key={statName}
-                  className={`stat-card ${isChosen ? 'stat-chosen' : ''}`}
+                  className={`stat-card ${isChosen ? 'stat-chosen' : ''} ${isBestChoice ? 'stat-best-choice' : ''}`}
                 >
                   <span className="stat-name">{STAT_LABELS[statName]}</span>
                   {pokemonWithStat ? (
@@ -120,18 +143,23 @@ export const PokemonCard = ({
                   ) : (
                     <span className="stat-value">{value}</span>
                   )}
-                  {isChosen && <span className="chosen-badge">✓ Choisi</span>}
+                  {isChosen && (
+                    <span className={`chosen-badge ${isBestChoice ? 'best-badge' : ''}`}>
+                      {isBestChoice ? '⭐ Meilleur!' : '✓ Choisi'}
+                    </span>
+                  )}
                 </div>
               )
             } else {
               // Hidden state: show mystery cards OR already selected stats from previous rounds
               if (pokemonWithStat) {
                 // This stat was selected in a previous round - show it with sprite
+                const isBestChoice = isBestStatForPokemon(pokemonWithStat.pokemon, statName)
                 return (
                   <div
-                    key={statName}
-                    className="stat-card stat-chosen"
-                  >
+                      key={statName}
+                      className={`stat-card stat-chosen ${isBestChoice ? 'stat-best-choice' : ''}`}
+                    >
                     <span className="stat-name">{STAT_LABELS[statName]}</span>
                     <div className="stat-with-sprite">
                       <img
@@ -141,7 +169,9 @@ export const PokemonCard = ({
                       />
                       <span className="stat-value">{pokemonWithStat.value}</span>
                     </div>
-                    <span className="chosen-badge">✓ Choisi</span>
+                    <span className={`chosen-badge ${isBestChoice ? 'best-badge' : ''}`}>
+                      {isBestChoice ? '⭐ Meilleur!' : '✓ Choisi'}
+                    </span>
                   </div>
                 )
               } else {
@@ -163,31 +193,6 @@ export const PokemonCard = ({
         </div>
       </div>
 
-      {!statsRevealed && selectedStatName && !skipConfirmation && (
-        <div className="modal-overlay" onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            onSelectStatName(null as any)
-          }
-        }}>
-          <div className="confirmation-modal">
-            <h3>Confirmer votre choix</h3>
-            <p className="confirmation-text">
-              Vous avez sélectionné : <strong>{STAT_LABELS[selectedStatName]}</strong>
-            </p>
-            <p className="confirmation-hint">
-              Êtes-vous sûr de vouloir choisir cette statistique ?
-            </p>
-            <div className="modal-buttons">
-              <button onClick={() => onSelectStatName(null as any)} className="cancel-button">
-                ✕ Annuler
-              </button>
-              <button onClick={onConfirmSelection} className="confirm-button">
-                ✓ {t('pokemonCard.confirm')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

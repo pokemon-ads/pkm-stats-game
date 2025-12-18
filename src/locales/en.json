@@ -1,9 +1,43 @@
 {
+  "nav": {
+    "home": "Home",
+    "pokestats": "PokéStats",
+    "pokequizz": "PokéQuizz",
+    "comingSoon": "Coming Soon..."
+  },
+  "home": {
+    "title": "Pokémon Mini-Games",
+    "welcome": "Welcome, Trainer!",
+    "subtitle": "Ready to put your Pokémon knowledge to the test? Pick a game and show us what you've got!",
+    "gamesTitle": "Choose your adventure",
+    "popular": "Popular",
+    "new": "New",
+    "pokestatsDesc": "Think you know your Pokémon stats? Guess which stat is the highest and prove you're a true expert!",
+    "pokequizzDesc": "Who's that Pokémon? Test your knowledge by identifying Pokémon from their silhouettes!",
+    "featureStats": "Stats",
+    "featureLeaderboard": "Leaderboard",
+    "featureKnowledge": "Knowledge",
+    "featureSpeed": "Speed",
+    "letsPlay": "Let's Play!",
+    "mysteryGame": "Mystery Game",
+    "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
+    "inDevelopment": "In development",
+    "about": {
+      "title": "About PKM Stats",
+      "intro": "Welcome to PKM Stats, your ultimate destination for Pokémon trivia and strategy games. Whether you're a casual fan or a competitive master, our mini-games are designed to test your knowledge and sharpen your skills.",
+      "pokestatsTitle": "Master the Stats with PokéStats",
+      "pokestatsText": "Dive into the numbers game with PokéStats! This higher/lower style game challenges you to predict which Pokémon statistic is superior. Analyze base stats, consider forms and variations, and climb the leaderboard. It's the perfect way to learn the competitive strengths of every Pokémon.",
+      "pokequizzTitle": "Test Your Knowledge with PokéQuizz",
+      "pokequizzText": "Can you identify them all? PokéQuizz brings the classic 'Who's that Pokémon?' experience to your screen. Use visual clues, silhouettes, and your encyclopedic knowledge to name Pokémon from every generation. Speed and accuracy are key to achieving the highest score."
+    },
+    "footerText": "Made with ❤️ for Pokémon fans everywhere"
+  },
   "app": {
     "homeButton": "Back to Home",
     "title": "PokéStats Challenge",
     "loading": "Drawing a Pokémon...",
-    "nextRound": "Next Pokémon in a few seconds..."
+    "nextRound": "Next Pokémon in a few seconds...",
+    "help": "Help"
   },
   "gameProgress": {
     "target": "Target:",
@@ -44,6 +78,9 @@
     "types": "Types",
     "special": "Special",
     "regional": "Regional",
+    "modeHelp": "Game Modes",
+    "modeHelpAdditive": "Additive (OR): Pokémon matching ANY selected filter are included.",
+    "modeHelpRestrictive": "Restrictive (AND): Pokémon must match ALL selected filters.",
     "play": "🎮 PLAY",
     "legendary": "Legendary",
     "mythical": "Mythical",
@@ -57,6 +94,26 @@
     "hisui": "Hisui",
     "paldea": "Paldea"
   },
+  "types": {
+    "normal": "Normal",
+    "fire": "Fire",
+    "water": "Water",
+    "electric": "Electric",
+    "grass": "Grass",
+    "ice": "Ice",
+    "fighting": "Fighting",
+    "poison": "Poison",
+    "ground": "Ground",
+    "flying": "Flying",
+    "psychic": "Psychic",
+    "bug": "Bug",
+    "rock": "Rock",
+    "ghost": "Ghost",
+    "dragon": "Dragon",
+    "steel": "Steel",
+    "dark": "Dark",
+    "fairy": "Fairy"
+  },
   "result": {
     "victory": "🎉 Victory!",
     "defeat": "😢 Defeat",
@@ -66,7 +123,10 @@
     "lostMessage": "You missed by {{difference}} points...",
     "replay": "🔄 Play Again",
     "config": "⚙️ Config",
-    "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?"
+    "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?",
+    "maxPossible": "Max Possible:",
+    "maxPossibleTooltip": "The highest possible score you could have achieved with these Pokémon.",
+    "optimalStrategy": "Optimal Strategy"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -105,6 +165,42 @@
     "confirmTitle": "Confirm your choice",
     "confirmText": "You selected:",
     "confirmHint": "Are you sure you want to choose this stat?",
-    "cancel": "✕ Cancel"
+    "cancel": "✕ Cancel",
+    "allStats": "All Stats"
+  },
+  "welcome": {
+    "title": "Welcome!",
+    "intro": "Ready to test your knowledge of Pokémon stats? Here's how to play:",
+    "step1Title": "Configure your game",
+    "step1Desc": "Choose the generations, types, and categories of Pokémon you want to play with.",
+    "step2Title": "Guess the highest stat",
+    "step2Desc": "In each round, a Pokémon appears. Guess its highest stat (HP, Attack, Speed...).",
+    "step3Title": "Reach the target",
+    "step3Desc": "Accumulate points from your correct answers to reach the set total target!",
+    "start": "Let's go!"
+  },
+  "settings": {
+    "title": "Settings",
+    "generation": "Generation",
+    "allGenerations": "All Generations",
+    "difficulty": "Difficulty",
+    "sound": "Sound"
+  },
+  "stats": {
+    "title": "Statistics",
+    "currentStreak": "Current Streak",
+    "bestStreak": "Best Streak",
+    "successRate": "Accuracy",
+    "lastTime": "Last Time",
+    "averageTime": "Avg Time",
+    "total": "Total Found"
+  },
+  "quizz": {
+    "question": "Who's that Pokémon?",
+    "correct": "Correct!",
+    "wrong": "Too bad!",
+    "placeholder": "Enter Pokémon name...",
+    "giveUp": "I don't know!",
+    "playCry": "Play Cry"
   }
 }

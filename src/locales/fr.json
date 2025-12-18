@@ -1,9 +1,43 @@
 {
+  "nav": {
+    "home": "Accueil",
+    "pokestats": "PokéStats",
+    "pokequizz": "PokéQuizz",
+    "comingSoon": "Bientôt..."
+  },
+  "home": {
+    "title": "Mini-Jeux Pokémon",
+    "welcome": "Bienvenue, Dresseur !",
+    "subtitle": "Prêt à tester tes connaissances Pokémon ? Choisis un jeu et montre-nous ce que tu sais faire !",
+    "gamesTitle": "Choisis ton aventure",
+    "popular": "Populaire",
+    "new": "Nouveau",
+    "pokestatsDesc": "Tu penses connaître les stats de tes Pokémon ? Devine quelle stat est la plus haute et prouve que tu es un vrai expert !",
+    "pokequizzDesc": "Quel est ce Pokémon ? Teste tes connaissances en identifiant les Pokémon à partir de leur silhouette !",
+    "featureStats": "Stats",
+    "featureLeaderboard": "Classement",
+    "featureKnowledge": "Connaissance",
+    "featureSpeed": "Vitesse",
+    "letsPlay": "C'est parti !",
+    "mysteryGame": "Jeu Mystère",
+    "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
+    "inDevelopment": "En développement",
+    "about": {
+      "title": "À propos de PKM Stats",
+      "intro": "Bienvenue sur PKM Stats, votre destination ultime pour les jeux de stratégie et de quiz Pokémon. Que vous soyez un fan occasionnel ou un maître compétitif, nos mini-jeux sont conçus pour tester vos connaissances et affûter vos compétences.",
+      "pokestatsTitle": "Maîtrisez les Stats avec PokéStats",
+      "pokestatsText": "Plongez dans les chiffres avec PokéStats ! Ce jeu de type plus/moins vous met au défi de prédire quelle statistique de Pokémon est supérieure. Analysez les statistiques de base, prenez en compte les formes et variations, et grimpez dans le classement. C'est le moyen idéal pour apprendre les forces compétitives de chaque Pokémon.",
+      "pokequizzTitle": "Testez vos connaissances avec PokéQuizz",
+      "pokequizzText": "Pouvez-vous tous les identifier ? PokéQuizz amène l'expérience classique 'Quel est ce Pokémon ?' sur votre écran. Utilisez des indices visuels, des silhouettes et votre savoir encyclopédique pour nommer des Pokémon de toutes les générations. Vitesse et précision sont les clés pour obtenir le meilleur score."
+    },
+    "footerText": "Fait avec ❤️ pour les fans de Pokémon du monde entier"
+  },
   "app": {
     "homeButton": "Retour à l'accueil",
     "title": "PokéStats Challenge",
     "loading": "Tirage d'un Pokémon...",
-    "nextRound": "Prochain Pokémon dans quelques secondes..."
+    "nextRound": "Prochain Pokémon dans quelques secondes...",
+    "help": "Aide"
   },
   "gameProgress": {
     "target": "Objectif :",
@@ -44,6 +78,9 @@
     "types": "Types",
     "special": "Spécial",
     "regional": "Régional",
+    "modeHelp": "Modes de jeu",
+    "modeHelpAdditive": "Additif (OU) : Les Pokémon correspondant à AU MOINS UN filtre sont inclus.",
+    "modeHelpRestrictive": "Restrictif (ET) : Les Pokémon doivent correspondre à TOUS les filtres sélectionnés.",
     "play": "🎮 JOUER",
     "legendary": "Légendaires",
     "mythical": "Mythiques",
@@ -57,6 +94,26 @@
     "hisui": "Hisui",
     "paldea": "Paldea"
   },
+  "types": {
+    "normal": "Normal",
+    "fire": "Feu",
+    "water": "Eau",
+    "electric": "Électrik",
+    "grass": "Plante",
+    "ice": "Glace",
+    "fighting": "Combat",
+    "poison": "Poison",
+    "ground": "Sol",
+    "flying": "Vol",
+    "psychic": "Psy",
+    "bug": "Insecte",
+    "rock": "Roche",
+    "ghost": "Spectre",
+    "dragon": "Dragon",
+    "steel": "Acier",
+    "dark": "Ténèbres",
+    "fairy": "Fée"
+  },
   "result": {
     "victory": "🎉 Victoire !",
     "defeat": "😢 Défaite",
@@ -66,7 +123,10 @@
     "lostMessage": "Il vous manquait {{difference}} points...",
     "replay": "🔄 Rejouer",
     "config": "⚙️ Config",
-    "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?"
+    "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?",
+    "maxPossible": "Max Possible :",
+    "maxPossibleTooltip": "Le score le plus élevé que vous auriez pu obtenir avec ces Pokémon.",
+    "optimalStrategy": "Stratégie Optimale"
   },
   "leaderboard": {
     "title": "Classement",
@@ -105,6 +165,42 @@
     "confirmTitle": "Confirmer votre choix",
     "confirmText": "Vous avez sélectionné :",
     "confirmHint": "Êtes-vous sûr de vouloir choisir cette statistique ?",
-    "cancel": "✕ Annuler"
+    "cancel": "✕ Annuler",
+    "allStats": "Toutes les stats"
+  },
+  "welcome": {
+    "title": "Bienvenue !",
+    "intro": "Prêt à tester vos connaissances sur les statistiques des Pokémon ? Voici comment jouer :",
+    "step1Title": "Configurez votre partie",
+    "step1Desc": "Choisissez les générations, types et catégories de Pokémon avec lesquels vous voulez jouer.",
+    "step2Title": "Devinez la meilleure stat",
+    "step2Desc": "À chaque manche, un Pokémon apparaît. Devinez sa statistique la plus élevée (PV, Attaque, Vitesse...).",
+    "step3Title": "Atteignez l'objectif",
+    "step3Desc": "Cumulez les points de vos bonnes réponses pour atteindre l'objectif total fixé !",
+    "start": "C'est parti !"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "generation": "Génération",
+    "allGenerations": "Toutes les générations",
+    "difficulty": "Difficulté",
+    "sound": "Son"
+  },
+  "stats": {
+    "title": "Statistiques",
+    "currentStreak": "Série actuelle",
+    "bestStreak": "Meilleure série",
+    "successRate": "Précision",
+    "lastTime": "Dernier temps",
+    "averageTime": "Temps moyen",
+    "total": "Total trouvé"
+  },
+  "quizz": {
+    "question": "Quel est ce Pokémon ?",
+    "correct": "Bravo !",
+    "wrong": "Dommage !",
+    "placeholder": "Entrez le nom du Pokémon...",
+    "giveUp": "Je ne sais pas !",
+    "playCry": "Écouter le cri"
   }
 }

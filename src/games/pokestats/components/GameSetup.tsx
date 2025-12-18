@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { FilterOptions } from '../types/pokemon'
-import { GENERATIONS, POKEMON_TYPES } from '../types/pokemon'
+import type { FilterOptions } from '../types/game'
+import { GENERATIONS, POKEMON_TYPES } from '../../../types/pokemon'
 import {
   GAME_CONFIG,
   STORAGE_KEYS,
-  TYPE_ICONS,
   REGIONAL_FORM_ICONS,
   CATEGORY_ICONS
 } from '../config/constants'
@@ -28,7 +27,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
   const [gigantamaxOnly, setGigantamaxOnly] = useState(false)
   const [legendsZAOnly, setLegendsZAOnly] = useState(false)
   const [selectedRegionalForms, setSelectedRegionalForms] = useState<('alola' | 'galar' | 'hisui' | 'paldea')[]>([])
-  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('OR')
+  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('AND')
   const [skipConfirmation, setSkipConfirmation] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SKIP_CONFIRMATION)
     return saved === 'true'
@@ -105,15 +104,21 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
     onStart(targetTotal, filters, skipConfirmation)
   }
 
-  const hasSpecialFilters = legendaryOnly || mythicalOnly || ultraBeastOnly || paradoxOnly || megaOnly || gigantamaxOnly || legendsZAOnly || selectedRegionalForms.length > 0
-
   return (
     <div className="game-setup-dashboard">
       <div className="dashboard-header">
         <h1>{t('setup.title')}</h1>
         <div className="quick-config">
-          <div className="config-group">
-            <label>{t('setup.target')}</label>
+          <label>{t('setup.target')}</label>
+          <div className="score-selector">
+            <button
+              className="score-adjust-btn decrease"
+              onClick={() => setTargetTotal(prev => Math.max(GAME_CONFIG.MIN_TARGET_TOTAL, prev - 50))}
+              title="-50"
+            >
+              <span className="arrow">◀</span>
+              <span className="value">-50</span>
+            </button>
             <input
               type="number"
               value={targetTotal}
@@ -121,67 +126,84 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               min={GAME_CONFIG.MIN_TARGET_TOTAL}
               max={GAME_CONFIG.MAX_TARGET_TOTAL}
               step={GAME_CONFIG.TARGET_STEP}
-              className="compact-input"
+              className="compact-input score-input"
             />
+            <button
+              className="score-adjust-btn increase"
+              onClick={() => setTargetTotal(prev => Math.min(GAME_CONFIG.MAX_TARGET_TOTAL, prev + 50))}
+              title="+50"
+            >
+              <span className="value">+50</span>
+              <span className="arrow">▶</span>
+            </button>
           </div>
-          <div className="config-group">
+          <div className="label-with-help">
             <label>{t('setup.mode')}</label>
-            <div className="toggle-switch-mode">
-              <button
-                className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
-                onClick={() => setFilterMode('OR')}
-                title={t('setup.addition')}
-              >
-                ➕
-              </button>
-              <button
-                className={`mode-toggle ${filterMode === 'AND' ? 'active' : ''}`}
-                onClick={() => setFilterMode('AND')}
-                title={t('setup.restriction')}
-              >
-                🔒
-              </button>
+            <div className="help-tooltip-container">
+              <span className="help-icon">?</span>
+              <div className="help-tooltip">
+                <h4>{t('setup.modeHelp')}</h4>
+                <p><strong>{t('setup.addition')}</strong>: {t('setup.modeHelpAdditive')}</p>
+                <p><strong>{t('setup.restriction')}</strong>: {t('setup.modeHelpRestrictive')}</p>
+              </div>
             </div>
+          </div>
+          <div className="toggle-switch-mode">
+            <button
+              className={`mode-toggle ${filterMode === 'OR' ? 'active' : ''}`}
+              onClick={() => setFilterMode('OR')}
+              title={t('setup.addition')}
+            >
+              ➕
+            </button>
+            <button
+              className={`mode-toggle ${filterMode === 'AND' ? 'active' : ''}`}
+              onClick={() => setFilterMode('AND')}
+              title={t('setup.restriction')}
+            >
+              🔒
+            </button>
           </div>
         </div>
       </div>
 
       <div className="dashboard-grid">
-        {/* Column 1: Generations */}
-        <div className="dashboard-panel generations-panel">
-          <h3>{t('setup.generations')}</h3>
-          <div className="generations-grid-compact">
-            {Object.entries(GENERATIONS).map(([key, gen]) => (
-              <button
-                key={key}
-                className={`gen-chip ${selectedGenerations.includes(Number(key)) ? 'active' : ''}`}
-                onClick={() => toggleGeneration(Number(key))}
-                title={gen.name}
-              >
-                {key}
-              </button>
-            ))}
+        {/* Column 1: Generations & Types */}
+        <div className="dashboard-panel main-filters-panel">
+          <div className="panel-section">
+            <h3>{t('setup.generations')}</h3>
+            <div className="generations-grid-compact">
+              {Object.entries(GENERATIONS).map(([key, gen]) => (
+                <button
+                  key={key}
+                  className={`gen-chip ${selectedGenerations.includes(Number(key)) ? 'active' : ''}`}
+                  onClick={() => toggleGeneration(Number(key))}
+                  title={gen.name}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <h3>{t('setup.types')}</h3>
+            <div className="types-grid-compact">
+              {POKEMON_TYPES.map((type) => (
+                <button
+                  key={type}
+                  className={`type-chip ${selectedTypes.includes(type) ? `active type-${type}` : ''}`}
+                  onClick={() => toggleType(type)}
+                  title={t(`types.${type}`)}
+                >
+                  {t(`types.${type}`)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Column 2: Types */}
-        <div className="dashboard-panel types-panel">
-          <h3>{t('setup.types')}</h3>
-          <div className="types-grid-compact">
-            {POKEMON_TYPES.map((type) => (
-              <button
-                key={type}
-                className={`type-chip ${selectedTypes.includes(type) ? 'active' : ''}`}
-                onClick={() => toggleType(type)}
-                title={type.charAt(0).toUpperCase() + type.slice(1)}
-              >
-                <img src={TYPE_ICONS[type]} alt={type} className="type-icon-img" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Column 3: Extras */}
+        {/* Column 2: Extras */}
         <div className="dashboard-panel extras-panel">
           <h3>{t('setup.special')}</h3>
           <div className="extras-grid">
