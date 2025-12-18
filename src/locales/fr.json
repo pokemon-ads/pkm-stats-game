@@ -22,6 +22,14 @@
     "mysteryGame": "Jeu Mystère",
     "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
     "inDevelopment": "En développement",
+    "about": {
+      "title": "À propos de PKM Stats",
+      "intro": "Bienvenue sur PKM Stats, votre destination ultime pour les jeux de stratégie et de quiz Pokémon. Que vous soyez un fan occasionnel ou un maître compétitif, nos mini-jeux sont conçus pour tester vos connaissances et affûter vos compétences.",
+      "pokestatsTitle": "Maîtrisez les Stats avec PokéStats",
+      "pokestatsText": "Plongez dans les chiffres avec PokéStats ! Ce jeu de type plus/moins vous met au défi de prédire quelle statistique de Pokémon est supérieure. Analysez les statistiques de base, prenez en compte les formes et variations, et grimpez dans le classement. C'est le moyen idéal pour apprendre les forces compétitives de chaque Pokémon.",
+      "pokequizzTitle": "Testez vos connaissances avec PokéQuizz",
+      "pokequizzText": "Pouvez-vous tous les identifier ? PokéQuizz amène l'expérience classique 'Quel est ce Pokémon ?' sur votre écran. Utilisez des indices visuels, des silhouettes et votre savoir encyclopédique pour nommer des Pokémon de toutes les générations. Vitesse et précision sont les clés pour obtenir le meilleur score."
+    },
     "footerText": "Fait avec ❤️ pour les fans de Pokémon du monde entier"
   },
   "app": {

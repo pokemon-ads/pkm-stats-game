@@ -61,6 +61,25 @@ export const Home = () => {
           </div>
         </div>
       </div>
+
+      <div className="about-section">
+        <h2 className="section-title">{t('home.about.title')}</h2>
+        <div className="about-content">
+          <p className="about-intro">{t('home.about.intro')}</p>
+          
+          <div className="about-grid">
+            <div className="about-card">
+              <h3>{t('home.about.pokestatsTitle')}</h3>
+              <p>{t('home.about.pokestatsText')}</p>
+            </div>
+            
+            <div className="about-card">
+              <h3>{t('home.about.pokequizzTitle')}</h3>
+              <p>{t('home.about.pokequizzText')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

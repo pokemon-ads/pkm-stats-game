@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Pokemon } from '../../../types/pokemon';
-import type { GameStatus, Difficulty } from '../types/game';
-import { DIFFICULTIES } from '../config/constants';
+import type { GameStatus, Difficulty, GameMode } from '../types/game';
+import { isCloseMatch, normalizeText } from '../utils/textNormalization';
+import { PokemonDisplay } from './PokemonDisplay';
 import '../styles/QuizzCard.css';
 
 interface QuizzCardProps {
   pokemon: Pokemon | null;
   status: GameStatus;
   difficulty: Difficulty;
+  mode: GameMode;
   isCorrect: boolean | null;
   onGuess: (guess: string) => void;
   onGiveUp: () => void;
@@ -18,76 +20,60 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
   pokemon,
   status,
   difficulty,
+  mode,
   isCorrect,
   onGuess,
   onGiveUp
 }) => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
+  const [closeCallMessage, setCloseCallMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (status === 'playing') {
       setInputValue('');
+      setCloseCallMessage(null);
       inputRef.current?.focus();
     }
   }, [status, pokemon]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (inputValue.trim()) {
-      onGuess(inputValue.trim());
+  const playCry = () => {
+    if (!pokemon) return;
+    const cryUrl = pokemon.cries.latest || pokemon.cries.legacy;
+    if (cryUrl) {
+      const audio = new Audio(cryUrl);
+      audio.volume = 0.5;
+      audio.play().catch(e => console.error("Error playing cry:", e));
     }
   };
 
-  const diffConfig = DIFFICULTIES[difficulty];
-  const isRevealed = status === 'revealed';
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || !pokemon) return;
 
-  useEffect(() => {
-    if (!pokemon || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = pokemon.sprites.front_default;
+    const guess = inputValue.trim();
+    const targetName = pokemon.names?.fr || pokemon.name;
     
-    img.onload = () => {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Save context state
-      ctx.save();
+    // Check for exact match first (let parent handle it)
+    if (normalizeText(guess) === normalizeText(targetName)) {
+      setCloseCallMessage(null);
+      onGuess(guess);
+      return;
+    }
 
-      // Handle rotation
-      if (!isRevealed && diffConfig.rotate) {
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(Math.PI); // 180 degrees
-        ctx.translate(-canvas.width / 2, -canvas.height / 2);
-      }
+    // Check for close match
+    if (isCloseMatch(guess, targetName)) {
+      setCloseCallMessage(t('quizz.closeCall', 'C\'est presque ça !'));
+      // Optional: Shake animation or visual cue specifically for close call
+      return;
+    }
 
-      // Draw image
-      // Center the image in the canvas
-      const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.8;
-      const x = (canvas.width - img.width * scale) / 2;
-      const y = (canvas.height - img.height * scale) / 2;
-      
-      // Apply filters
-      if (!isRevealed) {
-        ctx.filter = `brightness(0) blur(${diffConfig.blur}px)`;
-      } else {
-        ctx.filter = 'none';
-      }
+    setCloseCallMessage(null);
+    onGuess(guess);
+  };
 
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-      
-      // Restore context state
-      ctx.restore();
-    };
-  }, [pokemon, isRevealed, diffConfig]);
+  const isRevealed = status === 'revealed';
 
   return (
     <div className="quizz-card">
@@ -97,15 +83,25 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
           : t('quizz.question', 'Quel est ce Pokémon ?')}
       </h2>
 
-      <div className="quizz-image-container">
-        <canvas
-          ref={canvasRef}
-          width={300}
-          height={300}
-          className="quizz-canvas"
-          onContextMenu={(e) => e.preventDefault()}
+      <div style={{ position: 'relative', width: 'fit-content' }}>
+        <PokemonDisplay
+          pokemon={pokemon}
+          isRevealed={isRevealed}
+          difficulty={difficulty}
+          mode={mode}
+          status={status}
         />
-        
+        {(pokemon?.cries.latest || pokemon?.cries.legacy) && (
+          <button
+            className="play-cry-btn"
+            onClick={playCry}
+            type="button"
+            aria-label={t('quizz.playCry', 'Écouter le cri')}
+            title={t('quizz.playCry', 'Écouter le cri')}
+          >
+            🔊
+          </button>
+        )}
       </div>
 
       {isRevealed && pokemon ? (
@@ -125,7 +121,13 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
             autoFocus
           />
           
-          <button 
+          {closeCallMessage && (
+            <div className="close-call-message">
+              {closeCallMessage}
+            </div>
+          )}
+
+          <button
             type="button" 
             className="give-up-btn"
             onClick={onGiveUp}

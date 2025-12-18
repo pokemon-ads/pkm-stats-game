@@ -2,7 +2,10 @@ import type { Pokemon } from '../../../types/pokemon';
 
 export type Difficulty = 'facile' | 'normale' | 'hyper' | 'master';
 
+export type GameMode = 'classic' | 'time_attack' | 'survival' | 'blur' | 'cry';
+
 export interface GameSettings {
+  mode: GameMode;
   generation: number; // 0 for all, 1-9 for specific
   difficulty: Difficulty;
   soundEnabled: boolean;
@@ -25,4 +28,6 @@ export interface GameState {
   startTime: number | null;
   userGuess: string;
   isCorrect: boolean | null; // null if not guessed yet
+  timeLeft?: number; // For time attack
+  lives?: number; // For survival
 }

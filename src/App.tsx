@@ -4,6 +4,8 @@ import { PokeQuizzGame } from './games/pokequizz'
 import { Navbar } from './components/Navbar'
 import { Home } from './components/Home'
 import { Footer } from './components/Footer'
+import { PrivacyPolicy } from './components/PrivacyPolicy'
+import { TermsOfService } from './components/TermsOfService'
 import './App.css'
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/pokestats" element={<PokeStatsGame />} />
           <Route path="/pokequizz" element={<PokeQuizzGame />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
         </Routes>
       </main>
       

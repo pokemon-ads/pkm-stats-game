@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GENERATIONS } from '../../../types/pokemon';
-import { DIFFICULTIES } from '../config/constants';
-import type { GameSettings, Difficulty } from '../types/game';
+import { DIFFICULTIES, GAME_MODES } from '../config/constants';
+import type { GameSettings, Difficulty, GameMode } from '../types/game';
 import '../styles/Sidebars.css';
 
 interface SettingsSidebarProps {
@@ -34,8 +34,26 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
         )}
         
         <div className="setting-row">
+          <label className="setting-label">{t('settings.mode', 'Mode de jeu')}</label>
+          <select
+            className="setting-select"
+            value={settings.mode}
+            onChange={(e) => onUpdateSettings({ mode: e.target.value as GameMode })}
+          >
+            {Object.entries(GAME_MODES).map(([key, mode]) => (
+              <option key={key} value={key}>
+                {mode.label}
+              </option>
+            ))}
+          </select>
+          <div className="setting-description">
+            {GAME_MODES[settings.mode].description}
+          </div>
+        </div>
+
+        <div className="setting-row">
           <label className="setting-label">{t('settings.generation', 'Génération')}</label>
-          <select 
+          <select
             className="setting-select"
             value={settings.generation}
             onChange={(e) => onUpdateSettings({ generation: Number(e.target.value) })}
@@ -51,7 +69,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
 
         <div className="setting-row">
           <label className="setting-label">{t('settings.difficulty', 'Difficulté')}</label>
-          <select 
+          <select
             className="setting-select"
             value={settings.difficulty}
             onChange={(e) => onUpdateSettings({ difficulty: e.target.value as Difficulty })}

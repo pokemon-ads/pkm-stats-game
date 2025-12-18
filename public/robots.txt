@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pkm-stats.vercel.app/sitemap.xml

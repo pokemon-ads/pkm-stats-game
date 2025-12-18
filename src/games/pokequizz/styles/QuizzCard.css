@@ -159,6 +159,20 @@
   80% { transform: translateX(8px); }
 }
 
+.close-call-message {
+  color: #f39c12;
+  font-weight: 600;
+  font-size: 1rem;
+  animation: pulse 1.5s infinite;
+  text-align: center;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0.7; transform: scale(0.98); }
+}
+
 .give-up-btn {
   padding: 0.75rem 2rem;
   border-radius: 10px;
@@ -204,6 +218,25 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+.quizz-canvas.reveal-flash {
+  animation: flashReveal 0.6s ease-out forwards;
+}
+
+@keyframes flashReveal {
+  0% {
+    filter: brightness(1) blur(0);
+    transform: scale(1);
+  }
+  20% {
+    filter: brightness(2) blur(0);
+    transform: scale(1.05);
+  }
+  100% {
+    filter: brightness(1) blur(0);
+    transform: scale(1);
   }
 }
 
