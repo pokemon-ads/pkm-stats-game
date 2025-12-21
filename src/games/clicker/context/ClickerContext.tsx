@@ -15,35 +15,77 @@ const initialState: GameState = {
   upgrades: INITIAL_UPGRADES,
 };
 
+// Calculate click power with new balanced system
+// Base click = 1, then add all CLICK_BONUS values
 const calculateEnergyPerClick = (upgrades: Upgrade[]) => {
-  let multiplier = 1;
+  let baseClick = 1;
+  let clickBonus = 0;
+  
   upgrades.forEach(u => {
-    if (u.purchased && u.type === 'CLICK_MULTIPLIER') {
-      multiplier *= u.value;
+    if (u.purchased) {
+      if (u.type === 'CLICK_BONUS') {
+        clickBonus += u.value;
+      } else if (u.type === 'CLICK_MULTIPLIER') {
+        // Legacy support - still multiply if old type exists
+        baseClick *= u.value;
+      }
     }
   });
-  return 1 * multiplier;
+  
+  return baseClick + clickBonus;
 };
 
+// Calculate helper's effective base production (original + upgrades)
+const getHelperEffectiveBase = (helper: PokemonHelper, upgrades: Upgrade[]): number => {
+  let effectiveBase = helper.baseProduction;
+  
+  // Add all HELPER_BASE bonuses for this helper
+  upgrades.forEach(u => {
+    if (u.purchased && u.type === 'HELPER_BASE' && u.targetId === helper.id) {
+      effectiveBase += u.value;
+    }
+  });
+  
+  return effectiveBase;
+};
+
+// Calculate energy per second with new balanced system
+// Global bonus is additive (sum of percentages), not multiplicative
 const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[]) => {
-  let globalMultiplier = 1;
+  // Calculate global percentage bonus (additive)
+  let globalPercentBonus = 0;
+  upgrades.forEach(u => {
+    if (u.purchased && u.type === 'GLOBAL_PERCENT') {
+      globalPercentBonus += u.value;
+    }
+  });
+  
+  // Legacy support for old GLOBAL_MULTIPLIER
+  let legacyMultiplier = 1;
   upgrades.forEach(u => {
     if (u.purchased && u.type === 'GLOBAL_MULTIPLIER') {
-      globalMultiplier *= u.value;
+      legacyMultiplier *= u.value;
     }
   });
 
+  // Calculate base production from all helpers
   const baseProduction = helpers.reduce((total, h) => {
+    // Get effective base (original + HELPER_BASE upgrades)
+    const effectiveBase = getHelperEffectiveBase(h, upgrades);
+    
+    // Legacy support for HELPER_MULTIPLIER
     let helperMultiplier = 1;
     upgrades.forEach(u => {
       if (u.purchased && u.type === 'HELPER_MULTIPLIER' && u.targetId === h.id) {
         helperMultiplier *= u.value;
       }
     });
-    return total + (h.baseProduction * h.count * helperMultiplier);
+    
+    return total + (effectiveBase * h.count * helperMultiplier);
   }, 0);
 
-  return baseProduction * globalMultiplier;
+  // Apply global bonus: base * (1 + percentage/100) * legacyMultiplier
+  return baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
 };
 
 const gameReducer = (state: GameState, action: ClickerAction): GameState => {
@@ -155,6 +197,9 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       return state;
   }
 };
+
+// Export helper function for components to use
+export { getHelperEffectiveBase };
 
 export const ClickerContext = createContext<{
   state: GameState;

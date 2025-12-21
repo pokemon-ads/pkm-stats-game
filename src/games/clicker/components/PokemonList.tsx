@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ClickerContext } from '../context/ClickerContext';
+import { ClickerContext, getHelperEffectiveBase } from '../context/ClickerContext';
 import { getCurrentEvolution, getNextEvolution } from '../config/helpers';
 
 const getAnimatedSprite = (pokemonId: number): string => {
@@ -55,7 +55,10 @@ export const PokemonList: React.FC = () => {
         {state.helpers.map((helper) => {
           const cost = Math.floor(helper.baseCost * Math.pow(1.15, helper.count));
           const canAfford = state.energy >= cost;
-          const totalProduction = helper.baseProduction * helper.count;
+          // Use effective base (original + upgrades) for display
+          const effectiveBase = getHelperEffectiveBase(helper, state.upgrades);
+          const totalProduction = effectiveBase * helper.count;
+          const hasBaseBonus = effectiveBase > helper.baseProduction;
           const isPurchasing = purchaseAnimation === helper.id;
           const isEvolving = evolvingHelper === helper.id;
           const currentEvolution = getCurrentEvolution(helper);
@@ -80,7 +83,13 @@ export const PokemonList: React.FC = () => {
                   {!nextEvolution && helper.evolutions && helper.evolutions.length > 0 && <span className="max-badge">MAX</span>}
                 </div>
                 <div className="helper-stats-grid">
-                  <div className="stat-item"><span className="stat-label">{t('clicker.base')}</span><span className="stat-value">+{formatNumber(helper.baseProduction)}/s</span></div>
+                  <div className="stat-item">
+                    <span className="stat-label">{t('clicker.base')}</span>
+                    <span className={`stat-value ${hasBaseBonus ? 'boosted' : ''}`}>
+                      +{formatNumber(effectiveBase)}/s
+                      {hasBaseBonus && <span className="bonus-indicator">↑</span>}
+                    </span>
+                  </div>
                   <div className="stat-item"><span className="stat-label">{t('clicker.total')}</span><span className="stat-value highlight">{helper.count > 0 ? `+${formatNumber(totalProduction)}/s` : '—'}</span></div>
                 </div>
                 <div className="evolution-section">
@@ -136,8 +145,11 @@ export const PokemonList: React.FC = () => {
         .helper-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
         .stat-item { display: flex; flex-direction: column; gap: 0; }
         .stat-label { font-size: 0.55rem; color: rgba(255,255,255,0.5); text-transform: uppercase; }
-        .stat-value { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+        .stat-value { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 0.25rem; }
         .stat-value.highlight { color: #4ade80; }
+        .stat-value.boosted { color: #fbbf24; }
+        .bonus-indicator { font-size: 0.6rem; color: #4ade80; animation: pulse-bonus 1s ease-in-out infinite; }
+        @keyframes pulse-bonus { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .evolution-section { margin-top: auto; }
         .evo-progress { display: flex; flex-direction: column; gap: 0.2rem; }
         .evo-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }

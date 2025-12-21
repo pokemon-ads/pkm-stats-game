@@ -20,7 +20,7 @@ export interface Upgrade {
   name: string;
   description: string;
   cost: number;
-  type: 'CLICK_MULTIPLIER' | 'GLOBAL_MULTIPLIER' | 'HELPER_MULTIPLIER';
+  type: 'CLICK_BONUS' | 'CLICK_MULTIPLIER' | 'GLOBAL_PERCENT' | 'GLOBAL_MULTIPLIER' | 'HELPER_BASE' | 'HELPER_MULTIPLIER';
   targetId?: string;
   value: number;
   condition?: {
