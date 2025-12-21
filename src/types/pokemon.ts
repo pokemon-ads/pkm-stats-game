@@ -92,7 +92,7 @@ export const GALAR_FORM_IDS = [
 ]
 
 export const HISUI_FORM_IDS = [
-  58, 59, 100, 101, 157, 211, 215, 503, 549, 550, 570, 571, 628, 705, 706, 713, 724
+  58, 59, 100, 101, 157, 211, 215, 483, 484, 487, 503, 549, 550, 570, 571, 628, 705, 706, 713, 724
 ]
 
 export const PALDEA_FORM_IDS = [
@@ -150,6 +150,9 @@ export const REGIONAL_FORMS: Record<string, Record<number, string[]>> = {
     157: ['typhlosion-hisui'],
     211: ['qwilfish-hisui'],
     215: ['sneasel-hisui'],
+    483: ['dialga-origin'],
+    484: ['palkia-origin'],
+    487: ['giratina-origin'],
     503: ['samurott-hisui'],
     549: ['lilligant-hisui'],
     550: ['basculin-white-striped'],
@@ -182,7 +185,8 @@ export const LEGENDARY_IDS = [
   716, 717, 718, 719, 720, 721, // Gen 6
   785, 786, 787, 788, 789, 790, 791, 792, 800, 801, 802, 807, 808, 809, // Gen 7
   888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898, // Gen 8
-  1001, 1002, 1003, 1004, 1007, 1008, 1009, 1010, 1014, 1015, 1016, 1017, 1024, 1025 // Gen 9
+  1001, 1002, 1003, 1004, 1007, 1008, 1009, 1010, 1014, 1015, 1016, 1017, 1024, 1025, // Gen 9
+  10007, 10245, 10246 // Origin Forms
 ]
 
 // Mythical Pokemon IDs
@@ -202,8 +206,8 @@ export const MYTHICAL_IDS = [
 // Mega Evolution Pokemon (base forms that have megas)
 export const MEGA_EVOLUTION_IDS = [
   3, 6, 9, 15, 18, 65, 80, 94, 115, 127, 130, 142, 150, 181, 208, 212, 214, 229, 
-  248, 254, 257, 260, 282, 302, 303, 306, 308, 310, 319, 323, 334, 354, 359, 362, 
-  373, 376, 380, 381, 384, 428, 445, 448, 460, 475, 531, 719
+  248, 254, 257, 260, 282, 302, 303, 306, 308, 310, 319, 323, 334, 354, 359, 362,
+  373, 376, 380, 381, 382, 383, 384, 428, 445, 448, 460, 475, 531, 719
 ]
 
 // Gigantamax Pokemon IDs
@@ -343,6 +347,8 @@ export const MEGA_FORMS: Record<number, string[]> = {
   376: ['metagross-mega'],
   380: ['latias-mega'],
   381: ['latios-mega'],
+  382: ['kyogre-primal'],
+  383: ['groudon-primal'],
   384: ['rayquaza-mega'],
   
   // Gen 4 Megas
