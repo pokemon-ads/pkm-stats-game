@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useClickerGame } from '../hooks/useClickerGame';
-import { FloatingText } from './FloatingText';
 import { getCurrentEvolution } from '../config/helpers';
 
 interface FloatingTextItem {
@@ -8,6 +7,7 @@ interface FloatingTextItem {
   x: number;
   y: number;
   text: string;
+  amount: number;
 }
 
 interface Particle {
@@ -22,6 +22,12 @@ interface Particle {
 // Default Pokemon (Pikachu) if no helpers unlocked
 const DEFAULT_POKEMON_ID = 25;
 
+// Performance limits
+const MAX_FLOATING_TEXTS = 5;
+const MAX_PARTICLES = 16;
+const CLICK_BATCH_INTERVAL = 100; // ms - batch clicks within this window
+const MIN_EFFECT_INTERVAL = 50; // ms - minimum time between visual effects
+
 // Get animated sprite URL for a Pokemon
 const getAnimatedSprite = (pokemonId: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokemonId}.gif`;
@@ -35,17 +41,13 @@ export const ClickerArea: React.FC = () => {
   
   // Find the last unlocked helper with count > 0 and get its evolved form
   const { displayPokemonId, displayPokemonName } = useMemo(() => {
-    // Filter helpers that have been purchased (count > 0)
     const purchasedHelpers = state.helpers.filter(h => h.count > 0);
     
     if (purchasedHelpers.length === 0) {
       return { displayPokemonId: DEFAULT_POKEMON_ID, displayPokemonName: 'Pikachu' };
     }
     
-    // Get the last one in the list (most recently available in progression)
     const lastHelper = purchasedHelpers[purchasedHelpers.length - 1];
-    
-    // Get the current evolution state
     const evolution = getCurrentEvolution(lastHelper);
     
     return {
@@ -53,21 +55,38 @@ export const ClickerArea: React.FC = () => {
       displayPokemonName: evolution.name
     };
   }, [state.helpers]);
+
   const [floatingTexts, setFloatingTexts] = useState<FloatingTextItem[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isClicking, setIsClicking] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  // Click batching refs
+  const pendingClicksRef = useRef(0);
+  const lastEffectTimeRef = useRef(0);
+  const batchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastClickPosRef = useRef({ x: 0, y: 0 });
 
-  const createParticles = useCallback((centerX: number, centerY: number) => {
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (batchTimeoutRef.current) {
+        clearTimeout(batchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const createParticles = useCallback((centerX: number, centerY: number, intensity: number = 1) => {
     const colors = ['#ffcb05', '#a855f7', '#3b4cca', '#e94560', '#4ade80'];
+    const particleCount = Math.min(Math.ceil(4 * intensity), 8);
     const newParticles: Particle[] = [];
     
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const distance = 60 + Math.random() * 40;
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2 + Math.random() * 0.5;
+      const distance = 50 + Math.random() * 30 * intensity;
       newParticles.push({
-        id: Date.now() + i,
+        id: Date.now() + i + Math.random(),
         x: centerX,
         y: centerY,
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -76,7 +95,11 @@ export const ClickerArea: React.FC = () => {
       });
     }
     
-    setParticles(prev => [...prev, ...newParticles]);
+    setParticles(prev => {
+      const combined = [...prev, ...newParticles];
+      // Keep only the most recent particles
+      return combined.slice(-MAX_PARTICLES);
+    });
     
     // Clean up particles after animation
     setTimeout(() => {
@@ -84,25 +107,42 @@ export const ClickerArea: React.FC = () => {
     }, 600);
   }, []);
 
-  const handleAreaClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    handleClick();
+  const showVisualEffects = useCallback((clickCount: number, x: number, y: number) => {
+    const now = Date.now();
     
+    // Throttle visual effects
+    if (now - lastEffectTimeRef.current < MIN_EFFECT_INTERVAL) {
+      return;
+    }
+    lastEffectTimeRef.current = now;
+
     // Get button center for particles
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      createParticles(centerX, centerY);
+      createParticles(centerX, centerY, Math.min(clickCount, 3));
     }
     
-    // Create floating text
+    // Create floating text with accumulated amount
+    const totalAmount = state.energyPerClick * clickCount;
+    const displayText = clickCount > 1 
+      ? `+${totalAmount.toFixed(totalAmount >= 10 ? 0 : 1)} (x${clickCount})`
+      : `+${totalAmount.toFixed(totalAmount >= 10 ? 0 : 1)}`;
+    
     const newText: FloatingTextItem = {
-      id: Date.now(),
-      x: e.clientX,
-      y: e.clientY,
-      text: `+${state.energyPerClick.toFixed(state.energyPerClick >= 10 ? 0 : 1)}`
+      id: now + Math.random(),
+      x,
+      y,
+      text: displayText,
+      amount: totalAmount
     };
-    setFloatingTexts(prev => [...prev, newText]);
+    
+    setFloatingTexts(prev => {
+      const updated = [...prev, newText];
+      // Keep only the most recent texts
+      return updated.slice(-MAX_FLOATING_TEXTS);
+    });
     
     // Trigger click animation
     setIsClicking(true);
@@ -110,11 +150,37 @@ export const ClickerArea: React.FC = () => {
     
     setTimeout(() => setIsClicking(false), 150);
     setTimeout(() => setShowBurst(false), 400);
-  }, [handleClick, state.energyPerClick, createParticles]);
+    
+    // Auto-remove floating text after animation
+    setTimeout(() => {
+      setFloatingTexts(prev => prev.filter(item => item.id !== newText.id));
+    }, 800);
+  }, [state.energyPerClick, createParticles]);
 
-  const removeText = useCallback((id: number) => {
-    setFloatingTexts(prev => prev.filter(item => item.id !== id));
-  }, []);
+  const processBatchedClicks = useCallback(() => {
+    const clickCount = pendingClicksRef.current;
+    if (clickCount > 0) {
+      showVisualEffects(clickCount, lastClickPosRef.current.x, lastClickPosRef.current.y);
+      pendingClicksRef.current = 0;
+    }
+    batchTimeoutRef.current = null;
+  }, [showVisualEffects]);
+
+  const handleAreaClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    // Always process the game click immediately
+    handleClick();
+    
+    // Store click position
+    lastClickPosRef.current = { x: e.clientX, y: e.clientY };
+    
+    // Batch visual effects
+    pendingClicksRef.current += 1;
+    
+    // If no batch timeout is pending, start one
+    if (!batchTimeoutRef.current) {
+      batchTimeoutRef.current = setTimeout(processBatchedClicks, CLICK_BATCH_INTERVAL);
+    }
+  }, [handleClick, processBatchedClicks]);
 
   return (
     <div className="clicker-area">
@@ -136,7 +202,6 @@ export const ClickerArea: React.FC = () => {
             alt={displayPokemonName}
             className={`clicker-pokemon-sprite ${isClicking ? 'clicking' : ''}`}
             onError={(e) => {
-              // Fallback to static sprite if animated fails
               (e.target as HTMLImageElement).src = getStaticSprite(displayPokemonId);
             }}
           />
@@ -148,15 +213,21 @@ export const ClickerArea: React.FC = () => {
         <span className="click-power">⚡ {state.energyPerClick.toFixed(1)} per click</span>
       </div>
       
-      {/* Floating texts */}
+      {/* Floating texts - using CSS-only animation for performance */}
       {floatingTexts.map(item => (
-        <FloatingText
+        <div
           key={item.id}
-          x={item.x}
-          y={item.y}
-          text={item.text}
-          onComplete={() => removeText(item.id)}
-        />
+          className="floating-text-container"
+          style={{
+            position: 'fixed',
+            left: item.x,
+            top: item.y,
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+        >
+          <span className="floating-text-value">{item.text}</span>
+        </div>
       ))}
       
       {/* Particles */}
@@ -200,6 +271,7 @@ export const ClickerArea: React.FC = () => {
           pointer-events: none;
           animation: particleFly 0.6s ease-out forwards;
           z-index: 100;
+          will-change: transform, opacity;
         }
         
         @keyframes particleFly {
@@ -210,6 +282,39 @@ export const ClickerArea: React.FC = () => {
           100% {
             transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0);
             opacity: 0;
+          }
+        }
+        
+        .floating-text-container {
+          animation: floatUpFade 0.8s ease-out forwards;
+          will-change: transform, opacity;
+        }
+        
+        .floating-text-value {
+          font-weight: 900;
+          font-size: 1.8rem;
+          color: #ffcb05;
+          text-shadow: 
+            0 0 10px rgba(255, 203, 5, 0.8),
+            0 0 20px rgba(255, 203, 5, 0.5),
+            2px 2px 0 #3b4cca,
+            -1px -1px 0 #3b4cca;
+          transform: translate(-50%, -50%);
+          display: block;
+          white-space: nowrap;
+        }
+        
+        @keyframes floatUpFade {
+          0% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+          20% {
+            transform: translate(-50%, -70%) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -150%) scale(1);
           }
         }
       `}</style>

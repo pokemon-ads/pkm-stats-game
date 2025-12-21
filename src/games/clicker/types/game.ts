@@ -13,6 +13,7 @@ export interface PokemonHelper {
   unlocked: boolean;
   pokemonId?: number;
   evolutions?: PokemonEvolution[];  // Evolution chain
+  isShiny?: boolean;  // Shiny status - gives x10 production
 }
 
 export interface Upgrade {
@@ -52,4 +53,5 @@ export type ClickerAction =
   | { type: 'LOAD_GAME'; payload: GameState }
   | { type: 'RESET_GAME' }
   | { type: 'BUY_HELPER'; payload: { helperId: string } }
-  | { type: 'BUY_UPGRADE'; payload: { upgradeId: string } };
+  | { type: 'BUY_UPGRADE'; payload: { upgradeId: string } }
+  | { type: 'MAKE_SHINY'; payload: { helperId: string } };
