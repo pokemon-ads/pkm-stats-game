@@ -3,6 +3,7 @@
     "home": "Home",
     "pokestats": "PokéStats",
     "pokequizz": "PokéQuizz",
+    "pokeclicker": "PokéClicker",
     "comingSoon": "Coming Soon..."
   },
   "home": {
@@ -14,10 +15,13 @@
     "new": "New",
     "pokestatsDesc": "Think you know your Pokémon stats? Guess which stat is the highest and prove you're a true expert!",
     "pokequizzDesc": "Who's that Pokémon? Test your knowledge by identifying Pokémon from their silhouettes!",
+    "pokeclickerDesc": "Click to collect energy and recruit Pokémon helpers! Watch them evolve as you progress!",
     "featureStats": "Stats",
     "featureLeaderboard": "Leaderboard",
     "featureKnowledge": "Knowledge",
     "featureSpeed": "Speed",
+    "featureIdle": "Idle",
+    "featureEvolution": "Evolution",
     "letsPlay": "Let's Play!",
     "mysteryGame": "Mystery Game",
     "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
@@ -28,7 +32,9 @@
       "pokestatsTitle": "Master the Stats with PokéStats",
       "pokestatsText": "Dive into the numbers game with PokéStats! This higher/lower style game challenges you to predict which Pokémon statistic is superior. Analyze base stats, consider forms and variations, and climb the leaderboard. It's the perfect way to learn the competitive strengths of every Pokémon.",
       "pokequizzTitle": "Test Your Knowledge with PokéQuizz",
-      "pokequizzText": "Can you identify them all? PokéQuizz brings the classic 'Who's that Pokémon?' experience to your screen. Use visual clues, silhouettes, and your encyclopedic knowledge to name Pokémon from every generation. Speed and accuracy are key to achieving the highest score."
+      "pokequizzText": "Can you identify them all? PokéQuizz brings the classic 'Who's that Pokémon?' experience to your screen. Use visual clues, silhouettes, and your encyclopedic knowledge to name Pokémon from every generation. Speed and accuracy are key to achieving the highest score.",
+      "pokeclickerTitle": "Collect & Evolve with PokéClicker",
+      "pokeclickerText": "An addictive idle clicker game where you collect energy by clicking and recruit Pokémon helpers. Watch your team grow and evolve as you unlock upgrades and reach new milestones. How far can you go?"
     },
     "footerText": "Made with ❤️ for Pokémon fans everywhere"
   },
@@ -202,5 +208,33 @@
     "placeholder": "Enter Pokémon name...",
     "giveUp": "I don't know!",
     "playCry": "Play Cry"
+  },
+  "clicker": {
+    "title": "PokéClicker",
+    "energy": "Energy",
+    "perSecond": "Per Second",
+    "perClick": "Per Click",
+    "totalEarned": "Total Earned",
+    "totalClicks": "Total Clicks",
+    "resetProgress": "Reset Progress",
+    "resetConfirm": "⚠️ Are you sure you want to reset all your progress? This cannot be undone!",
+    "helpers": "Pokémon Helpers",
+    "total": "Total",
+    "owned": "owned",
+    "base": "Base",
+    "buy": "BUY",
+    "fullyEvolved": "Fully Evolved",
+    "legendary": "Legendary",
+    "upgrades": {
+      "all": "All",
+      "click": "Click",
+      "global": "Global",
+      "helpers": "Helpers",
+      "evolution": "Evolution",
+      "owned": "Owned",
+      "noPurchased": "No upgrades purchased yet",
+      "keepPlaying": "Keep playing to unlock more!",
+      "requires": "Requires"
+    }
   }
 }

@@ -84,7 +84,8 @@ This document outlines potential improvements for the PokeQuizz game to enhance 
 
 1.  **Phase 1: Polish (Quick Wins)**
     - Implement "Close!" typo detection.
-    - Add reveal animations and sound effects.
+    - Add reveal animations 
+    - turn on off pokemon cries
     - Refactor Canvas logic.
 2.  **Phase 2: New Modes**
     - Add "Time Attack" and "Survival" modes.

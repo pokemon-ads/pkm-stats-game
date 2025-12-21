@@ -29,6 +29,13 @@ export const Navbar = () => {
         >
           ❓ {t('nav.pokequizz')}
         </NavLink>
+
+        <NavLink
+          to="/clicker"
+          className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
+        >
+          ⚡ {t('nav.pokeclicker')}
+        </NavLink>
       </div>
       
       <div className="navbar-actions">

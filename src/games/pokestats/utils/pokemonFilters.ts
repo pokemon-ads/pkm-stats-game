@@ -93,6 +93,8 @@ export const generatePokemonPool = async (
     // Mega evolution filter
     if (filterOptions.mega) {
       pools.push(MEGA_EVOLUTION_IDS);
+      // Add Primal forms (Kyogre/Groudon) which are technically mega-like
+      pools.push([382, 383]);
     }
 
     // Gigantamax filter
@@ -147,6 +149,13 @@ export const generatePokemonPool = async (
     // AND mode: Intersection of all filters
     let pool = [...basePool];
 
+    // If Legendary filter is active, include special Legendary IDs (Origin forms, etc.)
+    // that are outside the normal range
+    if (filterOptions.legendary) {
+      const specialLegendaryIds = LEGENDARY_IDS.filter(id => id > POKEMON_CONFIG.TOTAL_POKEMON);
+      pool = [...pool, ...specialLegendaryIds];
+    }
+
     // If Legends Z-A filter is active, include external Z-A Pokemon in the starting pool
     // so they can be filtered by Type, etc.
     if (filterOptions.legendsZA) {
@@ -193,7 +202,7 @@ export const generatePokemonPool = async (
 
     // Apply mega evolution filter
     if (filterOptions.mega) {
-      pool = pool.filter((id) => MEGA_EVOLUTION_IDS.includes(id));
+      pool = pool.filter((id) => MEGA_EVOLUTION_IDS.includes(id) || [382, 383].includes(id));
     }
 
     // Apply gigantamax filter

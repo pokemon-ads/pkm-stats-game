@@ -13,14 +13,14 @@ export const GAME_CONFIG = {
   
   // Target score constraints
   MIN_TARGET_TOTAL: 100,
-  MAX_TARGET_TOTAL: 1000,
+  MAX_TARGET_TOTAL: 1500,
   TARGET_STEP: 50,
   
   // Number of rounds per game
   ROUNDS_PER_GAME: 6,
   
   // Shiny Pokemon probability (1 in X)
-  SHINY_PROBABILITY: 128,
+  SHINY_PROBABILITY: 64,
   
   // Shiny bonus multiplier
   SHINY_BONUS_MULTIPLIER: 2,
