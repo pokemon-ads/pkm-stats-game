@@ -52,14 +52,16 @@ export const UpgradesList: React.FC = () => {
     switch (upgrade.condition.type) {
       case 'TOTAL_ENERGY':
         return state.totalEnergy >= upgrade.condition.amount;
-      case 'HELPER_COUNT':
+      case 'HELPER_COUNT': {
         if (!upgrade.condition.targetId) return false;
         const helperCount = helperMap.get(upgrade.condition.targetId) ?? 0;
         return helperCount >= upgrade.condition.amount;
-      case 'EVOLUTION':
+      }
+      case 'EVOLUTION': {
         if (!upgrade.condition.targetId) return false;
         const helperEvoCount = helperMap.get(upgrade.condition.targetId) ?? 0;
         return helperEvoCount >= upgrade.condition.amount;
+      }
       default:
         return true;
     }
@@ -426,6 +428,12 @@ export const UpgradesList: React.FC = () => {
           height: 32px;
           object-fit: contain;
           image-rendering: pixelated;
+        }
+
+        .upgrade-item-image {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
         }
 
         .upgrade-content {

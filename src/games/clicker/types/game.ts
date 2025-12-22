@@ -32,6 +32,7 @@ export interface Upgrade {
   };
   purchased: boolean;
   icon?: string;
+  itemImage?: string; // URL to item image from PokeAPI
   category?: string;
 }
 

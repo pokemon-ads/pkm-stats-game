@@ -62,6 +62,12 @@ export const UPGRADE_ITEM_MAP: Record<string, string> = {
   'dialga_t1': 'metal-coat',
   'arceus_t1': 'silk-scarf',
   'giratina_t1': 'spell-tag',
+  'meowth_t1': 'amulet-coin',
+  'meowth_t2': 'nugget',
+  'machop_t1': 'black-belt',
+  'machop_t2': 'muscle-band',
+  'abra_t1': 'twisted-spoon',
+  'abra_t2': 'wise-glasses',
   
   // Evolution upgrades
   'raichu_power': 'thunder-stone',
@@ -85,6 +91,11 @@ export const UPGRADE_ITEM_MAP: Record<string, string> = {
   'tyranitar_crunch': 'dusk-stone',
   'shelgon_protect': 'dragon-fang',
   'salamence_fly': 'dragon-fang',
+  'persian_payday': 'amulet-coin',
+  'machoke_strength': 'black-belt',
+  'machamp_might': 'muscle-band',
+  'kadabra_psychic': 'twisted-spoon',
+  'alakazam_mind': 'wise-glasses',
 };
 
 // Mapping of boost IDs to Pokemon item names

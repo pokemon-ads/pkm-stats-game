@@ -115,6 +115,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               className="score-adjust-btn decrease"
               onClick={() => setTargetTotal(prev => Math.max(GAME_CONFIG.MIN_TARGET_TOTAL, prev - 50))}
               title="-50"
+              type="button"
             >
               <span className="arrow">◀</span>
               <span className="value">-50</span>
@@ -132,6 +133,7 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               className="score-adjust-btn increase"
               onClick={() => setTargetTotal(prev => Math.min(GAME_CONFIG.MAX_TARGET_TOTAL, prev + 50))}
               title="+50"
+              type="button"
             >
               <span className="value">+50</span>
               <span className="arrow">▶</span>

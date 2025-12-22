@@ -53,3 +53,26 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+/* Force dark mode by default */
+:root {
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+}
+
+/* Only apply light mode if explicitly requested via class or other mechanism,
+   but for now we want to enforce dark mode as default even if system is light */
+@media (prefers-color-scheme: light) {
+  /* Overriding system light mode preference to keep dark theme */
+  :root {
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+  }
+  a:hover {
+    color: #535bf2;
+  }
+  button {
+    background-color: #1a1a1a;
+  }
+}
