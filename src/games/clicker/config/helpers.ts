@@ -53,6 +53,44 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 35, pokemonId: 3, name: 'Venusaur' },
     ],
   },
+  {
+    id: 'meowth',
+    name: 'Meowth',
+    baseCost: 600,
+    baseProduction: 4,
+    count: 0,
+    unlocked: true,
+    pokemonId: 52,
+    evolutions: [
+      { level: 28, pokemonId: 53, name: 'Persian' },
+    ],
+  },
+  {
+    id: 'machop',
+    name: 'Machop',
+    baseCost: 4500,
+    baseProduction: 22,
+    count: 0,
+    unlocked: true,
+    pokemonId: 66,
+    evolutions: [
+      { level: 28, pokemonId: 67, name: 'Machoke' },
+      { level: 40, pokemonId: 68, name: 'Machamp' },
+    ],
+  },
+  {
+    id: 'abra',
+    name: 'Abra',
+    baseCost: 45000,
+    baseProduction: 120,
+    count: 0,
+    unlocked: true,
+    pokemonId: 63,
+    evolutions: [
+      { level: 16, pokemonId: 64, name: 'Kadabra' },
+      { level: 35, pokemonId: 65, name: 'Alakazam' },
+    ],
+  },
   // Tier 2 - Popular Pokemon with evolutions
   {
     id: 'eevee',
@@ -101,7 +139,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     id: 'snorlax',
     name: 'Munchlax',
     baseCost: 330000000,
-    baseProduction: 44000,
+    baseProduction: 144000,
     count: 0,
     unlocked: true,
     pokemonId: 446,

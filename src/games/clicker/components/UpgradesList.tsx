@@ -136,7 +136,11 @@ export const UpgradesList: React.FC = () => {
                 }}
               >
                 <div className={`upgrade-icon-wrapper ${upgrade.category === 'evolution' ? 'evolution-icon' : ''}`}>
-                  <span className="upgrade-icon">{upgrade.icon || '✨'}</span>
+                  {upgrade.itemImage ? (
+                    <img src={upgrade.itemImage} alt={upgrade.name} className="upgrade-item-image" />
+                  ) : (
+                    <span className="upgrade-icon">{upgrade.icon || '✨'}</span>
+                  )}
                 </div>
                 <div className="upgrade-content">
                   <div className="upgrade-header">
@@ -324,6 +328,12 @@ export const UpgradesList: React.FC = () => {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 10px;
           font-size: 1.3rem;
+        }
+
+        .upgrade-item-image {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
         }
 
         .upgrade-content {
