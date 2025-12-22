@@ -64,6 +64,15 @@ export const PokemonList: React.FC = () => {
     return sum + effectiveBase * h.count * shinyMultiplier;
   }, 0);
 
+  // Find the next locked helper (the first one that is not unlocked)
+  const nextLockedHelper = state.helpers.find(h => !h.unlocked);
+  const nextLockedHelperId = nextLockedHelper?.id;
+
+  // Filter helpers: show only unlocked ones + the next locked one
+  const visibleHelpers = state.helpers.filter(helper => 
+    helper.unlocked || helper.id === nextLockedHelperId
+  );
+
   return (
     <div className="helpers-container">
       {/* Header with summary stats */}
@@ -85,7 +94,7 @@ export const PokemonList: React.FC = () => {
 
       {/* Helpers list */}
       <div className="helpers-list">
-        {state.helpers.map((helper) => {
+        {visibleHelpers.map((helper) => {
           const cost = Math.floor(helper.baseCost * Math.pow(1.15, helper.count));
           const shinyCost = calculateShinyCost(helper);
           const canAfford = state.energy >= cost;
@@ -104,11 +113,12 @@ export const PokemonList: React.FC = () => {
             : 100;
           const hasEvolutions = helper.evolutions && helper.evolutions.length > 0;
           const isFullyEvolved = !nextEvolution && hasEvolutions;
+          const isLocked = !helper.unlocked;
 
           return (
             <div 
               key={helper.id} 
-              className={`helper-card ${isPurchasing ? 'purchasing' : ''} ${isEvolving ? 'evolving' : ''} ${helper.count > 0 ? 'owned' : ''} ${helper.isShiny ? 'shiny' : ''} ${isShinyAnimating ? 'shiny-animating' : ''}`}
+              className={`helper-card ${isPurchasing ? 'purchasing' : ''} ${isEvolving ? 'evolving' : ''} ${helper.count > 0 ? 'owned' : ''} ${helper.isShiny ? 'shiny' : ''} ${isShinyAnimating ? 'shiny-animating' : ''} ${isLocked ? 'locked' : ''}`}
             >
               {/* Pokemon sprite and count */}
               <div className="helper-visual">
@@ -177,31 +187,40 @@ export const PokemonList: React.FC = () => {
 
               {/* Actions */}
               <div className="helper-actions">
-                <button 
-                  onClick={() => handleBuy(helper.id)} 
-                  disabled={!canAfford} 
-                  className={`action-btn buy-btn ${canAfford ? 'affordable' : ''}`}
-                >
-                  <span className="btn-label">{t('clicker.buy')}</span>
-                  <span className="btn-cost">⚡{formatNumber(cost)}</span>
-                </button>
-                
-                {!helper.isShiny && helper.count > 0 && (
-                  <button 
-                    onClick={() => handleMakeShiny(helper.id)} 
-                    disabled={!canAffordShiny} 
-                    className={`action-btn shiny-btn ${canAffordShiny ? 'affordable' : ''}`}
-                    title="Make Shiny (×10 production)"
-                  >
-                    <span className="btn-label">✨</span>
-                    <span className="btn-cost">⚡{formatNumber(shinyCost)}</span>
-                  </button>
-                )}
-                
-                {helper.isShiny && (
-                  <div className="shiny-active-badge">
-                    ✨×10
+                {isLocked ? (
+                  <div className="locked-indicator">
+                    <span className="lock-icon">🔒</span>
+                    <span className="lock-text">Verrouillé</span>
                   </div>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => handleBuy(helper.id)} 
+                      disabled={!canAfford} 
+                      className={`action-btn buy-btn ${canAfford ? 'affordable' : ''}`}
+                    >
+                      <span className="btn-label">{t('clicker.buy')}</span>
+                      <span className="btn-cost">⚡{formatNumber(cost)}</span>
+                    </button>
+                    
+                    {!helper.isShiny && helper.count > 0 && (
+                      <button 
+                        onClick={() => handleMakeShiny(helper.id)} 
+                        disabled={!canAffordShiny} 
+                        className={`action-btn shiny-btn ${canAffordShiny ? 'affordable' : ''}`}
+                        title="Make Shiny (×10 production)"
+                      >
+                        <span className="btn-label">✨</span>
+                        <span className="btn-cost">⚡{formatNumber(shinyCost)}</span>
+                      </button>
+                    )}
+                    
+                    {helper.isShiny && (
+                      <div className="shiny-active-badge">
+                        ✨×10
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
