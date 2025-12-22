@@ -53,6 +53,14 @@ export const PrivacyPolicy: React.FC = () => {
         We want to inform our users that these third parties have access to your Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.
       </p>
 
+      <h3>4.1. Advertising Services</h3>
+      <p>
+        We use Google AdSense to display advertisements on our website. Google AdSense is a third-party advertising service provided by Google LLC. When you visit our website, Google AdSense may use cookies and similar technologies to collect information about your visits to this and other websites in order to provide advertisements about goods and services of interest to you.
+      </p>
+      <p>
+        You can opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">Google's Ads Settings</a>. For more information about how Google uses data when you use our website, please visit <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">How Google uses data when you use our partners' sites or apps</a>.
+      </p>
+
       <h2>5. Security</h2>
       <p>
         We value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and we cannot guarantee its absolute security.
@@ -73,9 +81,20 @@ export const PrivacyPolicy: React.FC = () => {
         We may update our Privacy Policy from time to time. Thus, we advise you to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately, after they are posted on this page.
       </p>
 
-      <h2>9. Contact Us</h2>
+      <h2>9. Cookies and Tracking Technologies</h2>
       <p>
-        If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us.
+        We use cookies and similar tracking technologies to track activity on our Service and store certain information. Cookies are files with a small amount of data which may include an anonymous unique identifier. Cookies are sent to your browser from a website and stored on your device.
+      </p>
+      <p>
+        You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Service.
+      </p>
+
+      <h2>10. Contact Us</h2>
+      <p>
+        If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at: <a href="mailto:contact@pkm-stats.vercel.app">contact@pkm-stats.vercel.app</a>
+      </p>
+      <p>
+        This website is operated by PKM Stats. For any inquiries regarding data protection or privacy concerns, please use the contact information provided above.
       </p>
     </div>
   )

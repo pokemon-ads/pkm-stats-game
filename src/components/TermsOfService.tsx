@@ -55,6 +55,19 @@ export const TermsOfService: React.FC = () => {
       <p>
         Any claim relating to PKM Stats's web site shall be governed by the laws of the State of France without regard to its conflict of law provisions.
       </p>
+
+      <h2>9. Intellectual Property</h2>
+      <p>
+        The content, games, and features on this website are original creations by PKM Stats. However, we acknowledge that Pokemon characters, names, and related content are trademarks and copyrights of Nintendo, Game Freak, and The Pokemon Company. This website is not affiliated with, endorsed by, or sponsored by these companies.
+      </p>
+      <p>
+        All game mechanics, user interfaces, and original content are the intellectual property of PKM Stats. Pokemon data is sourced from the publicly available PokeAPI, which provides free access to Pokemon information.
+      </p>
+
+      <h2>10. Contact Information</h2>
+      <p>
+        For questions regarding these Terms of Service, please contact us at: <a href="mailto:contact@pkm-stats.vercel.app">contact@pkm-stats.vercel.app</a>
+      </p>
     </div>
   )
 }

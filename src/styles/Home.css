@@ -301,7 +301,15 @@
   font-size: 1.2rem;
   color: #a0a0b0;
   line-height: 1.7;
+  margin: 0 0 1rem 0;
+}
+
+.hero-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0 0 2rem 0;
+  max-width: 700px;
+  line-height: 1.7;
 }
 
 .hero-cta {
@@ -532,7 +540,61 @@
   font-size: 1rem;
   color: #a0a0b0;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 1rem 0;
+}
+
+/* Game Progress Preview */
+.game-progress-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.progress-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.progress-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.progress-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #a855f7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Card Footer */
@@ -629,7 +691,24 @@
   line-height: 1.8;
   text-align: center;
   max-width: 800px;
+  margin: 0 auto 2rem auto;
+}
+
+.about-text {
+  color: #a0a0b0;
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: left;
+  max-width: 900px;
   margin: 0 auto 3rem auto;
+}
+
+.about-text p {
+  margin: 0 0 1.5rem 0;
+}
+
+.about-text p:last-child {
+  margin-bottom: 0;
 }
 
 .about-grid {

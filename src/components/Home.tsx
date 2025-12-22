@@ -1,16 +1,42 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import type { GameState } from '../games/clicker/types/game'
 import '../styles/Home.css'
 
 // Animated Pokemon sprites for the hero section
 const HERO_POKEMON = [25, 1, 4, 7, 150, 151, 133, 143, 94, 130];
+
+const SAVE_KEY = 'pokeclicker_save'
+
+const formatNumber = (num: number): string => {
+  if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qi'
+  if (num >= 1e15) return (num / 1e15).toFixed(1) + 'Qa'
+  if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T'
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B'
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M'
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K'
+  return Math.floor(num).toLocaleString()
+}
+
+const getClickerGameState = (): GameState | null => {
+  try {
+    const savedState = localStorage.getItem(SAVE_KEY)
+    if (savedState) {
+      return JSON.parse(savedState) as GameState
+    }
+  } catch (error) {
+    console.error('Failed to load clicker game state:', error)
+  }
+  return null
+}
 
 export const Home = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [currentPokemon, setCurrentPokemon] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
+  const [clickerGameState, setClickerGameState] = useState<GameState | null>(null)
 
   useEffect(() => {
     setIsVisible(true)
@@ -18,6 +44,20 @@ export const Home = () => {
       setCurrentPokemon(prev => (prev + 1) % HERO_POKEMON.length)
     }, 3000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    // Load clicker game state
+    const gameState = getClickerGameState()
+    setClickerGameState(gameState)
+    
+    // Update periodically to show latest stats
+    const updateInterval = setInterval(() => {
+      const updatedState = getClickerGameState()
+      setClickerGameState(updatedState)
+    }, 2000)
+    
+    return () => clearInterval(updateInterval)
   }, [])
 
   const games = [
@@ -115,6 +155,9 @@ export const Home = () => {
               </span>
             </h1>
             <p className="hero-subtitle">{t('home.subtitle')}</p>
+            <p className="hero-description">
+              Discover three exciting Pokemon games: test your knowledge of Pokemon statistics, identify Pokemon from silhouettes and clues, or enjoy an addictive idle clicker experience. All games are completely free to play, no registration required!
+            </p>
             <div className="hero-cta">
               <button className="cta-button primary" onClick={() => navigate('/pokestats')}>
                 <span className="cta-icon">🎮</span>
@@ -163,6 +206,44 @@ export const Home = () => {
                 <div className="card-body">
                   <h3 className="card-title">{game.title}</h3>
                   <p className="card-description">{game.description}</p>
+                  
+                  {/* Game progress preview for PokeClicker */}
+                  {game.id === 'pokeclicker' && clickerGameState && (
+                    <div className="game-progress-preview">
+                      <div className="progress-stats">
+                        <div className="progress-stat">
+                          <span className="progress-icon">⚡</span>
+                          <div className="progress-info">
+                            <span className="progress-label">Énergie</span>
+                            <span className="progress-value">{formatNumber(clickerGameState.energy)}</span>
+                          </div>
+                        </div>
+                        <div className="progress-stat">
+                          <span className="progress-icon">📊</span>
+                          <div className="progress-info">
+                            <span className="progress-label">Total</span>
+                            <span className="progress-value">{formatNumber(clickerGameState.totalEnergy)}</span>
+                          </div>
+                        </div>
+                        <div className="progress-stat">
+                          <span className="progress-icon">👥</span>
+                          <div className="progress-info">
+                            <span className="progress-label">Pokémon</span>
+                            <span className="progress-value">
+                              {clickerGameState.helpers.reduce((sum, h) => sum + h.count, 0)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="progress-stat">
+                          <span className="progress-icon">⚡</span>
+                          <div className="progress-info">
+                            <span className="progress-label">/s</span>
+                            <span className="progress-value">{formatNumber(clickerGameState.energyPerSecond)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <footer className="card-footer">
@@ -176,7 +257,7 @@ export const Home = () => {
                   </div>
                   
                   <button className="card-button" style={{ background: game.gradient }}>
-                    <span>{t('home.letsPlay')}</span>
+                    <span>{clickerGameState && game.id === 'pokeclicker' ? t('home.continue') : t('home.letsPlay')}</span>
                     <span className="button-arrow">→</span>
                   </button>
                 </footer>
@@ -198,6 +279,15 @@ export const Home = () => {
         
         <div className="about-content">
           <p className="about-intro">{t('home.about.intro')}</p>
+          
+          <div className="about-text">
+            <p>
+              PKM Stats is a free, educational gaming platform dedicated to Pokemon fans worldwide. Our mission is to provide engaging, interactive games that help players learn about Pokemon statistics, types, and characteristics while having fun. All games are completely free to play and require no registration.
+            </p>
+            <p>
+              Whether you're a casual Pokemon fan or a competitive trainer, our games offer challenges for all skill levels. Test your knowledge, improve your Pokemon expertise, and compete with friends through our leaderboard systems.
+            </p>
+          </div>
           
           <div className="about-grid">
             <div className="about-card">

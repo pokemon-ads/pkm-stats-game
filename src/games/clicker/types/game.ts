@@ -36,6 +36,32 @@ export interface Upgrade {
   category?: string;
 }
 
+export interface Boost {
+  id: string;
+  name: string;
+  description: string;
+  baseCost: number; // Base cost, will be scaled based on production
+  costMultiplier: number; // Multiplier for scaling (higher = more expensive as production increases)
+  type: 'CLICK_MULTIPLIER' | 'PRODUCTION_MULTIPLIER' | 'INSTANT_ENERGY' | 'AUTO_CLICKER';
+  value: number; // Multiplier value or energy amount
+  duration: number; // Duration in seconds (0 for instant)
+  cooldown: number; // Cooldown in seconds
+  icon: string;
+}
+
+export interface ActiveBoost {
+  boostId: string;
+  type: Boost['type'];
+  value: number;
+  expiresAt: number; // Timestamp when boost expires
+  startTime: number; // Timestamp when boost started
+}
+
+export interface BoostCooldown {
+  boostId: string;
+  availableAt: number; // Timestamp when boost becomes available again
+}
+
 export interface GameState {
   energy: number;
   totalEnergy: number;
@@ -45,6 +71,8 @@ export interface GameState {
   lastSaveTime: number;
   helpers: PokemonHelper[];
   upgrades: Upgrade[];
+  activeBoosts: ActiveBoost[];
+  boostCooldowns: BoostCooldown[];
 }
 
 export type ClickerAction =
@@ -55,4 +83,6 @@ export type ClickerAction =
   | { type: 'RESET_GAME' }
   | { type: 'BUY_HELPER'; payload: { helperId: string } }
   | { type: 'BUY_UPGRADE'; payload: { upgradeId: string } }
-  | { type: 'MAKE_SHINY'; payload: { helperId: string } };
+  | { type: 'MAKE_SHINY'; payload: { helperId: string } }
+  | { type: 'ACTIVATE_BOOST'; payload: { boostId: string } }
+  | { type: 'CLEANUP_EXPIRED_BOOSTS' };

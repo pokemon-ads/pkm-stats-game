@@ -40,20 +40,21 @@ export const ClickerArea: React.FC = () => {
   const { handleClick, state } = useClickerGame();
   
   // Find the last unlocked helper with count > 0 and get its evolved form
+  // Optimized: iterate backwards to find last purchased helper without filtering all
   const { displayPokemonId, displayPokemonName } = useMemo(() => {
-    const purchasedHelpers = state.helpers.filter(h => h.count > 0);
-    
-    if (purchasedHelpers.length === 0) {
-      return { displayPokemonId: DEFAULT_POKEMON_ID, displayPokemonName: 'Pikachu' };
+    // Find last helper with count > 0 by iterating backwards
+    for (let i = state.helpers.length - 1; i >= 0; i--) {
+      const helper = state.helpers[i];
+      if (helper.count > 0) {
+        const evolution = getCurrentEvolution(helper);
+        return {
+          displayPokemonId: evolution.pokemonId,
+          displayPokemonName: evolution.name
+        };
+      }
     }
     
-    const lastHelper = purchasedHelpers[purchasedHelpers.length - 1];
-    const evolution = getCurrentEvolution(lastHelper);
-    
-    return {
-      displayPokemonId: evolution.pokemonId,
-      displayPokemonName: evolution.name
-    };
+    return { displayPokemonId: DEFAULT_POKEMON_ID, displayPokemonName: 'Pikachu' };
   }, [state.helpers]);
 
   const [floatingTexts, setFloatingTexts] = useState<FloatingTextItem[]>([]);
@@ -78,33 +79,56 @@ export const ClickerArea: React.FC = () => {
   }, []);
 
   const createParticles = useCallback((centerX: number, centerY: number, intensity: number = 1) => {
-    const colors = ['#ffcb05', '#a855f7', '#3b4cca', '#e94560', '#4ade80'];
-    const particleCount = Math.min(Math.ceil(4 * intensity), 8);
+    const colors = ['#ffcb05', '#a855f7', '#3b4cca', '#e94560', '#4ade80', '#ffd700', '#f0abfc'];
+    const particleCount = Math.min(Math.ceil(6 * intensity), 12);
     const newParticles: Particle[] = [];
+    const baseId = Date.now();
+    const colorCount = colors.length;
+    
+    // Pre-calculate reusable values
+    const angleStep = (Math.PI * 2) / particleCount;
+    const baseDistance = 60;
+    const distanceRange = 40 * intensity;
     
     for (let i = 0; i < particleCount; i++) {
-      const angle = (i / particleCount) * Math.PI * 2 + Math.random() * 0.5;
-      const distance = 50 + Math.random() * 30 * intensity;
+      const angle = angleStep * i + Math.random() * 0.5;
+      const distance = baseDistance + Math.random() * distanceRange;
+      const cosAngle = Math.cos(angle);
+      const sinAngle = Math.sin(angle);
+      
       newParticles.push({
-        id: Date.now() + i + Math.random(),
+        id: baseId + i,
         x: centerX,
         y: centerY,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        tx: Math.cos(angle) * distance,
-        ty: Math.sin(angle) * distance,
+        color: colors[Math.floor(Math.random() * colorCount)],
+        tx: cosAngle * distance,
+        ty: sinAngle * distance,
       });
     }
     
+    // Use functional update to avoid closure issues
     setParticles(prev => {
       const combined = [...prev, ...newParticles];
       // Keep only the most recent particles
-      return combined.slice(-MAX_PARTICLES);
+      if (combined.length > MAX_PARTICLES) {
+        return combined.slice(-MAX_PARTICLES);
+      }
+      return combined;
     });
     
-    // Clean up particles after animation
-    setTimeout(() => {
-      setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
-    }, 600);
+    // Clean up particles after animation using requestAnimationFrame for better performance
+    const particleIds = new Set(newParticles.map(p => p.id));
+    const cleanupTime = Date.now() + 800;
+    
+    const cleanup = () => {
+      const now = Date.now();
+      if (now >= cleanupTime) {
+        setParticles(prev => prev.filter(p => !particleIds.has(p.id)));
+      } else {
+        requestAnimationFrame(cleanup);
+      }
+    };
+    requestAnimationFrame(cleanup);
   }, []);
 
   const showVisualEffects = useCallback((clickCount: number, x: number, y: number) => {
@@ -214,7 +238,7 @@ export const ClickerArea: React.FC = () => {
       </div>
       
       {/* Floating texts - using CSS-only animation for performance */}
-      {floatingTexts.map(item => (
+      {floatingTexts.length > 0 && floatingTexts.map(item => (
         <div
           key={item.id}
           className="floating-text-container"
@@ -231,24 +255,26 @@ export const ClickerArea: React.FC = () => {
       ))}
       
       {/* Particles */}
-      <div className="click-particles">
-        {particles.map(particle => (
-          <div
-            key={particle.id}
-            className="particle"
-            style={{
-              left: particle.x,
-              top: particle.y,
-              backgroundColor: particle.color,
-              '--tx': `${particle.tx}px`,
-              '--ty': `${particle.ty}px`,
-              width: '12px',
-              height: '12px',
-              boxShadow: `0 0 10px ${particle.color}`,
-            } as React.CSSProperties}
-          />
-        ))}
-      </div>
+      {particles.length > 0 && (
+        <div className="click-particles">
+          {particles.map(particle => (
+            <div
+              key={particle.id}
+              className="particle"
+              style={{
+                left: particle.x,
+                top: particle.y,
+                backgroundColor: particle.color,
+                '--tx': `${particle.tx}px`,
+                '--ty': `${particle.ty}px`,
+                width: '14px',
+                height: '14px',
+                boxShadow: `0 0 15px ${particle.color}, 0 0 25px ${particle.color}`,
+              } as React.CSSProperties}
+            />
+          ))}
+        </div>
+      )}
       
       <style>{`
         .click-info {
@@ -269,18 +295,22 @@ export const ClickerArea: React.FC = () => {
           position: fixed;
           border-radius: 50%;
           pointer-events: none;
-          animation: particleFly 0.6s ease-out forwards;
+          animation: particleFly 0.8s ease-out forwards;
           z-index: 100;
           will-change: transform, opacity;
         }
         
         @keyframes particleFly {
           0% {
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
             opacity: 1;
           }
+          50% {
+            transform: translate(calc(-50% + var(--tx) * 0.5), calc(-50% + var(--ty) * 0.5)) scale(1.2) rotate(180deg);
+            opacity: 0.8;
+          }
           100% {
-            transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0);
+            transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0) rotate(360deg);
             opacity: 0;
           }
         }

@@ -23,6 +23,7 @@
     "featureIdle": "Idle",
     "featureEvolution": "Évolution",
     "letsPlay": "C'est parti !",
+    "continue": "Continuer",
     "mysteryGame": "Jeu Mystère",
     "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
     "inDevelopment": "En développement",
@@ -226,6 +227,7 @@
     "fullyEvolved": "Évolution Max",
     "legendary": "Légendaire",
     "upgrades": {
+      "title": "Améliorations",
       "all": "Tous",
       "click": "Clic",
       "global": "Global",
@@ -235,6 +237,18 @@
       "noPurchased": "Aucune amélioration achetée",
       "keepPlaying": "Continuez à jouer pour en débloquer !",
       "requires": "Requiert"
+    },
+    "shop": {
+      "title": "Shop",
+      "subtitle": "Boostes temporaires puissants",
+      "activeBoosts": "Boosts Actifs",
+      "clickBoosts": "Boostes de Clic",
+      "productionBoosts": "Boostes de Production",
+      "instantEnergy": "Énergie Instantanée",
+      "autoClicker": "Auto-Clicker",
+      "active": "Actif",
+      "cooldown": "Rechargement",
+      "instant": "Instantané"
     }
   }
 }

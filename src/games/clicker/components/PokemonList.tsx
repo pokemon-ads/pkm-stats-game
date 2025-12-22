@@ -1,7 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClickerContext, getHelperEffectiveBase, calculateShinyCost } from '../context/ClickerContext';
-import { getCurrentEvolution, getNextEvolution } from '../config/helpers';
+import { getCurrentEvolution, getNextEvolution, calculateHelperCost } from '../config/helpers';
 import '../styles/PokemonList.css';
 
 const getAnimatedSprite = (pokemonId: number, isShiny: boolean = false): string => {
@@ -36,8 +36,9 @@ export const PokemonList: React.FC = () => {
   const [purchaseAnimation, setPurchaseAnimation] = useState<string | null>(null);
   const [evolvingHelper, setEvolvingHelper] = useState<string | null>(null);
   const [shinyAnimation, setShinyAnimation] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const handleBuy = (helperId: string) => {
+  const handleBuy = useCallback((helperId: string) => {
     const helper = state.helpers.find(h => h.id === helperId);
     if (!helper) return;
     const nextEvolution = getNextEvolution(helper);
@@ -49,63 +50,124 @@ export const PokemonList: React.FC = () => {
       setTimeout(() => setEvolvingHelper(null), 1500);
     }
     setTimeout(() => setPurchaseAnimation(null), 500);
-  };
+  }, [state.helpers, dispatch]);
 
-  const handleMakeShiny = (helperId: string) => {
+  const handleMakeShiny = useCallback((helperId: string) => {
     dispatch({ type: 'MAKE_SHINY', payload: { helperId } });
     setShinyAnimation(helperId);
     setTimeout(() => setShinyAnimation(null), 2000);
-  };
+  }, [dispatch]);
 
-  const totalHelpers = state.helpers.reduce((sum, h) => sum + h.count, 0);
-  const totalProduction = state.helpers.reduce((sum, h) => {
-    const effectiveBase = getHelperEffectiveBase(h, state.upgrades);
-    const shinyMultiplier = h.isShiny ? 10 : 1;
-    return sum + effectiveBase * h.count * shinyMultiplier;
-  }, 0);
+  // Memoize expensive calculations
+  const totalHelpers = useMemo(() => {
+    return state.helpers.reduce((sum, h) => sum + h.count, 0);
+  }, [state.helpers]);
+
+  const totalProduction = useMemo(() => {
+    return state.helpers.reduce((sum, h) => {
+      if (h.count === 0) return sum;
+      const effectiveBase = getHelperEffectiveBase(h, state.upgrades);
+      const shinyMultiplier = h.isShiny ? 10 : 1;
+      return sum + effectiveBase * h.count * shinyMultiplier;
+    }, 0);
+  }, [state.helpers, state.upgrades]);
+
+  const shinyCount = useMemo(() => {
+    return state.helpers.filter(h => h.isShiny && h.count > 0).length;
+  }, [state.helpers]);
+
+  const unlockedCount = useMemo(() => {
+    return state.helpers.filter(h => h.unlocked).length;
+  }, [state.helpers]);
 
   // Find the next locked helper (the first one that is not unlocked)
-  const nextLockedHelper = state.helpers.find(h => !h.unlocked);
-  const nextLockedHelperId = nextLockedHelper?.id;
+  const nextLockedHelperId = useMemo(() => {
+    const nextLockedHelper = state.helpers.find(h => !h.unlocked);
+    return nextLockedHelper?.id;
+  }, [state.helpers]);
 
   // Filter helpers: show only unlocked ones + the next locked one
-  const visibleHelpers = state.helpers.filter(helper => 
-    helper.unlocked || helper.id === nextLockedHelperId
-  );
+  const visibleHelpers = useMemo(() => {
+    return state.helpers.filter(helper => 
+      helper.unlocked || helper.id === nextLockedHelperId
+    );
+  }, [state.helpers, nextLockedHelperId]);
 
   return (
-    <div className="helpers-container">
+    <div className={`helpers-container ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Header with summary stats */}
       <div className="helpers-header">
-        <div className="helpers-title-row">
-          <h2 className="helpers-title">🎮 {t('clicker.helpers')}</h2>
-        </div>
-        <div className="helpers-stats">
-          <div className="stat-chip">
-            <span className="stat-icon">👥</span>
-            <span className="stat-value">{totalHelpers}</span>
+        <div className="helpers-header-top">
+          <div className="helpers-title-section">
+            <div className="helpers-title-row">
+              <h2 className="helpers-title">{t('clicker.helpers')}</h2>
+              <button 
+                className="collapse-toggle-btn"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                title={isCollapsed ? 'Agrandir' : 'Réduire'}
+              >
+                {isCollapsed ? '▼' : '▲'}
+              </button>
+            </div>
+            {!isCollapsed && <div className="helpers-subtitle">Pokémon Assistants</div>}
           </div>
-          <div className="stat-chip production">
-            <span className="stat-icon">⚡</span>
-            <span className="stat-value">{formatNumber(totalProduction)}/s</span>
-          </div>
+          {!isCollapsed && (
+            <div className="helpers-progress">
+              <div className="progress-label">Débloqués</div>
+              <div className="progress-value">
+                {unlockedCount}/{state.helpers.length}
+              </div>
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${(unlockedCount / state.helpers.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
+        
+        {!isCollapsed && (
+          <div className="helpers-stats-grid">
+            <div className="stat-card total">
+              <div className="stat-card-header">
+                <span className="stat-icon">👥</span>
+                <span className="stat-label">Total</span>
+              </div>
+              <div className="stat-card-value">{totalHelpers}</div>
+            </div>
+            
+            <div className="stat-card production">
+              <div className="stat-card-header">
+                <span className="stat-icon">⚡</span>
+                <span className="stat-label">Production</span>
+              </div>
+              <div className="stat-card-value" title={formatNumber(totalProduction) + '/s'}>
+                {formatNumber(totalProduction)}/s
+              </div>
+            </div>
+            
+            <div className="stat-card shiny">
+              <div className="stat-card-header">
+                <span className="stat-icon">✨</span>
+                <span className="stat-label">Shiny</span>
+              </div>
+              <div className="stat-card-value">{shinyCount}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Helpers list */}
       <div className="helpers-list">
         {visibleHelpers.map((helper) => {
-          const cost = Math.floor(helper.baseCost * Math.pow(1.15, helper.count));
+          // Calculate dynamic cost based on count and production
+          const cost = calculateHelperCost(helper, state.energyPerSecond);
           const shinyCost = calculateShinyCost(helper);
-          const canAfford = state.energy >= cost;
-          const canAffordShiny = state.energy >= shinyCost && helper.count > 0 && !helper.isShiny;
           const effectiveBase = getHelperEffectiveBase(helper, state.upgrades);
           const shinyMultiplier = helper.isShiny ? 10 : 1;
           const helperTotalProduction = effectiveBase * helper.count * shinyMultiplier;
           const hasBaseBonus = effectiveBase > helper.baseProduction;
-          const isPurchasing = purchaseAnimation === helper.id;
-          const isEvolving = evolvingHelper === helper.id;
-          const isShinyAnimating = shinyAnimation === helper.id;
           const currentEvolution = getCurrentEvolution(helper);
           const nextEvolution = getNextEvolution(helper);
           const evolutionProgress = nextEvolution 
@@ -113,6 +175,12 @@ export const PokemonList: React.FC = () => {
             : 100;
           const hasEvolutions = helper.evolutions && helper.evolutions.length > 0;
           const isFullyEvolved = !nextEvolution && hasEvolutions;
+          
+          const canAfford = state.energy >= cost;
+          const canAffordShiny = state.energy >= shinyCost && helper.count > 0 && !helper.isShiny;
+          const isPurchasing = purchaseAnimation === helper.id;
+          const isEvolving = evolvingHelper === helper.id;
+          const isShinyAnimating = shinyAnimation === helper.id;
           const isLocked = !helper.unlocked;
 
           return (
@@ -127,6 +195,7 @@ export const PokemonList: React.FC = () => {
                     src={getAnimatedSprite(currentEvolution.pokemonId, helper.isShiny)} 
                     alt={currentEvolution.name} 
                     className={`helper-sprite ${isEvolving ? 'evolution-flash' : ''}`} 
+                    loading="lazy"
                     onError={(e) => { 
                       (e.target as HTMLImageElement).src = getStaticSprite(currentEvolution.pokemonId, helper.isShiny); 
                     }} 

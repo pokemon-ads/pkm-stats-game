@@ -1,26 +1,42 @@
 .app-footer {
   width: 100%;
-  padding: 2rem 1rem;
-  text-align: center;
+  padding: 3rem 1rem 2rem;
   margin-top: auto;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.app-footer .footer-text {
-  color: #707080;
-  font-size: 0.95rem;
-  margin: 0 0 0.5rem 0;
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  text-align: left;
+}
+
+.footer-section h3 {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.footer-section p {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
 }
 
 .footer-links {
   display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .footer-links a {
-  color: #707080;
+  color: #a0a0a0;
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
@@ -31,12 +47,32 @@
   text-decoration: underline;
 }
 
+.footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-footer .footer-text {
+  color: #707080;
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.footer-copyright {
+  color: #606060;
+  font-size: 0.8rem;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.5;
+}
+
 .app-footer .footer-pokemon {
   display: flex;
   justify-content: center;
   gap: 1rem;
   font-size: 1.5rem;
   opacity: 0.6;
+  margin-top: 1.5rem;
 }
 
 .app-footer .footer-pokemon span {
@@ -47,4 +83,15 @@
 .app-footer .footer-pokemon span:hover {
   transform: scale(1.3) translateY(-4px);
   opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .footer-links {
+    align-items: center;
+  }
 }

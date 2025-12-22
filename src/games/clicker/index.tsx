@@ -18,7 +18,7 @@ const PokeClickerGame: React.FC = () => {
         <h1 className="clicker-game-title">{t('clicker.title')}</h1>
         
         <div className="clicker-layout">
-          {/* Left Column - Upgrades */}
+          {/* Left Column - Upgrades & Shop */}
           <div className="clicker-left-column">
             <UpgradesList />
           </div>
