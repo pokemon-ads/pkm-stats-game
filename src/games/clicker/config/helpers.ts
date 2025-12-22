@@ -1,5 +1,46 @@
 import type { PokemonHelper } from '../types/game';
 
+// Calculate dynamic helper cost based on count and current production
+// Formula: baseCost * (1.15^count) * (1 + log(1 + energyPerSecond / baseProduction) * costMultiplier)
+// Combines exponential growth per purchase with logarithmic scaling based on production
+export const calculateHelperCost = (helper: PokemonHelper, energyPerSecond: number): number => {
+  // Base production threshold for scaling
+  const baseProduction = 50;
+  
+  // Exponential growth per purchase (original formula)
+  const countMultiplier = Math.pow(1.15, helper.count);
+  
+  // Logarithmic scaling based on production (similar to boosts but gentler)
+  const productionRatio = Math.max(0, energyPerSecond / baseProduction);
+  const logFactor = Math.log1p(productionRatio);
+  
+  // Cost multiplier based on helper tier (higher tier = more scaling)
+  // Lower tier helpers (early game) have less scaling, higher tier have more
+  const tierMultiplier = getHelperTierMultiplier(helper);
+  const productionScaling = 1 + logFactor * tierMultiplier;
+  
+  // Combine both multipliers
+  const finalCost = helper.baseCost * countMultiplier * productionScaling;
+  
+  return Math.max(helper.baseCost, Math.floor(finalCost));
+};
+
+// Get cost multiplier based on helper tier (position in list)
+// Early helpers scale less, late-game helpers scale more
+const getHelperTierMultiplier = (helper: PokemonHelper): number => {
+  // Find helper index in INITIAL_HELPERS to determine tier
+  const index = INITIAL_HELPERS.findIndex(h => h.id === helper.id);
+  
+  if (index === -1) return 0.2; // Default for unknown helpers
+  
+  // Tier-based multipliers: early game = less scaling, late game = more scaling
+  if (index < 4) return 0.15;      // Tier 1 (starters) - minimal scaling
+  if (index < 7) return 0.25;      // Tier 2 - low scaling
+  if (index < 10) return 0.35;     // Tier 3 - moderate scaling
+  if (index < 13) return 0.45;     // Tier 4 (legendaries) - higher scaling
+  return 0.5;                      // Tier 5 (mythicals) - highest scaling
+};
+
 export const INITIAL_HELPERS: PokemonHelper[] = [
   // Tier 1 - Starter Pokemon with evolutions
   {

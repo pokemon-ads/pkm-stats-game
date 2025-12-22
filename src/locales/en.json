@@ -23,6 +23,7 @@
     "featureIdle": "Idle",
     "featureEvolution": "Evolution",
     "letsPlay": "Let's Play!",
+    "continue": "Continue",
     "mysteryGame": "Mystery Game",
     "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
     "inDevelopment": "In development",
@@ -226,6 +227,7 @@
     "fullyEvolved": "Fully Evolved",
     "legendary": "Legendary",
     "upgrades": {
+      "title": "Upgrades",
       "all": "All",
       "click": "Click",
       "global": "Global",
@@ -235,6 +237,18 @@
       "noPurchased": "No upgrades purchased yet",
       "keepPlaying": "Keep playing to unlock more!",
       "requires": "Requires"
+    },
+    "shop": {
+      "title": "Shop",
+      "subtitle": "Powerful temporary boosts",
+      "activeBoosts": "Active Boosts",
+      "clickBoosts": "Click Boosts",
+      "productionBoosts": "Production Boosts",
+      "instantEnergy": "Instant Energy",
+      "autoClicker": "Auto-Clicker",
+      "active": "Active",
+      "cooldown": "Cooldown",
+      "instant": "Instant"
     }
   }
 }

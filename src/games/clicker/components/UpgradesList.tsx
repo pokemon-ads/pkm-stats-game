@@ -1,7 +1,8 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClickerContext } from '../context/ClickerContext';
 import type { Upgrade } from '../types/game';
+import { Shop } from './Shop';
 
 // Format large numbers
 const formatNumber = (num: number): string => {
@@ -14,9 +15,15 @@ const formatNumber = (num: number): string => {
   return Math.floor(num).toLocaleString();
 };
 
-type TabType = 'available' | 'click' | 'global' | 'helper' | 'evolution' | 'purchased';
+type MainTabType = 'shop' | 'upgrades';
+type UpgradeSubTabType = 'available' | 'click' | 'global' | 'helper' | 'evolution' | 'purchased';
 
-const TAB_CONFIG: { id: TabType; labelKey: string; icon: string }[] = [
+const MAIN_TABS: { id: MainTabType; labelKey: string; icon: string }[] = [
+  { id: 'shop', labelKey: 'clicker.shop.title', icon: '🛒' },
+  { id: 'upgrades', labelKey: 'clicker.upgrades.title', icon: '⚙️' },
+];
+
+const UPGRADE_SUB_TABS: { id: UpgradeSubTabType; labelKey: string; icon: string }[] = [
   { id: 'available', labelKey: 'clicker.upgrades.all', icon: '🎯' },
   { id: 'click', labelKey: 'clicker.upgrades.click', icon: '👆' },
   { id: 'global', labelKey: 'clicker.upgrades.global', icon: '🌍' },
@@ -28,9 +35,17 @@ const TAB_CONFIG: { id: TabType; labelKey: string; icon: string }[] = [
 export const UpgradesList: React.FC = () => {
   const { t } = useTranslation();
   const { state, dispatch } = useContext(ClickerContext);
-  const [activeTab, setActiveTab] = useState<TabType>('available');
+  const [activeMainTab, setActiveMainTab] = useState<MainTabType>('upgrades');
+  const [activeSubTab, setActiveSubTab] = useState<UpgradeSubTabType>('available');
 
-  const isUpgradeAvailable = (upgrade: Upgrade) => {
+  // Create helper lookup map for O(1) access instead of O(n) find
+  const helperMap = useMemo(() => {
+    const map = new Map<string, number>();
+    state.helpers.forEach(h => map.set(h.id, h.count));
+    return map;
+  }, [state.helpers]);
+
+  const isUpgradeAvailable = useCallback((upgrade: Upgrade) => {
     if (upgrade.purchased) return false;
     if (!upgrade.condition) return true;
 
@@ -39,28 +54,27 @@ export const UpgradesList: React.FC = () => {
         return state.totalEnergy >= upgrade.condition.amount;
       case 'HELPER_COUNT':
         if (!upgrade.condition.targetId) return false;
-        const helperCount = state.helpers.find(h => h.id === upgrade.condition?.targetId);
-        return helperCount ? helperCount.count >= upgrade.condition.amount : false;
+        const helperCount = helperMap.get(upgrade.condition.targetId) ?? 0;
+        return helperCount >= upgrade.condition.amount;
       case 'EVOLUTION':
-        // Evolution upgrades unlock when a helper reaches a certain count (evolution threshold)
         if (!upgrade.condition.targetId) return false;
-        const helperEvo = state.helpers.find(h => h.id === upgrade.condition?.targetId);
-        return helperEvo ? helperEvo.count >= upgrade.condition.amount : false;
+        const helperEvoCount = helperMap.get(upgrade.condition.targetId) ?? 0;
+        return helperEvoCount >= upgrade.condition.amount;
       default:
         return true;
     }
-  };
+  }, [state.totalEnergy, helperMap]);
 
-  const handlePurchase = (upgradeId: string) => {
+  const handlePurchase = useCallback((upgradeId: string) => {
     dispatch({ type: 'BUY_UPGRADE', payload: { upgradeId } });
-  };
+  }, [dispatch]);
 
-  // Filter upgrades based on active tab
+  // Filter upgrades based on active sub tab
   const filteredUpgrades = useMemo(() => {
     const available = state.upgrades.filter(isUpgradeAvailable);
     const purchased = state.upgrades.filter(u => u.purchased);
 
-    switch (activeTab) {
+    switch (activeSubTab) {
       case 'available':
         return available;
       case 'click':
@@ -76,7 +90,7 @@ export const UpgradesList: React.FC = () => {
       default:
         return available;
     }
-  }, [state.upgrades, state.totalEnergy, state.helpers, activeTab]);
+  }, [state.upgrades, isUpgradeAvailable, activeSubTab]);
 
   // Count available upgrades per category
   const counts = useMemo(() => {
@@ -89,32 +103,58 @@ export const UpgradesList: React.FC = () => {
       evolution: available.filter(u => u.category === 'evolution').length,
       purchased: state.upgrades.filter(u => u.purchased).length,
     };
-  }, [state.upgrades, state.totalEnergy, state.helpers]);
+  }, [state.upgrades, isUpgradeAvailable]);
+
+  // Reset sub tab when switching main tabs
+  const handleMainTabChange = useCallback((tab: MainTabType) => {
+    setActiveMainTab(tab);
+    if (tab === 'upgrades') {
+      setActiveSubTab('available');
+    }
+  }, []);
 
   return (
     <div className="upgrades-panel">
-      {/* Tab Navigation */}
-      <div className="upgrades-tabs">
-        {TAB_CONFIG.map(tab => (
+      {/* Main Tab Navigation */}
+      <div className="main-tabs">
+        {MAIN_TABS.map(tab => (
           <button
             key={tab.id}
-            className={`upgrade-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            className={`main-tab ${activeMainTab === tab.id ? 'active' : ''}`}
+            onClick={() => handleMainTabChange(tab.id)}
           >
             <span className="tab-icon">{tab.icon}</span>
             <span className="tab-label">{t(tab.labelKey)}</span>
-            {counts[tab.id] > 0 && (
-              <span className="tab-count">{counts[tab.id]}</span>
-            )}
           </button>
         ))}
       </div>
 
-      {/* Upgrades List */}
+      {/* Sub Tab Navigation (only for upgrades) */}
+      {activeMainTab === 'upgrades' && (
+        <div className="sub-tabs">
+          {UPGRADE_SUB_TABS.map(tab => (
+            <button
+              key={tab.id}
+              className={`sub-tab ${activeSubTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveSubTab(tab.id)}
+            >
+              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-label">{t(tab.labelKey)}</span>
+              {counts[tab.id] > 0 && (
+                <span className="tab-count">{counts[tab.id]}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Content */}
       <div className="upgrades-list">
-        {filteredUpgrades.length === 0 ? (
+        {activeMainTab === 'shop' ? (
+          <Shop />
+        ) : filteredUpgrades.length === 0 ? (
           <div className="no-upgrades">
-            {activeTab === 'purchased' ? (
+            {activeSubTab === 'purchased' ? (
               <p>🔒 {t('clicker.upgrades.noPurchased')}</p>
             ) : (
               <p>🎮 {t('clicker.upgrades.keepPlaying')}</p>
@@ -136,7 +176,23 @@ export const UpgradesList: React.FC = () => {
                 }}
               >
                 <div className={`upgrade-icon-wrapper ${upgrade.category === 'evolution' ? 'evolution-icon' : ''}`}>
-                  <span className="upgrade-icon">{upgrade.icon || '✨'}</span>
+                  {upgrade.icon && upgrade.icon.startsWith('http') ? (
+                    <img 
+                      src={upgrade.icon} 
+                      alt={upgrade.name}
+                      className="upgrade-icon-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const fallback = document.createElement('span');
+                        fallback.className = 'upgrade-icon';
+                        fallback.textContent = '✨';
+                        e.currentTarget.parentElement?.appendChild(fallback);
+                      }}
+                    />
+                  ) : (
+                    <span className="upgrade-icon">{upgrade.icon || '✨'}</span>
+                  )}
                 </div>
                 <div className="upgrade-content">
                   <div className="upgrade-header">
@@ -177,35 +233,73 @@ export const UpgradesList: React.FC = () => {
           overflow: hidden;
         }
 
-        .upgrades-tabs {
+        .main-tabs {
+          display: flex;
+          gap: 8px;
+          padding: 12px;
+          background: rgba(0, 0, 0, 0.3);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          flex-shrink: 0;
+        }
+
+        .main-tab {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 10px 16px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.85rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .main-tab:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+
+        .main-tab.active {
+          background: linear-gradient(135deg, rgba(255, 203, 5, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
+          border-color: rgba(255, 203, 5, 0.5);
+          color: white;
+          box-shadow: 0 2px 8px rgba(255, 203, 5, 0.2);
+        }
+
+        .sub-tabs {
           display: flex;
           gap: 4px;
-          padding: 12px;
+          padding: 8px 12px;
           background: rgba(0, 0, 0, 0.2);
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           overflow-x: auto;
           flex-shrink: 0;
         }
 
-        .upgrades-tabs::-webkit-scrollbar {
+        .sub-tabs::-webkit-scrollbar {
           height: 4px;
         }
 
-        .upgrades-tabs::-webkit-scrollbar-thumb {
+        .sub-tabs::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.2);
           border-radius: 2px;
         }
 
-        .upgrade-tab {
+        .sub-tab {
           display: flex;
           align-items: center;
           gap: 4px;
-          padding: 8px 12px;
+          padding: 6px 10px;
           background: rgba(255, 255, 255, 0.05);
           border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
+          border-radius: 8px;
           color: rgba(255, 255, 255, 0.6);
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
@@ -213,14 +307,14 @@ export const UpgradesList: React.FC = () => {
           flex-shrink: 0;
         }
 
-        .upgrade-tab:hover {
+        .sub-tab:hover {
           background: rgba(255, 255, 255, 0.1);
           color: white;
         }
 
-        .upgrade-tab.active {
-          background: linear-gradient(135deg, rgba(255, 203, 5, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
-          border-color: rgba(255, 203, 5, 0.5);
+        .sub-tab.active {
+          background: linear-gradient(135deg, rgba(59, 76, 202, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
+          border-color: rgba(59, 76, 202, 0.5);
           color: white;
         }
 
@@ -324,6 +418,14 @@ export const UpgradesList: React.FC = () => {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 10px;
           font-size: 1.3rem;
+          overflow: hidden;
+        }
+
+        .upgrade-icon-image {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+          image-rendering: pixelated;
         }
 
         .upgrade-content {

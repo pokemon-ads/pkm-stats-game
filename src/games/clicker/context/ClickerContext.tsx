@@ -1,8 +1,9 @@
 import React, { createContext, useReducer } from 'react';
 import type { ReactNode, Dispatch } from 'react';
-import type { GameState, ClickerAction, Upgrade, PokemonHelper } from '../types/game';
-import { INITIAL_HELPERS } from '../config/helpers';
+import type { GameState, ClickerAction, Upgrade, PokemonHelper, ActiveBoost } from '../types/game';
+import { INITIAL_HELPERS, calculateHelperCost } from '../config/helpers';
 import { INITIAL_UPGRADES } from '../config/upgrades';
+import { AVAILABLE_BOOSTS, calculateBoostCost } from '../config/boosts';
 
 const initialState: GameState = {
   energy: 0,
@@ -13,15 +14,25 @@ const initialState: GameState = {
   lastSaveTime: Date.now(),
   helpers: INITIAL_HELPERS,
   upgrades: INITIAL_UPGRADES,
+  activeBoosts: [],
+  boostCooldowns: [],
+};
+
+// Get active click multiplier from boosts
+const getClickMultiplier = (activeBoosts: ActiveBoost[]): number => {
+  const clickBoost = activeBoosts.find(b => b.type === 'CLICK_MULTIPLIER');
+  return clickBoost ? clickBoost.value : 1;
 };
 
 // Calculate click power with new balanced system
 // Base click = 1, then add all CLICK_BONUS values
-const calculateEnergyPerClick = (upgrades: Upgrade[]) => {
+// Optimized: filter purchased upgrades first
+const calculateEnergyPerClick = (upgrades: Upgrade[], activeBoosts: ActiveBoost[] = []) => {
   let baseClick = 1;
   let clickBonus = 0;
   
-  upgrades.forEach(u => {
+  // Only iterate through purchased upgrades
+  for (const u of upgrades) {
     if (u.purchased) {
       if (u.type === 'CLICK_BONUS') {
         clickBonus += u.value;
@@ -30,21 +41,25 @@ const calculateEnergyPerClick = (upgrades: Upgrade[]) => {
         baseClick *= u.value;
       }
     }
-  });
+  }
   
-  return baseClick + clickBonus;
+  const baseValue = baseClick + clickBonus;
+  const boostMultiplier = getClickMultiplier(activeBoosts);
+  
+  return baseValue * boostMultiplier;
 };
 
 // Calculate helper's effective base production (original + upgrades)
+// Optimized: filter purchased upgrades first
 const getHelperEffectiveBase = (helper: PokemonHelper, upgrades: Upgrade[]): number => {
   let effectiveBase = helper.baseProduction;
   
-  // Add all HELPER_BASE bonuses for this helper
-  upgrades.forEach(u => {
+  // Only iterate through purchased upgrades
+  for (const u of upgrades) {
     if (u.purchased && u.type === 'HELPER_BASE' && u.targetId === helper.id) {
       effectiveBase += u.value;
     }
-  });
+  }
   
   return effectiveBase;
 };
@@ -56,64 +71,85 @@ const calculateShinyCost = (helper: PokemonHelper): number => {
 };
 
 // Export for components
+// eslint-disable-next-line react-refresh/only-export-components
 export { calculateShinyCost };
+
+// Get active production multiplier from boosts
+const getProductionMultiplier = (activeBoosts: ActiveBoost[]): number => {
+  const productionBoost = activeBoosts.find(b => b.type === 'PRODUCTION_MULTIPLIER');
+  return productionBoost ? productionBoost.value : 1;
+};
 
 // Calculate energy per second with new balanced system
 // Global bonus is additive (sum of percentages), not multiplicative
-const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[]) => {
-  // Calculate global percentage bonus (additive)
+// Optimized: cache helper multipliers and reduce iterations
+const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[], activeBoosts: ActiveBoost[] = []) => {
+  // Pre-calculate global bonuses once
   let globalPercentBonus = 0;
-  upgrades.forEach(u => {
-    if (u.purchased && u.type === 'GLOBAL_PERCENT') {
-      globalPercentBonus += u.value;
-    }
-  });
-  
-  // Legacy support for old GLOBAL_MULTIPLIER
   let legacyMultiplier = 1;
-  upgrades.forEach(u => {
-    if (u.purchased && u.type === 'GLOBAL_MULTIPLIER') {
+  const purchasedUpgrades = upgrades.filter(u => u.purchased);
+  
+  for (const u of purchasedUpgrades) {
+    if (u.type === 'GLOBAL_PERCENT') {
+      globalPercentBonus += u.value;
+    } else if (u.type === 'GLOBAL_MULTIPLIER') {
       legacyMultiplier *= u.value;
     }
-  });
+  }
+  
+  // Pre-calculate helper multipliers map for performance
+  const helperMultipliers = new Map<string, number>();
+  for (const u of purchasedUpgrades) {
+    if (u.type === 'HELPER_MULTIPLIER' && u.targetId) {
+      const current = helperMultipliers.get(u.targetId) || 1;
+      helperMultipliers.set(u.targetId, current * u.value);
+    }
+  }
 
   // Calculate base production from all helpers
-  const baseProduction = helpers.reduce((total, h) => {
+  let baseProduction = 0;
+  for (const h of helpers) {
+    if (h.count === 0) continue; // Skip helpers with 0 count
+    
     // Get effective base (original + HELPER_BASE upgrades)
-    const effectiveBase = getHelperEffectiveBase(h, upgrades);
+    const effectiveBase = getHelperEffectiveBase(h, purchasedUpgrades);
     
     // Shiny multiplier (x10 if shiny)
     const shinyMultiplier = h.isShiny ? 10 : 1;
     
-    // Legacy support for HELPER_MULTIPLIER
-    let helperMultiplier = 1;
-    upgrades.forEach(u => {
-      if (u.purchased && u.type === 'HELPER_MULTIPLIER' && u.targetId === h.id) {
-        helperMultiplier *= u.value;
-      }
-    });
+    // Get helper multiplier from cache
+    const helperMultiplier = helperMultipliers.get(h.id) || 1;
     
-    return total + (effectiveBase * h.count * helperMultiplier * shinyMultiplier);
-  }, 0);
+    baseProduction += effectiveBase * h.count * helperMultiplier * shinyMultiplier;
+  }
 
   // Apply global bonus: base * (1 + percentage/100) * legacyMultiplier
-  return baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
+  const baseValue = baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
+  const boostMultiplier = getProductionMultiplier(activeBoosts);
+  
+  return baseValue * boostMultiplier;
 };
 
 // Auto-unlock helpers based on totalEnergy
 // A helper is unlocked when totalEnergy reaches 50% of its baseCost
+// Optimized: only creates new array if something actually changed
 const autoUnlockHelpers = (helpers: PokemonHelper[], totalEnergy: number): PokemonHelper[] => {
-  return helpers.map(helper => {
+  let hasChanges = false;
+  const newHelpers = helpers.map(helper => {
     if (helper.unlocked) return helper;
     
     // Unlock if totalEnergy reaches 50% of baseCost
     const unlockThreshold = helper.baseCost * 0.5;
     if (totalEnergy >= unlockThreshold) {
+      hasChanges = true;
       return { ...helper, unlocked: true };
     }
     
     return helper;
   });
+  
+  // Only return new array if something changed
+  return hasChanges ? newHelpers : helpers;
 };
 
 const gameReducer = (state: GameState, action: ClickerAction): GameState => {
@@ -125,7 +161,8 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       if (helperIndex === -1) return state;
       
       const helper = state.helpers[helperIndex];
-      const cost = Math.floor(helper.baseCost * Math.pow(1.15, helper.count));
+      // Calculate dynamic cost based on count and production
+      const cost = calculateHelperCost(helper, state.energyPerSecond);
       
       if (state.energy < cost) return state;
       
@@ -135,7 +172,7 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         count: helper.count + 1,
       };
       
-      const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades);
+      const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades, state.activeBoosts);
       const unlockedHelpers = autoUnlockHelpers(newHelpers, state.totalEnergy);
       
       return {
@@ -164,8 +201,8 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         ...state,
         energy: state.energy - upgrade.cost,
         upgrades: newUpgrades,
-        energyPerClick: calculateEnergyPerClick(newUpgrades),
-        energyPerSecond: calculateEnergyPerSecond(state.helpers, newUpgrades),
+        energyPerClick: calculateEnergyPerClick(newUpgrades, state.activeBoosts),
+        energyPerSecond: calculateEnergyPerSecond(state.helpers, newUpgrades, state.activeBoosts),
       };
     }
     case 'CLICK': {
@@ -228,8 +265,10 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         ...action.payload,
         helpers: finalHelpers,
         upgrades: mergedUpgrades,
-        energyPerClick: calculateEnergyPerClick(mergedUpgrades),
-        energyPerSecond: calculateEnergyPerSecond(finalHelpers, mergedUpgrades),
+        activeBoosts: action.payload.activeBoosts || [],
+        boostCooldowns: action.payload.boostCooldowns || [],
+        energyPerClick: calculateEnergyPerClick(mergedUpgrades, action.payload.activeBoosts || []),
+        energyPerSecond: calculateEnergyPerSecond(finalHelpers, mergedUpgrades, action.payload.activeBoosts || []),
       };
     case 'RESET_GAME':
       return {
@@ -256,12 +295,125 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         isShiny: true,
       };
       
-      const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades);
+      const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades, state.activeBoosts);
       
       return {
         ...state,
         energy: state.energy - cost,
         helpers: newHelpers,
+        energyPerSecond: newEnergyPerSecond,
+      };
+    }
+    case 'ACTIVATE_BOOST': {
+      const { boostId } = action.payload;
+      const boost = AVAILABLE_BOOSTS.find(b => b.id === boostId);
+      
+      if (!boost) return state;
+      
+      // Check if boost is on cooldown
+      const cooldown = state.boostCooldowns.find(c => c.boostId === boostId);
+      if (cooldown && Date.now() < cooldown.availableAt) {
+        return state; // Still on cooldown
+      }
+      
+      // Calculate dynamic cost based on current production
+      const dynamicCost = calculateBoostCost(boost, state.energyPerSecond);
+      
+      // Check if player has enough energy
+      if (state.energy < dynamicCost) return state;
+      
+      const now = Date.now();
+      let newActiveBoosts = [...state.activeBoosts];
+      let newBoostCooldowns = [...state.boostCooldowns];
+      
+      // Handle instant energy boost
+      if (boost.type === 'INSTANT_ENERGY') {
+        const energyGain = Math.floor(state.totalEnergy * boost.value);
+        const newTotalEnergy = state.totalEnergy + energyGain;
+        const unlockedHelpers = autoUnlockHelpers(state.helpers, newTotalEnergy);
+        
+        // Add cooldown
+        const cooldownIndex = newBoostCooldowns.findIndex(c => c.boostId === boostId);
+        if (cooldownIndex >= 0) {
+          newBoostCooldowns[cooldownIndex] = {
+            boostId,
+            availableAt: now + boost.cooldown * 1000,
+          };
+        } else {
+          newBoostCooldowns.push({
+            boostId,
+            availableAt: now + boost.cooldown * 1000,
+          });
+        }
+        
+        return {
+          ...state,
+          energy: state.energy - dynamicCost + energyGain,
+          totalEnergy: newTotalEnergy,
+          boostCooldowns: newBoostCooldowns,
+          helpers: unlockedHelpers,
+        };
+      }
+      
+      // Handle temporary boosts (replace existing boost of same type if any)
+      if (boost.duration > 0) {
+        // Remove existing boost of same type
+        newActiveBoosts = newActiveBoosts.filter(b => b.type !== boost.type);
+        
+        // Add new boost
+        newActiveBoosts.push({
+          boostId: boost.id,
+          type: boost.type,
+          value: boost.value,
+          expiresAt: now + boost.duration * 1000,
+          startTime: now,
+        });
+      }
+      
+      // Add cooldown
+      const cooldownIndex = newBoostCooldowns.findIndex(c => c.boostId === boostId);
+      if (cooldownIndex >= 0) {
+        newBoostCooldowns[cooldownIndex] = {
+          boostId,
+          availableAt: now + boost.cooldown * 1000,
+        };
+      } else {
+        newBoostCooldowns.push({
+          boostId,
+          availableAt: now + boost.cooldown * 1000,
+        });
+      }
+      
+      // Recalculate stats with new boosts
+      const newEnergyPerClick = calculateEnergyPerClick(state.upgrades, newActiveBoosts);
+      const newEnergyPerSecond = calculateEnergyPerSecond(state.helpers, state.upgrades, newActiveBoosts);
+      
+      return {
+        ...state,
+        energy: state.energy - dynamicCost,
+        activeBoosts: newActiveBoosts,
+        boostCooldowns: newBoostCooldowns,
+        energyPerClick: newEnergyPerClick,
+        energyPerSecond: newEnergyPerSecond,
+      };
+    }
+    case 'CLEANUP_EXPIRED_BOOSTS': {
+      const now = Date.now();
+      const activeBoosts = state.activeBoosts.filter(b => b.expiresAt > now);
+      
+      // Only update if something changed
+      if (activeBoosts.length === state.activeBoosts.length) {
+        return state;
+      }
+      
+      // Recalculate stats without expired boosts
+      const newEnergyPerClick = calculateEnergyPerClick(state.upgrades, activeBoosts);
+      const newEnergyPerSecond = calculateEnergyPerSecond(state.helpers, state.upgrades, activeBoosts);
+      
+      return {
+        ...state,
+        activeBoosts,
+        energyPerClick: newEnergyPerClick,
         energyPerSecond: newEnergyPerSecond,
       };
     }
@@ -338,6 +490,30 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
     localStorage.removeItem(SAVE_KEY);
     dispatch({ type: 'RESET_GAME' });
   };
+
+  // Cleanup expired boosts periodically
+  React.useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      dispatch({ type: 'CLEANUP_EXPIRED_BOOSTS' });
+    }, 1000); // Check every second
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
+
+  // Auto-clicker logic
+  React.useEffect(() => {
+    const autoClickerBoost = state.activeBoosts.find(b => b.type === 'AUTO_CLICKER');
+    if (!autoClickerBoost) return;
+
+    const clicksPerSecond = autoClickerBoost.value;
+    const interval = 1000 / clicksPerSecond; // ms between clicks
+
+    const autoClickInterval = setInterval(() => {
+      dispatch({ type: 'CLICK' });
+    }, interval);
+
+    return () => clearInterval(autoClickInterval);
+  }, [state.activeBoosts, dispatch]);
 
   // Game Loop
   const lastTickRef = React.useRef<number>(Date.now());

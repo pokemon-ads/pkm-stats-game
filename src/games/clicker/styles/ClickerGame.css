@@ -48,8 +48,18 @@
   50% { opacity: 1; }
 }
 
-.clicker-game-title {
+.clicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.clicker-game-title {
+  margin: 0;
   font-size: 3.5rem;
   font-weight: 900;
   text-transform: uppercase;
@@ -60,8 +70,85 @@
   background-clip: text;
   filter: drop-shadow(0 0 20px rgba(255, 203, 5, 0.5));
   animation: titleGlow 2s ease-in-out infinite;
+}
+
+.shop-toggle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 203, 5, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
+  border: 2px solid rgba(255, 203, 5, 0.5);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(255, 203, 5, 0.3);
+}
+
+.shop-toggle-btn:hover {
+  transform: scale(1.1) rotate(10deg);
+  background: linear-gradient(135deg, rgba(255, 203, 5, 0.5) 0%, rgba(168, 85, 247, 0.5) 100%);
+  box-shadow: 0 6px 20px rgba(255, 203, 5, 0.5);
+}
+
+.shop-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.shop-overlay-content {
   position: relative;
-  z-index: 1;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  background: rgba(20, 20, 30, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.shop-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.shop-close-btn:hover {
+  background: rgba(239, 68, 68, 0.5);
+  transform: scale(1.1);
 }
 
 @keyframes titleGlow {
@@ -210,24 +297,43 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 3px solid transparent;
+  border: 4px solid transparent;
   border-top-color: var(--poke-energy);
   border-right-color: var(--poke-yellow);
   animation: ringRotate 3s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
 }
 
 .energy-ring::before {
   content: '';
   position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   border-bottom-color: var(--poke-blue);
   border-left-color: var(--poke-accent);
   animation: ringRotate 4s linear infinite reverse;
+  filter: drop-shadow(0 0 8px rgba(59, 76, 202, 0.5));
+}
+
+.energy-ring::after {
+  content: '';
+  position: absolute;
+  top: -25px;
+  left: -25px;
+  right: -25px;
+  bottom: -25px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(255, 203, 5, 0.4);
+  border-right-color: rgba(168, 85, 247, 0.4);
+  border-bottom-color: rgba(59, 76, 202, 0.4);
+  border-left-color: rgba(233, 69, 96, 0.4);
+  animation: ringRotate 5s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 203, 5, 0.3));
 }
 
 @keyframes ringRotate {
@@ -239,15 +345,27 @@
   height: 220px;
   border-radius: 50%;
   border: none;
-  background: radial-gradient(circle at 30% 30%, #4a5568 0%, #2d3748 50%, #1a202c 100%);
+  background: radial-gradient(
+    circle at 30% 30%, 
+    rgba(168, 85, 247, 0.4) 0%, 
+    rgba(59, 76, 202, 0.3) 30%,
+    rgba(45, 45, 60, 0.9) 60%,
+    rgba(26, 26, 46, 1) 100%
+  );
   cursor: pointer;
   position: relative;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.3), 0 0 30px rgba(168, 85, 247, 0.2), inset 0 -10px 30px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 0 0 4px rgba(168, 85, 247, 0.4),
+    0 0 40px rgba(168, 85, 247, 0.3),
+    0 0 80px rgba(168, 85, 247, 0.2),
+    inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 15px 20px rgba(255, 255, 255, 0.1);
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: buttonGlow 3s ease-in-out infinite;
 }
 
 .clicker-button::before {
@@ -255,30 +373,138 @@
   position: absolute;
   top: 10%;
   left: 15%;
-  width: 30%;
-  height: 20%;
-  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  width: 35%;
+  height: 25%;
+  background: radial-gradient(
+    ellipse, 
+    rgba(255, 255, 255, 0.5) 0%, 
+    rgba(255, 203, 5, 0.3) 30%,
+    transparent 70%
+  );
   border-radius: 50%;
+  animation: shineMove 4s ease-in-out infinite;
+}
+
+.clicker-button::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(168, 85, 247, 0.3),
+    transparent 30%,
+    transparent,
+    rgba(255, 203, 5, 0.3),
+    transparent 60%,
+    transparent,
+    rgba(59, 76, 202, 0.3),
+    transparent 90%,
+    transparent
+  );
+  animation: ringRotate 8s linear infinite;
+  z-index: -1;
+  opacity: 0.6;
 }
 
 .clicker-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 0 6px rgba(168, 85, 247, 0.5), 0 0 50px rgba(168, 85, 247, 0.4), inset 0 -10px 30px rgba(0, 0, 0, 0.3);
+  transform: scale(1.08);
+  box-shadow: 
+    0 0 0 8px rgba(168, 85, 247, 0.6),
+    0 0 60px rgba(168, 85, 247, 0.5),
+    0 0 100px rgba(168, 85, 247, 0.3),
+    inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 15px 20px rgba(255, 255, 255, 0.15);
+  animation: buttonGlowHover 1.5s ease-in-out infinite;
+}
+
+.clicker-button:hover::after {
+  opacity: 1;
+  animation: ringRotate 4s linear infinite;
 }
 
 .clicker-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 0 8px rgba(255, 203, 5, 0.6), 0 0 60px rgba(255, 203, 5, 0.5), inset 0 -5px 20px rgba(0, 0, 0, 0.4);
+  transform: scale(0.92);
+  box-shadow: 
+    0 0 0 12px rgba(255, 203, 5, 0.8),
+    0 0 80px rgba(255, 203, 5, 0.7),
+    0 0 120px rgba(255, 203, 5, 0.5),
+    inset 0 -10px 30px rgba(0, 0, 0, 0.5),
+    inset 0 10px 15px rgba(255, 255, 255, 0.2);
 }
 
 .clicker-button.clicking {
-  animation: clickPulse 0.15s ease-out;
+  animation: clickPulse 0.2s ease-out, buttonGlowHover 0.2s ease-out;
+}
+
+@keyframes buttonGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 4px rgba(168, 85, 247, 0.4),
+      0 0 40px rgba(168, 85, 247, 0.3),
+      0 0 80px rgba(168, 85, 247, 0.2),
+      inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+      inset 0 15px 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 6px rgba(168, 85, 247, 0.5),
+      0 0 50px rgba(168, 85, 247, 0.4),
+      0 0 100px rgba(168, 85, 247, 0.3),
+      inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+      inset 0 15px 20px rgba(255, 255, 255, 0.15);
+  }
+}
+
+@keyframes buttonGlowHover {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 8px rgba(168, 85, 247, 0.6),
+      0 0 60px rgba(168, 85, 247, 0.5),
+      0 0 100px rgba(168, 85, 247, 0.3),
+      inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+      inset 0 15px 20px rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 10px rgba(168, 85, 247, 0.7),
+      0 0 70px rgba(168, 85, 247, 0.6),
+      0 0 120px rgba(168, 85, 247, 0.4),
+      inset 0 -15px 40px rgba(0, 0, 0, 0.4),
+      inset 0 15px 20px rgba(255, 255, 255, 0.2);
+  }
 }
 
 @keyframes clickPulse {
-  0% { transform: scale(0.95); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
+  0% { 
+    transform: scale(0.92);
+  }
+  50% { 
+    transform: scale(1.05);
+  }
+  100% { 
+    transform: scale(1);
+  }
+}
+
+@keyframes shineMove {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(10px, -10px) scale(1.1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-5px, 5px) scale(0.9);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(5px, -5px) scale(1.05);
+    opacity: 0.8;
+  }
 }
 
 .clicker-pokemon-sprite {
@@ -286,26 +512,64 @@
   height: 140px;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-  animation: pokemonIdle 2s ease-in-out infinite;
-  transition: all 0.15s ease;
+  filter: 
+    drop-shadow(0 0 15px rgba(255, 255, 255, 0.4))
+    drop-shadow(0 0 25px rgba(168, 85, 247, 0.3))
+    drop-shadow(0 0 35px rgba(255, 203, 5, 0.2));
+  animation: pokemonIdle 2.5s ease-in-out infinite;
+  transition: all 0.2s ease;
   pointer-events: none;
+  z-index: 2;
+  position: relative;
 }
 
 .clicker-pokemon-sprite.clicking {
-  animation: pokemonClick 0.15s ease-out;
+  animation: pokemonClick 0.2s ease-out;
+  filter: 
+    drop-shadow(0 0 20px rgba(255, 203, 5, 0.8))
+    drop-shadow(0 0 30px rgba(168, 85, 247, 0.6))
+    drop-shadow(0 0 40px rgba(255, 203, 5, 0.4));
+}
+
+.clicker-button:hover .clicker-pokemon-sprite {
+  filter: 
+    drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))
+    drop-shadow(0 0 30px rgba(168, 85, 247, 0.4))
+    drop-shadow(0 0 40px rgba(255, 203, 5, 0.3));
+  transform: scale(1.05);
 }
 
 @keyframes pokemonIdle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { 
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) scale(1.02);
+  }
+  50% { 
+    transform: translateY(-12px) scale(1.05);
+  }
+  75% {
+    transform: translateY(-8px) scale(1.02);
+  }
 }
 
 @keyframes pokemonClick {
-  0% { transform: scale(1) rotate(0deg); }
-  25% { transform: scale(0.9) rotate(-5deg); }
-  50% { transform: scale(1.1) rotate(5deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% { 
+    transform: scale(1) rotate(0deg) translateY(0);
+  }
+  25% { 
+    transform: scale(0.85) rotate(-8deg) translateY(5px);
+  }
+  50% { 
+    transform: scale(1.15) rotate(8deg) translateY(-10px);
+  }
+  75% {
+    transform: scale(0.95) rotate(-3deg) translateY(-5px);
+  }
+  100% { 
+    transform: scale(1) rotate(0deg) translateY(0);
+  }
 }
 
 .click-particles {
@@ -327,19 +591,52 @@
   height: 100%;
   border-radius: 50%;
   pointer-events: none;
-  animation: burstExpand 0.4s ease-out forwards;
+  animation: burstExpand 0.5s ease-out forwards;
+  z-index: 1;
+}
+
+.energy-burst::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 203, 5, 0.6) 0%,
+    rgba(168, 85, 247, 0.4) 50%,
+    transparent 100%
+  );
+  animation: burstExpandInner 0.5s ease-out forwards;
 }
 
 @keyframes burstExpand {
   0% {
     transform: scale(0.8);
+    opacity: 0.9;
+    box-shadow: 
+      0 0 0 0 rgba(168, 85, 247, 0.8),
+      0 0 0 0 rgba(255, 203, 5, 0.6);
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+    box-shadow: 
+      0 0 0 40px rgba(168, 85, 247, 0),
+      0 0 0 60px rgba(255, 203, 5, 0);
+  }
+}
+
+@keyframes burstExpandInner {
+  0% {
+    transform: scale(0.5);
     opacity: 0.8;
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.8);
   }
   100% {
     transform: scale(1.5);
     opacity: 0;
-    box-shadow: 0 0 0 30px rgba(168, 85, 247, 0);
   }
 }
 
