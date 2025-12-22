@@ -182,6 +182,7 @@ export const PokemonCard = ({
                     onClick={() => onSelectStatName(statName)}
                     disabled={!isAvailable}
                     className={`stat-button-blind ${!isAvailable ? 'stat-disabled' : ''} ${isSelected ? 'stat-selected' : ''}`}
+                    type="button"
                   >
                     <span className="stat-name">{STAT_LABELS[statName]}</span>
                     <span className="stat-mystery">?</span>
