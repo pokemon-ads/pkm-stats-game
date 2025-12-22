@@ -56,8 +56,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'meowth',
     name: 'Meowth',
-    baseCost: 600,
-    baseProduction: 4,
+    baseCost: 25000,
+    baseProduction: 85,
     count: 0,
     unlocked: true,
     pokemonId: 52,
@@ -68,8 +68,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'machop',
     name: 'Machop',
-    baseCost: 4500,
-    baseProduction: 22,
+    baseCost: 50000,
+    baseProduction: 150,
     count: 0,
     unlocked: true,
     pokemonId: 66,
@@ -81,8 +81,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'abra',
     name: 'Abra',
-    baseCost: 45000,
-    baseProduction: 120,
+    baseCost: 90000,
+    baseProduction: 220,
     count: 0,
     unlocked: true,
     pokemonId: 63,
