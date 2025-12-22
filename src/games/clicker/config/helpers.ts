@@ -20,7 +20,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 100,
     baseProduction: 1,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 4,
     evolutions: [
       { level: 15, pokemonId: 5, name: 'Charmeleon' },
@@ -33,7 +33,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 1100,
     baseProduction: 8,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 7,
     evolutions: [
       { level: 15, pokemonId: 8, name: 'Wartortle' },
@@ -46,7 +46,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 12000,
     baseProduction: 47,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 1,
     evolutions: [
       { level: 15, pokemonId: 2, name: 'Ivysaur' },
@@ -60,7 +60,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 130000,
     baseProduction: 260,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 133,
     evolutions: [
       { level: 10, pokemonId: 134, name: 'Vaporeon' },
@@ -76,7 +76,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 1400000,
     baseProduction: 1400,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 92,
     evolutions: [
       { level: 15, pokemonId: 93, name: 'Haunter' },
@@ -89,7 +89,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 20000000,
     baseProduction: 7800,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 147,
     evolutions: [
       { level: 15, pokemonId: 148, name: 'Dragonair' },
@@ -103,7 +103,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 330000000,
     baseProduction: 44000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 446,
     evolutions: [
       { level: 25, pokemonId: 143, name: 'Snorlax' },
@@ -115,7 +115,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 5100000000,
     baseProduction: 260000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 246,
     evolutions: [
       { level: 15, pokemonId: 247, name: 'Pupitar' },
@@ -128,7 +128,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 75000000000,
     baseProduction: 1600000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 371,
     evolutions: [
       { level: 15, pokemonId: 372, name: 'Shelgon' },
@@ -142,7 +142,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 1000000000000,
     baseProduction: 10000000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 150,
   },
   {
@@ -151,7 +151,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 14000000000000,
     baseProduction: 65000000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 384,
   },
   {
@@ -160,7 +160,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 170000000000000,
     baseProduction: 430000000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 483,
   },
   // Tier 5 - Mythical Pokemon (no evolutions)
@@ -170,7 +170,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 2100000000000000,
     baseProduction: 2900000000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 493,
   },
   {
@@ -179,7 +179,7 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
     baseCost: 26000000000000000,
     baseProduction: 21000000000,
     count: 0,
-    unlocked: true,
+    unlocked: false,
     pokemonId: 487,
   },
 ];

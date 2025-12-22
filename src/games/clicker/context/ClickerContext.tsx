@@ -100,6 +100,22 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[])
   return baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
 };
 
+// Auto-unlock helpers based on totalEnergy
+// A helper is unlocked when totalEnergy reaches 50% of its baseCost
+const autoUnlockHelpers = (helpers: PokemonHelper[], totalEnergy: number): PokemonHelper[] => {
+  return helpers.map(helper => {
+    if (helper.unlocked) return helper;
+    
+    // Unlock if totalEnergy reaches 50% of baseCost
+    const unlockThreshold = helper.baseCost * 0.5;
+    if (totalEnergy >= unlockThreshold) {
+      return { ...helper, unlocked: true };
+    }
+    
+    return helper;
+  });
+};
+
 const gameReducer = (state: GameState, action: ClickerAction): GameState => {
   switch (action.type) {
     case 'BUY_HELPER': {
@@ -120,11 +136,12 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       };
       
       const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades);
+      const unlockedHelpers = autoUnlockHelpers(newHelpers, state.totalEnergy);
       
       return {
         ...state,
         energy: state.energy - cost,
-        helpers: newHelpers,
+        helpers: unlockedHelpers,
         energyPerSecond: newEnergyPerSecond,
       };
     }
@@ -151,28 +168,40 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         energyPerSecond: calculateEnergyPerSecond(state.helpers, newUpgrades),
       };
     }
-    case 'CLICK':
+    case 'CLICK': {
+      const newTotalEnergy = state.totalEnergy + state.energyPerClick;
+      const unlockedHelpers = autoUnlockHelpers(state.helpers, newTotalEnergy);
       return {
         ...state,
         energy: state.energy + state.energyPerClick,
-        totalEnergy: state.totalEnergy + state.energyPerClick,
+        totalEnergy: newTotalEnergy,
         clickCount: state.clickCount + 1,
+        helpers: unlockedHelpers,
       };
-    case 'TICK':
+    }
+    case 'TICK': {
       const { delta } = action.payload;
       const energyGain = state.energyPerSecond * delta;
+      const newTotalEnergy = state.totalEnergy + energyGain;
+      const unlockedHelpers = autoUnlockHelpers(state.helpers, newTotalEnergy);
       return {
         ...state,
         energy: state.energy + energyGain,
-        totalEnergy: state.totalEnergy + energyGain,
+        totalEnergy: newTotalEnergy,
         lastSaveTime: Date.now(),
+        helpers: unlockedHelpers,
       };
-    case 'ADD_ENERGY':
+    }
+    case 'ADD_ENERGY': {
+      const newTotalEnergy = state.totalEnergy + action.payload.amount;
+      const unlockedHelpers = autoUnlockHelpers(state.helpers, newTotalEnergy);
       return {
         ...state,
         energy: state.energy + action.payload.amount,
-        totalEnergy: state.totalEnergy + action.payload.amount,
+        totalEnergy: newTotalEnergy,
+        helpers: unlockedHelpers,
       };
+    }
     case 'LOAD_GAME':
       // Merge saved helpers with initial helpers to ensure new helpers are added
       // and new properties (like pokemonId) are preserved from initial config
@@ -192,13 +221,15 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         return savedUpgrade ? { ...initialUpgrade, purchased: savedUpgrade.purchased } : initialUpgrade;
       });
 
+      const finalHelpers = autoUnlockHelpers(mergedHelpers, action.payload.totalEnergy || 0);
+      
       return {
         ...state,
         ...action.payload,
-        helpers: mergedHelpers,
+        helpers: finalHelpers,
         upgrades: mergedUpgrades,
         energyPerClick: calculateEnergyPerClick(mergedUpgrades),
-        energyPerSecond: calculateEnergyPerSecond(mergedHelpers, mergedUpgrades),
+        energyPerSecond: calculateEnergyPerSecond(finalHelpers, mergedUpgrades),
       };
     case 'RESET_GAME':
       return {
