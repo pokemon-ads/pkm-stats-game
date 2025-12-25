@@ -416,6 +416,15 @@
   color: white;
 }
 
+.category-icon-sprite {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  image-rendering: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .start-button-dashboard {
   width: 100%;
   padding: 1rem;
@@ -1508,12 +1517,25 @@
   }
 }
 
-/* Responsive */
+/* Mobile: Figer l'interface avec largeur fixe */
 @media (max-width: 768px) {
+  .pokestats-game {
+    max-width: 414px;
+    width: 100%;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .game-setup-dashboard {
+    max-width: 100%;
+  }
+  
   .pokemon-card-game {
     grid-template-columns: 1fr;
-    max-width: 500px;
+    max-width: 100%;
     gap: 1rem;
+    padding: 1rem;
   }
 
   .stats-grid {
@@ -1564,6 +1586,34 @@
 
   .category-title {
     font-size: 1rem;
+  }
+  
+  .game-header {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
+  
+  .game-progress {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .current-total {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+  
+  .game-result-compact {
+    max-width: 100%;
+    padding: 1rem;
+  }
+  
+  .stats-list-compact {
+    grid-template-columns: 1fr;
   }
 }
 

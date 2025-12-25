@@ -43,23 +43,32 @@
   width: 100%;
 }
 
+/* Mobile: Figer l'interface avec largeur fixe */
 @media (max-width: 1024px) {
   .pokequizz-game {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
+    max-width: 414px;
+    width: 100%;
+    margin: 0 auto;
     padding: 1rem;
     padding-top: 80px;
   }
   
   .pokequizz-sidebar {
     width: 100%;
-    max-width: 500px;
+    max-width: 100%;
     margin: 0 auto;
+  }
+  
+  .pokequizz-main {
+    width: 100%;
   }
 }
 
 @media (max-width: 600px) {
   .pokequizz-game {
+    max-width: 100%;
     gap: 1rem;
     padding: 0.75rem;
     padding-top: 70px;

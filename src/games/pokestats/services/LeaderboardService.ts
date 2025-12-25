@@ -22,13 +22,17 @@ export class LeaderboardService {
     const keyParts: string[] = [];
 
     if (filters.generations && filters.generations.length > 0) {
-      keyParts.push(`gen:${[...filters.generations].sort().join(',')}`);
+      // Sort numbers numerically, not as strings
+      const sortedGens = [...filters.generations].sort((a, b) => a - b);
+      keyParts.push(`gen:${sortedGens.join(',')}`);
     } else if (filters.generation) {
        keyParts.push(`gen:${filters.generation}`);
     }
 
     if (filters.types && filters.types.length > 0) {
-      keyParts.push(`type:${[...filters.types].sort().join(',')}`);
+      // Sort types alphabetically
+      const sortedTypes = [...filters.types].sort();
+      keyParts.push(`type:${sortedTypes.join(',')}`);
     } else if (filters.type) {
       keyParts.push(`type:${filters.type}`);
     }

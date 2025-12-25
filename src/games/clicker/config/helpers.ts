@@ -1,14 +1,21 @@
-import type { PokemonHelper } from '../types/game';
+import type { PokemonHelper, StarterHelper } from '../types/game';
+import { HELPERS_SCALING } from './helper-scaling';
+import { ALL_STARTERS } from './helper/starters';
+import { ALL_POPULARS } from './helper/populars';
+import { ALL_POWERHOUSE } from './helper/powerhouse';
+import { ALL_LEGENDARIES } from './helper/legendaries';
 
 // Calculate dynamic helper cost based on count and current production
 // Formula: baseCost * (1.15^count) * (1 + log(1 + energyPerSecond / baseProduction) * costMultiplier)
 // Combines exponential growth per purchase with logarithmic scaling based on production
+// Adjusted to balance the powerful first helper purchase
 export const calculateHelperCost = (helper: PokemonHelper, energyPerSecond: number): number => {
-  // Base production threshold for scaling
-  const baseProduction = 50;
+  // Base production threshold for scaling (increased to account for higher production)
+  const baseProduction = 200;
   
-  // Exponential growth per purchase (original formula)
-  const countMultiplier = Math.pow(1.15, helper.count);
+  // Exponential growth per purchase - slightly increased to balance powerful first helper
+  // This ensures subsequent helpers remain expensive after the impactful first purchase
+  const countMultiplier = Math.pow(1.18, helper.count);
   
   // Logarithmic scaling based on production (similar to boosts but gentler)
   const productionRatio = Math.max(0, energyPerSecond / baseProduction);
@@ -41,13 +48,15 @@ const getHelperTierMultiplier = (helper: PokemonHelper): number => {
   return 0.5;                      // Tier 5 (mythicals) - highest scaling
 };
 
-export const INITIAL_HELPERS: PokemonHelper[] = [
+
+export const INITIAL_HELPERS_test: PokemonHelper[] = [
   // Tier 1 - Starter Pokemon with evolutions
+  // Pikachu: Premier helper très accessible pour démarrer rapidement
   {
     id: 'pikachu',
     name: 'Pikachu',
-    baseCost: 15,
-    baseProduction: 0.1,
+    baseCost: 10,
+    baseProduction: 0.5,
     count: 0,
     unlocked: true,
     pokemonId: 25,
@@ -55,11 +64,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 25, pokemonId: 26, name: 'Raichu' },
     ],
   },
+  // Charmander: Coût modéré, production qui double significativement
   {
     id: 'charmander',
     name: 'Charmander',
     baseCost: 100,
-    baseProduction: 1,
+    baseProduction: 5,
     count: 0,
     unlocked: false,
     pokemonId: 4,
@@ -68,11 +78,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 35, pokemonId: 6, name: 'Charizard' },
     ],
   },
+  // Squirtle: Progression équilibrée
   {
     id: 'squirtle',
     name: 'Squirtle',
     baseCost: 1100,
-    baseProduction: 8,
+    baseProduction: 50,
     count: 0,
     unlocked: false,
     pokemonId: 7,
@@ -81,11 +92,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 35, pokemonId: 9, name: 'Blastoise' },
     ],
   },
+  // Bulbasaur: Augmentation significative de production
   {
     id: 'bulbasaur',
     name: 'Bulbasaur',
     baseCost: 12000,
-    baseProduction: 47,
+    baseProduction: 500,
     count: 0,
     unlocked: false,
     pokemonId: 1,
@@ -94,11 +106,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 35, pokemonId: 3, name: 'Venusaur' },
     ],
   },
+  // Meowth: Milieu de Tier 1
   {
     id: 'meowth',
     name: 'Meowth',
-    baseCost: 25000,
-    baseProduction: 85,
+    baseCost: 130000,
+    baseProduction: 5000,
     count: 0,
     unlocked: false,
     pokemonId: 52,
@@ -106,11 +119,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 28, pokemonId: 53, name: 'Persian' },
     ],
   },
+  // Machop: Fin Tier 1
   {
     id: 'machop',
     name: 'Machop',
-    baseCost: 50000,
-    baseProduction: 150,
+    baseCost: 1400000,
+    baseProduction: 50000,
     count: 0,
     unlocked: false,
     pokemonId: 66,
@@ -119,11 +133,12 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
       { level: 40, pokemonId: 68, name: 'Machamp' },
     ],
   },
+  // Abra: Transition vers Tier 2
   {
     id: 'abra',
     name: 'Abra',
-    baseCost: 90000,
-    baseProduction: 220,
+    baseCost: 20000000,
+    baseProduction: 700000,
     count: 0,
     unlocked: false,
     pokemonId: 63,
@@ -136,8 +151,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'eevee',
     name: 'Eevee',
-    baseCost: 130000,
-    baseProduction: 260,
+    baseCost: 330000000,
+    baseProduction: 11000000,
     count: 0,
     unlocked: false,
     pokemonId: 133,
@@ -152,8 +167,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'gengar',
     name: 'Gastly',
-    baseCost: 1400000,
-    baseProduction: 1400,
+    baseCost: 5100000000,
+    baseProduction: 170000000,
     count: 0,
     unlocked: false,
     pokemonId: 92,
@@ -165,8 +180,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'dragonite',
     name: 'Dratini',
-    baseCost: 20000000,
-    baseProduction: 7800,
+    baseCost: 75000000000,
+    baseProduction: 2500000000,
     count: 0,
     unlocked: false,
     pokemonId: 147,
@@ -179,8 +194,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'snorlax',
     name: 'Munchlax',
-    baseCost: 330000000,
-    baseProduction: 144000,
+    baseCost: 1000000000000,
+    baseProduction: 33000000000,
     count: 0,
     unlocked: false,
     pokemonId: 446,
@@ -191,8 +206,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'tyranitar',
     name: 'Larvitar',
-    baseCost: 5100000000,
-    baseProduction: 260000,
+    baseCost: 14000000000000,
+    baseProduction: 460000000000,
     count: 0,
     unlocked: false,
     pokemonId: 246,
@@ -204,8 +219,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'salamence',
     name: 'Bagon',
-    baseCost: 75000000000,
-    baseProduction: 1600000,
+    baseCost: 170000000000000,
+    baseProduction: 5600000000000,
     count: 0,
     unlocked: false,
     pokemonId: 371,
@@ -218,8 +233,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'mewtwo',
     name: 'Mewtwo',
-    baseCost: 1000000000000,
-    baseProduction: 10000000,
+    baseCost: 2100000000000000,
+    baseProduction: 70000000000000,
     count: 0,
     unlocked: false,
     pokemonId: 150,
@@ -227,8 +242,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'rayquaza',
     name: 'Rayquaza',
-    baseCost: 14000000000000,
-    baseProduction: 65000000,
+    baseCost: 26000000000000000,
+    baseProduction: 860000000000000,
     count: 0,
     unlocked: false,
     pokemonId: 384,
@@ -236,8 +251,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'dialga',
     name: 'Dialga',
-    baseCost: 170000000000000,
-    baseProduction: 430000000,
+    baseCost: 330000000000000000,
+    baseProduction: 11000000000000000,
     count: 0,
     unlocked: false,
     pokemonId: 483,
@@ -246,8 +261,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'arceus',
     name: 'Arceus',
-    baseCost: 2100000000000000,
-    baseProduction: 2900000000,
+    baseCost: 4100000000000000000,
+    baseProduction: 136000000000000000,
     count: 0,
     unlocked: false,
     pokemonId: 493,
@@ -255,8 +270,8 @@ export const INITIAL_HELPERS: PokemonHelper[] = [
   {
     id: 'giratina',
     name: 'Giratina',
-    baseCost: 26000000000000000,
-    baseProduction: 21000000000,
+    baseCost: 51000000000000000000,
+    baseProduction: 1700000000000000000,
     count: 0,
     unlocked: false,
     pokemonId: 487,
@@ -295,3 +310,35 @@ export const getNextEvolution = (helper: PokemonHelper): { level: number; name: 
 
   return null; // Fully evolved
 };
+
+export const getRandomHelpers = (helpers: StarterHelper[][]): StarterHelper[] => {
+  const randomIndex = Math.floor(Math.random() * helpers.length);
+  return helpers[randomIndex];
+};
+
+
+// 4 premier starters
+// 5 suivant populars
+// 3 suivant powerhouse
+// 3 suivant legendary
+
+export const buildInitalHelpersWithScaling = (): PokemonHelper[] => {
+  const starters = getRandomHelpers(ALL_STARTERS);       // 4 premiers
+  const populars = getRandomHelpers(ALL_POPULARS);       // 5 suivants
+  const powerhouse = getRandomHelpers(ALL_POWERHOUSE);   // 3 suivants
+  const legendary = getRandomHelpers(ALL_LEGENDARIES);   // 3 suivants
+
+  const helpersArray: StarterHelper[] = [
+    ...starters,
+    ...populars,
+    ...powerhouse,
+    ...legendary,
+  ];
+
+  return HELPERS_SCALING.map((h, index) => {
+    const template = helpersArray[index];
+    return template ? { ...h, ...template } : { ...h };
+  }) as PokemonHelper[];
+};
+export const INITIAL_HELPERS: PokemonHelper[] =  INITIAL_HELPERS_test//buildInitalHelpersWithScaling() 
+

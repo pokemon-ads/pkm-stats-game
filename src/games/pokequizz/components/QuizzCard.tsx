@@ -12,6 +12,7 @@ interface QuizzCardProps {
   difficulty: Difficulty;
   mode: GameMode;
   isCorrect: boolean | null;
+  cryVolume: number;
   onGuess: (guess: string) => void;
   onGiveUp: () => void;
 }
@@ -22,6 +23,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
   difficulty,
   mode,
   isCorrect,
+  cryVolume,
   onGuess,
   onGiveUp
 }) => {
@@ -43,7 +45,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
     const cryUrl = pokemon.cries.latest || pokemon.cries.legacy;
     if (cryUrl) {
       const audio = new Audio(cryUrl);
-      audio.volume = 0.5;
+      audio.volume = cryVolume;
       audio.play().catch(e => console.error("Error playing cry:", e));
     }
   };

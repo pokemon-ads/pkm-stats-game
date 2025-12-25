@@ -148,7 +148,7 @@ export const usePokeQuizz = () => {
     if (isCorrect) {
       if (settings.soundEnabled && gameState.currentPokemon?.cries?.latest) {
         const audio = new Audio(gameState.currentPokemon.cries.latest);
-        audio.volume = 0.5;
+        audio.volume = settings.cryVolume;
         audio.play().catch(e => console.error('Error playing cry:', e));
       }
 
@@ -224,7 +224,7 @@ export const usePokeQuizz = () => {
 
     if (settings.soundEnabled && gameState.currentPokemon?.cries?.latest) {
       const audio = new Audio(gameState.currentPokemon.cries.latest);
-      audio.volume = 0.5;
+      audio.volume = settings.cryVolume;
       audio.play().catch(e => console.error('Error playing cry:', e));
     }
 
@@ -289,9 +289,9 @@ export const usePokeQuizz = () => {
     playCry: useCallback(() => {
       if (gameState.currentPokemon?.cries?.latest) {
         const audio = new Audio(gameState.currentPokemon.cries.latest);
-        audio.volume = 0.5;
+        audio.volume = settings.cryVolume;
         audio.play().catch(e => console.error('Error playing cry:', e));
       }
-    }, [gameState.currentPokemon])
+    }, [gameState.currentPokemon, settings.cryVolume])
   };
 };

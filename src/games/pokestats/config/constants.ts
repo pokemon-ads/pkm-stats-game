@@ -160,25 +160,31 @@ export const TYPE_ICONS: Record<string, string> = {
 
 // ============================================================================
 // REGIONAL FORM ICONS
+// Using the same sprites as in the game (from pokemon.sprites.front_default)
+// These URLs match what PokeAPI returns for these form names
 // ============================================================================
 
 export const REGIONAL_FORM_ICONS: Record<string, string> = {
-  alola: '🏝️',
-  galar: '🏰',
-  hisui: '⛰️',
-  paldea: '🌮',
+  // Using form names to get sprites - these will be resolved via API in GameSetup
+  // For static display, we use representative Pokemon IDs
+  alola: 'vulpix-alola', // Will be resolved to sprite URL via API
+  galar: 'ponyta-galar', // Will be resolved to sprite URL via API
+  hisui: 'growlithe-hisui', // Will be resolved to sprite URL via API
+  paldea: 'tauros-paldea-combat-breed', // Will be resolved to sprite URL via API
 } as const
 
 // ============================================================================
 // SPECIAL CATEGORY ICONS
+// Using the same sprites as in the game (from pokemon.sprites.front_default)
+// These use form names that will be resolved via API to get the correct sprite URLs
 // ============================================================================
 
 export const CATEGORY_ICONS = {
-  LEGENDARY: '👑',
-  MYTHICAL: '🌟',
-  ULTRA_BEAST: '👾',
-  PARADOX: '⏳',
-  MEGA: '💎',
-  GIGANTAMAX: '⭐',
-  LEGENDS_ZA: '🅰️',
+  LEGENDARY: 'rayquaza', // Will be resolved to sprite URL via API
+  MYTHICAL: 'mew', // Will be resolved to sprite URL via API
+  ULTRA_BEAST: 'nihilego', // Will be resolved to sprite URL via API
+  PARADOX: 'miraidon', // Will be resolved to sprite URL via API
+  MEGA: 'charizard-mega-x', // Will be resolved to sprite URL via API
+  GIGANTAMAX: 'pikachu-gmax', // Will be resolved to sprite URL via API
+  LEGENDS_ZA: 'pecharunt', // Will be resolved to sprite URL via API
 } as const

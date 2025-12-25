@@ -4,4 +4,20 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    target: ['es2015', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    minify: 'esbuild',
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  esbuild: {
+    target: 'es2015',
+    supported: {
+      'top-level-await': false,
+    },
+  },
 })

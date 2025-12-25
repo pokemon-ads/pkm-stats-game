@@ -43,6 +43,7 @@ export const PokeQuizzGame: React.FC = () => {
           difficulty={settings.difficulty}
           mode={settings.mode}
           isCorrect={gameState.isCorrect}
+          cryVolume={settings.cryVolume}
           onGuess={handleGuess}
           onGiveUp={handleGiveUp}
         />

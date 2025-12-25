@@ -41,6 +41,7 @@ export const ClickerArea: React.FC = () => {
   
   // Find the last unlocked helper with count > 0 and get its evolved form
   // Optimized: iterate backwards to find last purchased helper without filtering all
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const { displayPokemonId, displayPokemonName } = useMemo(() => {
     // Find last helper with count > 0 by iterating backwards
     for (let i = state.helpers.length - 1; i >= 0; i--) {

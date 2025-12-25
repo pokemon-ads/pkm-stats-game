@@ -9,6 +9,7 @@ import {
   REGIONAL_FORM_ICONS,
   CATEGORY_ICONS
 } from '../config/constants'
+import { pokemonService } from '../../../services/pokemon.service'
 
 interface GameSetupProps {
   onStart: (targetTotal: number, filters: FilterOptions, skipConfirmation: boolean) => void
@@ -32,6 +33,39 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
     const saved = localStorage.getItem(STORAGE_KEYS.SKIP_CONFIRMATION)
     return saved === 'true'
   })
+  
+  // Load sprite URLs from API (same as in the game)
+  const [spriteCache, setSpriteCache] = useState<Record<string, string>>({})
+  
+  useEffect(() => {
+    const loadSprites = async () => {
+      const sprites: Record<string, string> = {}
+      
+      // Load category icons
+      for (const [key, formName] of Object.entries(CATEGORY_ICONS)) {
+        try {
+          const pokemon = await pokemonService.getPokemon(formName)
+          sprites[`category_${key}`] = pokemon.sprites.front_default
+        } catch (error) {
+          console.warn(`Failed to load sprite for ${formName}:`, error)
+        }
+      }
+      
+      // Load regional form icons
+      for (const [key, formName] of Object.entries(REGIONAL_FORM_ICONS)) {
+        try {
+          const pokemon = await pokemonService.getPokemon(formName)
+          sprites[`regional_${key}`] = pokemon.sprites.front_default
+        } catch (error) {
+          console.warn(`Failed to load sprite for ${formName}:`, error)
+        }
+      }
+      
+      setSpriteCache(sprites)
+    }
+    
+    loadSprites()
+  }, [])
 
   // Save preference to localStorage whenever it changes
   useEffect(() => {
@@ -213,43 +247,92 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               className={`extra-chip ${legendaryOnly ? 'active' : ''}`}
               onClick={() => setLegendaryOnly(!legendaryOnly)}
             >
-              {CATEGORY_ICONS.LEGENDARY} {t('setup.legendary')}
+              {spriteCache[`category_LEGENDARY`] ? (
+                <img src={spriteCache[`category_LEGENDARY`]} alt={t('setup.legendary')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>👑</span>';
+                }} />
+              ) : (
+                <span>👑</span>
+              )} {t('setup.legendary')}
             </button>
             <button
               className={`extra-chip ${mythicalOnly ? 'active' : ''}`}
               onClick={() => setMythicalOnly(!mythicalOnly)}
             >
-              {CATEGORY_ICONS.MYTHICAL} {t('setup.mythical')}
+              {spriteCache[`category_MYTHICAL`] ? (
+                <img src={spriteCache[`category_MYTHICAL`]} alt={t('setup.mythical')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>🌟</span>';
+                }} />
+              ) : (
+                <span>🌟</span>
+              )} {t('setup.mythical')}
             </button>
             <button
               className={`extra-chip ${ultraBeastOnly ? 'active' : ''}`}
               onClick={() => setUltraBeastOnly(!ultraBeastOnly)}
             >
-              {CATEGORY_ICONS.ULTRA_BEAST} {t('setup.ultraBeast')}
+              {spriteCache[`category_ULTRA_BEAST`] ? (
+                <img src={spriteCache[`category_ULTRA_BEAST`]} alt={t('setup.ultraBeast')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>👾</span>';
+                }} />
+              ) : (
+                <span>👾</span>
+              )} {t('setup.ultraBeast')}
             </button>
             <button
               className={`extra-chip ${paradoxOnly ? 'active' : ''}`}
               onClick={() => setParadoxOnly(!paradoxOnly)}
             >
-              {CATEGORY_ICONS.PARADOX} {t('setup.paradox')}
+              {spriteCache[`category_PARADOX`] ? (
+                <img src={spriteCache[`category_PARADOX`]} alt={t('setup.paradox')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>⏳</span>';
+                }} />
+              ) : (
+                <span>⏳</span>
+              )} {t('setup.paradox')}
             </button>
             <button
               className={`extra-chip ${megaOnly ? 'active' : ''}`}
               onClick={() => setMegaOnly(!megaOnly)}
             >
-              {CATEGORY_ICONS.MEGA} {t('setup.mega')}
+              {spriteCache[`category_MEGA`] ? (
+                <img src={spriteCache[`category_MEGA`]} alt={t('setup.mega')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>💎</span>';
+                }} />
+              ) : (
+                <span>💎</span>
+              )} {t('setup.mega')}
             </button>
             <button
               className={`extra-chip ${gigantamaxOnly ? 'active' : ''}`}
               onClick={() => setGigantamaxOnly(!gigantamaxOnly)}
             >
-              {CATEGORY_ICONS.GIGANTAMAX} {t('setup.gigantamax')}
+              {spriteCache[`category_GIGANTAMAX`] ? (
+                <img src={spriteCache[`category_GIGANTAMAX`]} alt={t('setup.gigantamax')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>⭐</span>';
+                }} />
+              ) : (
+                <span>⭐</span>
+              )} {t('setup.gigantamax')}
             </button>
             <button
               className={`extra-chip ${legendsZAOnly ? 'active' : ''}`}
               onClick={() => setLegendsZAOnly(!legendsZAOnly)}
             >
-              {CATEGORY_ICONS.LEGENDS_ZA} {t('setup.legendsZA')}
+              {spriteCache[`category_LEGENDS_ZA`] ? (
+                <img src={spriteCache[`category_LEGENDS_ZA`]} alt={t('setup.legendsZA')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>🅰️</span>';
+                }} />
+              ) : (
+                <span>🅰️</span>
+              )} {t('setup.legendsZA')}
             </button>
           </div>
 
@@ -259,25 +342,53 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
               className={`extra-chip ${selectedRegionalForms.includes('alola') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('alola')}
             >
-              {REGIONAL_FORM_ICONS.alola} {t('setup.alola')}
+              {spriteCache[`regional_alola`] ? (
+                <img src={spriteCache[`regional_alola`]} alt={t('setup.alola')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>🏝️</span>';
+                }} />
+              ) : (
+                <span>🏝️</span>
+              )} {t('setup.alola')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('galar') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('galar')}
             >
-              {REGIONAL_FORM_ICONS.galar} {t('setup.galar')}
+              {spriteCache[`regional_galar`] ? (
+                <img src={spriteCache[`regional_galar`]} alt={t('setup.galar')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>🏰</span>';
+                }} />
+              ) : (
+                <span>🏰</span>
+              )} {t('setup.galar')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('hisui') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('hisui')}
             >
-              {REGIONAL_FORM_ICONS.hisui} {t('setup.hisui')}
+              {spriteCache[`regional_hisui`] ? (
+                <img src={spriteCache[`regional_hisui`]} alt={t('setup.hisui')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>⛰️</span>';
+                }} />
+              ) : (
+                <span>⛰️</span>
+              )} {t('setup.hisui')}
             </button>
             <button
               className={`extra-chip ${selectedRegionalForms.includes('paldea') ? 'active' : ''}`}
               onClick={() => toggleRegionalForm('paldea')}
             >
-              {REGIONAL_FORM_ICONS.paldea} {t('setup.paldea')}
+              {spriteCache[`regional_paldea`] ? (
+                <img src={spriteCache[`regional_paldea`]} alt={t('setup.paldea')} className="category-icon-sprite" onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.outerHTML = '<span>🌮</span>';
+                }} />
+              ) : (
+                <span>🌮</span>
+              )} {t('setup.paldea')}
             </button>
           </div>
         </div>

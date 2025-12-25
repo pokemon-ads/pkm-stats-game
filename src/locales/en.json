@@ -191,7 +191,8 @@
     "generation": "Generation",
     "allGenerations": "All Generations",
     "difficulty": "Difficulty",
-    "sound": "Sound"
+    "sound": "Sound",
+    "cryVolume": "Cry Volume"
   },
   "stats": {
     "title": "Statistics",
