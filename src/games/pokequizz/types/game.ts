@@ -9,6 +9,7 @@ export interface GameSettings {
   generation: number; // 0 for all, 1-9 for specific
   difficulty: Difficulty;
   soundEnabled: boolean;
+  cryVolume: number; // 0.0 to 1.0
 }
 
 export interface GameStats {

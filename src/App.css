@@ -7,6 +7,13 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 0;
+  }
 }
 
 .app {
@@ -15,6 +22,8 @@
   align-items: center;
   min-height: 100vh;
   position: relative;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .app-content {
@@ -109,6 +118,25 @@
     width: 40px;
     height: 40px;
     font-size: 1rem;
+    top: 70px;
+    right: 0.75rem;
+  }
+  
+  .top-controls {
+    top: 70px;
+    right: 0.75rem;
+  }
+  
+  .home-button {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .app-content {
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 

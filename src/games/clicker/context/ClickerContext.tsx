@@ -80,6 +80,27 @@ const getProductionMultiplier = (activeBoosts: ActiveBoost[]): number => {
   return productionBoost ? productionBoost.value : 1;
 };
 
+// Calculate helper production with linear scaling
+// Each helper of the same type gives the same production
+// Formula: effectiveBase * count * multipliers
+const calculateHelperProduction = (
+  effectiveBase: number,
+  count: number,
+  helperMultiplier: number,
+  shinyMultiplier: number
+): number => {
+  if (count === 0) return 0;
+  
+  // Linear production: each helper gives the same production
+  // count = 1: effectiveBase * 1 * multipliers
+  // count = 2: effectiveBase * 2 * multipliers (each helper gives the same)
+  // count = 10: effectiveBase * 10 * multipliers
+  // This ensures every purchase of the same helper type has the same impact
+  
+  // Apply all multipliers
+  return effectiveBase * count * helperMultiplier * shinyMultiplier;
+};
+
 // Calculate energy per second with new balanced system
 // Global bonus is additive (sum of percentages), not multiplicative
 // Optimized: cache helper multipliers and reduce iterations
@@ -106,7 +127,7 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
     }
   }
 
-  // Calculate base production from all helpers
+  // Calculate base production from all helpers using linear scaling
   let baseProduction = 0;
   for (const h of helpers) {
     if (h.count === 0) continue; // Skip helpers with 0 count
@@ -120,7 +141,13 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
     // Get helper multiplier from cache
     const helperMultiplier = helperMultipliers.get(h.id) || 1;
     
-    baseProduction += effectiveBase * h.count * helperMultiplier * shinyMultiplier;
+    // Use linear production calculation (each helper gives the same production)
+    baseProduction += calculateHelperProduction(
+      effectiveBase,
+      h.count,
+      helperMultiplier,
+      shinyMultiplier
+    );
   }
 
   // Apply global bonus: base * (1 + percentage/100) * legacyMultiplier
@@ -242,7 +269,7 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
     case 'LOAD_GAME':
       // Merge saved helpers with initial helpers to ensure new helpers are added
       // and new properties (like pokemonId) are preserved from initial config
-      const savedHelpers = action.payload.helpers || [];
+      { const savedHelpers = action.payload.helpers || [];
       const mergedHelpers = INITIAL_HELPERS.map(initialHelper => {
         const savedHelper = savedHelpers.find(h => h.id === initialHelper.id);
         // Merge saved data with initial config to preserve new properties like pokemonId and isShiny
@@ -269,7 +296,7 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         boostCooldowns: action.payload.boostCooldowns || [],
         energyPerClick: calculateEnergyPerClick(mergedUpgrades, action.payload.activeBoosts || []),
         energyPerSecond: calculateEnergyPerSecond(finalHelpers, mergedUpgrades, action.payload.activeBoosts || []),
-      };
+      }; }
     case 'RESET_GAME':
       return {
         ...initialState,
@@ -324,7 +351,7 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       
       const now = Date.now();
       let newActiveBoosts = [...state.activeBoosts];
-      let newBoostCooldowns = [...state.boostCooldowns];
+      const newBoostCooldowns = [...state.boostCooldowns];
       
       // Handle instant energy boost
       if (boost.type === 'INSTANT_ENERGY') {
@@ -422,17 +449,23 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
   }
 };
 
-// Export helper function for components to use
-export { getHelperEffectiveBase };
+// Export helper functions for components to use
+// eslint-disable-next-line react-refresh/only-export-components
+export { getHelperEffectiveBase, calculateHelperProduction };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ClickerContext = createContext<{
   state: GameState;
   dispatch: Dispatch<ClickerAction>;
   resetGame: () => void;
+  exportSave: () => string;
+  importSave: (saveData: string) => boolean;
 }>({
   state: initialState,
   dispatch: () => null,
   resetGame: () => null,
+  exportSave: () => '',
+  importSave: () => false,
 });
 
 const SAVE_KEY = 'pokeclicker_save';
@@ -489,6 +522,67 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const resetGame = () => {
     localStorage.removeItem(SAVE_KEY);
     dispatch({ type: 'RESET_GAME' });
+  };
+
+  // Export save data as JSON string
+  const exportSave = (): string => {
+    const saveData = {
+      ...stateRef.current,
+      lastSaveTime: Date.now(),
+    };
+    return JSON.stringify(saveData, null, 2);
+  };
+
+  // Import save data from JSON string
+  const importSave = (saveData: string): boolean => {
+    try {
+      const parsedState = JSON.parse(saveData);
+      
+      // Validate that it's a valid game state
+      if (!parsedState || typeof parsedState !== 'object') {
+        throw new Error('Invalid save data format');
+      }
+
+      // Merge saved helpers with initial helpers to ensure new helpers are added
+      const savedHelpers = parsedState.helpers || [];
+      const mergedHelpers = INITIAL_HELPERS.map(initialHelper => {
+        const savedHelper = savedHelpers.find((h: PokemonHelper) => h.id === initialHelper.id);
+        return savedHelper
+          ? { ...initialHelper, count: savedHelper.count, unlocked: savedHelper.unlocked, isShiny: savedHelper.isShiny || false }
+          : initialHelper;
+      });
+
+      // Merge saved upgrades
+      const savedUpgrades = parsedState.upgrades || [];
+      const mergedUpgrades = INITIAL_UPGRADES.map(initialUpgrade => {
+        const savedUpgrade = savedUpgrades.find((u: Upgrade) => u.id === initialUpgrade.id);
+        return savedUpgrade ? { ...initialUpgrade, purchased: savedUpgrade.purchased } : initialUpgrade;
+      });
+
+      const finalHelpers = autoUnlockHelpers(mergedHelpers, parsedState.totalEnergy || 0);
+
+      // Update the state
+      dispatch({ type: 'LOAD_GAME', payload: {
+        ...parsedState,
+        helpers: finalHelpers,
+        upgrades: mergedUpgrades,
+        activeBoosts: parsedState.activeBoosts || [],
+        boostCooldowns: parsedState.boostCooldowns || [],
+      }});
+
+      // Save to localStorage
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        ...parsedState,
+        helpers: finalHelpers,
+        upgrades: mergedUpgrades,
+        lastSaveTime: Date.now(),
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Failed to import save:', error);
+      return false;
+    }
   };
 
   // Cleanup expired boosts periodically
@@ -551,7 +645,7 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, []);
 
   return (
-    <ClickerContext.Provider value={{ state, dispatch, resetGame }}>
+    <ClickerContext.Provider value={{ state, dispatch, resetGame, exportSave, importSave }}>
       {children}
     </ClickerContext.Provider>
   );

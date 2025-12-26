@@ -32,6 +32,22 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
             </button>
           </div>
         )}
+
+        <div className="setting-row">
+          <label className="setting-label">
+            {t('settings.cryVolume', 'Volume du cri')}: {Math.round(settings.cryVolume * 100)}%
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={settings.cryVolume}
+            onChange={(e) => onUpdateSettings({ cryVolume: parseFloat(e.target.value) })}
+            className="volume-slider"
+            title={t('settings.cryVolume', 'Volume du cri')}
+          />
+        </div>
         
         <div className="setting-row">
           <label className="setting-label">{t('settings.mode', 'Mode de jeu')}</label>

@@ -9,6 +9,7 @@ import { getItemSpriteUrl } from '../utils/itemSprites';
 
 export const INITIAL_UPGRADES: Upgrade[] = [
   // CLICK UPGRADES - Additive bonuses to click power
+  //{ id: 'better_mouse_cheat', name: 'Poké Ball cheat', description: '+1 per click', cost: 1, type: 'CLICK_BONUS', value: 10000000000000000, purchased: false, icon: getItemSpriteUrl('poke-ball'), category: 'click', condition: { type: 'TOTAL_ENERGY', amount: 5 } },
   { id: 'better_mouse', name: 'Poké Ball', description: '+1 per click', cost: 100, type: 'CLICK_BONUS', value: 1, purchased: false, icon: getItemSpriteUrl('poke-ball'), category: 'click', condition: { type: 'TOTAL_ENERGY', amount: 50 } },
   { id: 'gaming_mouse', name: 'Great Ball', description: '+2 per click', cost: 500, type: 'CLICK_BONUS', value: 2, purchased: false, icon: getItemSpriteUrl('great-ball'), category: 'click', condition: { type: 'TOTAL_ENERGY', amount: 250 } },
   { id: 'super_mouse', name: 'Ultra Ball', description: '+5 per click', cost: 2500, type: 'CLICK_BONUS', value: 5, purchased: false, icon: getItemSpriteUrl('ultra-ball'), category: 'click', condition: { type: 'TOTAL_ENERGY', amount: 1000 } },

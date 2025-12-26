@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   generation: 0, // 0 = All
   difficulty: 'normale',
   soundEnabled: true,
+  cryVolume: 0.5,
 };
 
 export const TIME_ATTACK_DURATION = 60; // seconds

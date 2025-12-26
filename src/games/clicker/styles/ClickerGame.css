@@ -689,51 +689,112 @@
   }
 }
 
+/* Mobile: Garder les 3 colonnes mais rétrécir */
 @media (max-width: 1024px) {
-  .clicker-layout {
-    grid-template-columns: 1fr;
-    max-width: 600px;
+  .clicker-game-container {
+    padding: 1rem;
   }
   
-  .clicker-left-column { order: 1; }
-  .clicker-center-column { order: 3; }
-  .clicker-right-column { order: 2; }
+  .clicker-layout {
+    grid-template-columns: 200px 1fr 200px;
+    gap: 0.75rem;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .clicker-left-column {
+    height: auto;
+    max-height: calc(100vh - 150px);
+    position: sticky;
+    top: 20px;
+  }
+  
+  .clicker-center-column {
+    position: sticky;
+    top: 20px;
+  }
+  
+  .clicker-right-column {
+    height: auto;
+    max-height: calc(100vh - 150px);
+    position: sticky;
+    top: 20px;
+  }
   
   .clicker-game-title {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .clicker-layout {
+    grid-template-columns: 160px 1fr 160px;
+    gap: 0.5rem;
   }
   
-  .upgrades-container,
-  .helpers-container {
-    max-height: none;
+  .clicker-left-column,
+  .clicker-right-column {
+    max-height: calc(100vh - 120px);
+  }
+  
+  .clicker-game-title {
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .clicker-game-container {
-    padding: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .clicker-layout {
+    grid-template-columns: 120px 1fr 120px;
+    gap: 0.4rem;
   }
   
   .clicker-game-title {
-    font-size: 2rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
   }
   
   .clicker-pokemon-container {
-    width: 220px;
-    height: 220px;
+    width: 160px;
+    height: 160px;
   }
   
   .clicker-button {
-    width: 180px;
-    height: 180px;
+    width: 130px;
+    height: 130px;
   }
   
   .clicker-pokemon-sprite {
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
   }
   
   .hud-stats {
     grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  
+  .hud-stat {
+    height: 55px;
+    min-height: 55px;
+    max-height: 55px;
+    padding: 0.5rem 0.4rem;
+  }
+  
+  .hud-stat h3 {
+    font-size: 0.65rem;
+  }
+  
+  .hud-stat-value {
+    font-size: 1rem;
+  }
+  
+  .clicker-left-column,
+  .clicker-right-column {
+    max-height: calc(100vh - 100px);
   }
 }

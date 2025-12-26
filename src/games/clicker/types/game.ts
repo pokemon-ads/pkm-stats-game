@@ -16,6 +16,8 @@ export interface PokemonHelper {
   isShiny?: boolean;  // Shiny status - gives x10 production
 }
 
+export type StarterHelper = Pick<PokemonHelper, 'id' | 'name'| 'evolutions'| 'pokemonId'>;
+
 export interface Upgrade {
   id: string;
   name: string;
