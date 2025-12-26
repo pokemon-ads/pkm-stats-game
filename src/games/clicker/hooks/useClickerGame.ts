@@ -8,7 +8,7 @@ export const useClickerGame = () => {
     throw new Error('useClickerGame must be used within a ClickerProvider');
   }
 
-  const { state, dispatch, resetGame } = context;
+  const { state, dispatch, resetGame, exportSave, importSave } = context;
 
   // Memoize handleClick to prevent unnecessary re-renders
   const handleClick = useCallback(() => {
@@ -19,5 +19,7 @@ export const useClickerGame = () => {
     state,
     handleClick,
     resetGame,
+    exportSave,
+    importSave,
   };
 };

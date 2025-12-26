@@ -458,10 +458,14 @@ export const ClickerContext = createContext<{
   state: GameState;
   dispatch: Dispatch<ClickerAction>;
   resetGame: () => void;
+  exportSave: () => string;
+  importSave: (saveData: string) => boolean;
 }>({
   state: initialState,
   dispatch: () => null,
   resetGame: () => null,
+  exportSave: () => '',
+  importSave: () => false,
 });
 
 const SAVE_KEY = 'pokeclicker_save';
@@ -520,6 +524,67 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
     dispatch({ type: 'RESET_GAME' });
   };
 
+  // Export save data as JSON string
+  const exportSave = (): string => {
+    const saveData = {
+      ...stateRef.current,
+      lastSaveTime: Date.now(),
+    };
+    return JSON.stringify(saveData, null, 2);
+  };
+
+  // Import save data from JSON string
+  const importSave = (saveData: string): boolean => {
+    try {
+      const parsedState = JSON.parse(saveData);
+      
+      // Validate that it's a valid game state
+      if (!parsedState || typeof parsedState !== 'object') {
+        throw new Error('Invalid save data format');
+      }
+
+      // Merge saved helpers with initial helpers to ensure new helpers are added
+      const savedHelpers = parsedState.helpers || [];
+      const mergedHelpers = INITIAL_HELPERS.map(initialHelper => {
+        const savedHelper = savedHelpers.find((h: PokemonHelper) => h.id === initialHelper.id);
+        return savedHelper
+          ? { ...initialHelper, count: savedHelper.count, unlocked: savedHelper.unlocked, isShiny: savedHelper.isShiny || false }
+          : initialHelper;
+      });
+
+      // Merge saved upgrades
+      const savedUpgrades = parsedState.upgrades || [];
+      const mergedUpgrades = INITIAL_UPGRADES.map(initialUpgrade => {
+        const savedUpgrade = savedUpgrades.find((u: Upgrade) => u.id === initialUpgrade.id);
+        return savedUpgrade ? { ...initialUpgrade, purchased: savedUpgrade.purchased } : initialUpgrade;
+      });
+
+      const finalHelpers = autoUnlockHelpers(mergedHelpers, parsedState.totalEnergy || 0);
+
+      // Update the state
+      dispatch({ type: 'LOAD_GAME', payload: {
+        ...parsedState,
+        helpers: finalHelpers,
+        upgrades: mergedUpgrades,
+        activeBoosts: parsedState.activeBoosts || [],
+        boostCooldowns: parsedState.boostCooldowns || [],
+      }});
+
+      // Save to localStorage
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        ...parsedState,
+        helpers: finalHelpers,
+        upgrades: mergedUpgrades,
+        lastSaveTime: Date.now(),
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Failed to import save:', error);
+      return false;
+    }
+  };
+
   // Cleanup expired boosts periodically
   React.useEffect(() => {
     const cleanupInterval = setInterval(() => {
@@ -545,9 +610,7 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [state.activeBoosts, dispatch]);
 
   // Game Loop
-  // eslint-disable-next-line react-hooks/purity
   const lastTickRef = React.useRef<number>(Date.now());
-  // eslint-disable-next-line react-hooks/purity
   const lastDispatchRef = React.useRef<number>(Date.now());
   const accumulatedDeltaRef = React.useRef<number>(0);
 
@@ -582,7 +645,7 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, []);
 
   return (
-    <ClickerContext.Provider value={{ state, dispatch, resetGame }}>
+    <ClickerContext.Provider value={{ state, dispatch, resetGame, exportSave, importSave }}>
       {children}
     </ClickerContext.Provider>
   );

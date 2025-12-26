@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useClickerGame } from '../hooks/useClickerGame';
 import { AVAILABLE_BOOSTS } from '../config/boosts';
-import { getItemSpriteUrl, BOOST_ITEM_MAP } from '../utils/itemSprites';
 
 // Format large numbers
 const formatNumber = (num: number): string => {
@@ -17,9 +17,15 @@ const formatNumber = (num: number): string => {
 
 export const HUD: React.FC = () => {
   const { t } = useTranslation();
-  const { state, resetGame } = useClickerGame();
+  const { state, resetGame, exportSave, importSave } = useClickerGame();
   const [prevEnergy, setPrevEnergy] = useState(state.energy);
   const [isGaining, setIsGaining] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [shareCode, setShareCode] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Animate energy changes
   useEffect(() => {
@@ -34,6 +40,79 @@ export const HUD: React.FC = () => {
   const handleReset = () => {
     if (window.confirm(t('clicker.resetConfirm'))) {
       resetGame();
+    }
+  };
+
+  // Encode save data to base64 for sharing
+  const encodeSaveToShareCode = (saveData: string): string => {
+    return btoa(unescape(encodeURIComponent(saveData)));
+  };
+
+  // Decode base64 share code to save data
+  const decodeShareCodeToSave = (shareCode: string): string => {
+    try {
+      return decodeURIComponent(escape(atob(shareCode)));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      throw new Error('Code de partage invalide');
+    }
+  };
+
+  const handleExportAsCode = () => {
+    const saveData = exportSave();
+    const code = encodeSaveToShareCode(saveData);
+    setShareCode(code);
+    setShowExportModal(true);
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(shareCode);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      // Fallback: select text
+      const textarea = document.createElement('textarea');
+      textarea.value = shareCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  const handleImport = () => {
+    setImportError(null);
+    if (!importText.trim()) {
+      setImportError('Veuillez coller un code de partage valide');
+      return;
+    }
+
+    let saveData = importText.trim();
+    
+    // Remove any whitespace/newlines from the code
+    saveData = saveData.replace(/\s/g, '');
+    
+    // Try to decode base64 code
+    try {
+      saveData = decodeShareCodeToSave(saveData);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setImportError('Code de partage invalide. Assurez-vous d\'avoir collé le code complet.');
+      return;
+    }
+
+    const success = importSave(saveData);
+    if (success) {
+      setShowImportModal(false);
+      setImportText('');
+      // Optionnel: recharger la page pour s'assurer que tout est synchronisé
+      window.location.reload();
+    } else {
+      setImportError('Échec de l\'import. Vérifiez que le code de partage est valide.');
     }
   };
 
@@ -55,6 +134,7 @@ export const HUD: React.FC = () => {
     return state.activeBoosts.map(activeBoost => {
       const boost = AVAILABLE_BOOSTS.find(b => b.id === activeBoost.boostId);
       if (!boost) return null;
+      // eslint-disable-next-line react-hooks/purity
       const remaining = Math.ceil((activeBoost.expiresAt - Date.now()) / 1000);
       if (remaining <= 0) return null;
       
@@ -69,7 +149,8 @@ export const HUD: React.FC = () => {
   }, [state.activeBoosts]);
 
   return (
-    <div className="hud-container">
+    <>
+      <div className="hud-container">
       <div className="hud-stats">
         <div className="hud-stat">
           <h3>⚡ {t('clicker.energy')}</h3>
@@ -132,9 +213,17 @@ export const HUD: React.FC = () => {
           <span className="mini-label">{t('clicker.totalClicks')}:</span>
           <span className="mini-value">{state.clickCount.toLocaleString()}</span>
         </div>
-        <button className="hud-reset-btn-mini" onClick={handleReset} title={t('clicker.resetProgress')}>
-          🔄
-        </button>
+        <div className="hud-action-buttons">
+          <button className="hud-export-btn-mini" onClick={handleExportAsCode} title="Générer un code de partage">
+            🔗
+          </button>
+          <button className="hud-import-btn-mini" onClick={() => setShowImportModal(true)} title="Importer une sauvegarde">
+            📥
+          </button>
+          <button className="hud-reset-btn-mini" onClick={handleReset} title={t('clicker.resetProgress')}>
+            🔄
+          </button>
+        </div>
       </div>
       
       <style>{`
@@ -262,7 +351,451 @@ export const HUD: React.FC = () => {
           background: rgba(239, 68, 68, 0.5);
           border-color: rgba(239, 68, 68, 0.8);
         }
+
+        .hud-action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .hud-export-btn-mini,
+        .hud-import-btn-mini {
+          width: 32px;
+          height: 32px;
+          min-width: 32px;
+          padding: 0;
+          background: rgba(59, 130, 246, 0.3);
+          color: white;
+          border: 1px solid rgba(59, 130, 246, 0.5);
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .hud-export-btn-mini:hover,
+        .hud-import-btn-mini:hover {
+          background: rgba(59, 130, 246, 0.5);
+          border-color: rgba(59, 130, 246, 0.8);
+        }
+
+        .import-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 99999;
+          backdrop-filter: blur(4px);
+        }
+
+        .import-modal {
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(59, 76, 202, 0.95) 100%);
+          border: 2px solid rgba(168, 85, 247, 0.5);
+          border-radius: 20px;
+          padding: 0;
+          max-width: 800px;
+          width: 90%;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          overflow: hidden;
+        }
+
+        .import-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .import-modal-header h3 {
+          margin: 0;
+          color: white;
+          font-size: 1.25rem;
+          font-weight: 700;
+        }
+
+        .import-modal-close {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 2rem;
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+          transition: background 0.2s ease;
+        }
+
+        .import-modal-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .import-modal-body {
+          padding: 1.5rem;
+          flex: 1;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .import-modal-description {
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 1rem;
+          font-size: 0.9rem;
+        }
+
+        .import-modal-textarea {
+          width: 100%;
+          padding: 1rem;
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 10px;
+          color: white;
+          font-family: monospace;
+          font-size: 0.9rem;
+          resize: none;
+          min-height: 300px;
+          max-height: 400px;
+          box-sizing: border-box;
+        }
+
+        .import-modal-textarea:focus {
+          outline: none;
+          border-color: rgba(168, 85, 247, 0.8);
+        }
+
+        .import-modal-textarea::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .import-modal-error {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(239, 68, 68, 0.3);
+          border: 1px solid rgba(239, 68, 68, 0.5);
+          border-radius: 10px;
+          color: white;
+          font-size: 0.9rem;
+        }
+
+        .import-modal-warning {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(255, 193, 7, 0.2);
+          border: 1px solid rgba(255, 193, 7, 0.4);
+          border-radius: 10px;
+          color: #ffc107;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+
+        .import-modal-footer {
+          display: flex;
+          gap: 1rem;
+          padding: 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          justify-content: flex-end;
+        }
+
+        .import-modal-cancel,
+        .import-modal-confirm {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 10px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .import-modal-cancel {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+        }
+
+        .import-modal-cancel:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .import-modal-confirm {
+          background: rgba(34, 197, 94, 0.8);
+          color: white;
+        }
+
+        .import-modal-confirm:hover {
+          background: rgba(34, 197, 94, 1);
+        }
+
+        .export-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 99999;
+          backdrop-filter: blur(4px);
+        }
+
+        .export-modal {
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(59, 76, 202, 0.95) 100%);
+          border: 2px solid rgba(168, 85, 247, 0.5);
+          border-radius: 20px;
+          padding: 0;
+          max-width: 700px;
+          width: 90%;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          overflow: hidden;
+        }
+
+        .export-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .export-modal-header h3 {
+          margin: 0;
+          color: white;
+          font-size: 1.25rem;
+          font-weight: 700;
+        }
+
+        .export-modal-close {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 2rem;
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+          transition: background 0.2s ease;
+        }
+
+        .export-modal-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        .export-modal-body {
+          padding: 1.5rem;
+          overflow-y: auto;
+          flex: 1;
+        }
+
+        .export-modal-description {
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 1rem;
+          font-size: 0.9rem;
+        }
+
+        .export-modal-code-container {
+          position: relative;
+          margin-bottom: 1rem;
+        }
+
+        .export-modal-code {
+          width: 100%;
+          padding: 0.75rem;
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 10px;
+          color: white;
+          font-family: monospace;
+          font-size: 0.75rem;
+          resize: vertical;
+          min-height: 120px;
+          box-sizing: border-box;
+          word-break: break-all;
+          cursor: text;
+        }
+
+        .export-modal-code:focus {
+          outline: none;
+          border-color: rgba(168, 85, 247, 0.8);
+        }
+
+        .export-modal-copy-btn {
+          margin-top: 0.75rem;
+          padding: 0.75rem 1.5rem;
+          background: rgba(34, 197, 94, 0.8);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          width: 100%;
+        }
+
+        .export-modal-copy-btn:hover {
+          background: rgba(34, 197, 94, 1);
+        }
+
+        .export-modal-copy-btn.success {
+          background: rgba(34, 197, 94, 1);
+        }
+
+        .export-modal-info {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(59, 130, 246, 0.2);
+          border: 1px solid rgba(59, 130, 246, 0.4);
+          border-radius: 10px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.85rem;
+        }
+
+        .export-modal-footer {
+          display: flex;
+          justify-content: flex-end;
+          padding: 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .export-modal-close-btn {
+          padding: 0.75rem 1.5rem;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .export-modal-close-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .import-modal-info {
+          margin-top: 1rem;
+          padding: 0.75rem;
+          background: rgba(59, 130, 246, 0.2);
+          border: 1px solid rgba(59, 130, 246, 0.4);
+          border-radius: 10px;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.85rem;
+        }
       `}</style>
-    </div>
+      </div>
+
+      {/* Export Modal */}
+      {showExportModal && createPortal(
+        (
+          <div className="export-modal-overlay" onClick={() => setShowExportModal(false)}>
+            <div className="export-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="export-modal-header">
+                <h3>Code de partage</h3>
+                <button className="export-modal-close" onClick={() => setShowExportModal(false)}>×</button>
+              </div>
+              <div className="export-modal-body">
+                <p className="export-modal-description">
+                  Copiez ce code pour partager votre sauvegarde :
+                </p>
+                <div className="export-modal-code-container">
+                  <textarea
+                    className="export-modal-code"
+                    value={shareCode}
+                    readOnly
+                    rows={6}
+                    onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                  />
+                  <button 
+                    className={`export-modal-copy-btn ${copySuccess ? 'success' : ''}`}
+                    onClick={handleCopyCode}
+                  >
+                    {copySuccess ? '✓ Copié !' : 'Copier'}
+                  </button>
+                </div>
+                <div className="export-modal-info">
+                  💡 Vous pouvez partager ce code avec d'autres joueurs ou l'utiliser pour transférer votre sauvegarde sur un autre appareil.
+                </div>
+              </div>
+              <div className="export-modal-footer">
+                <button className="export-modal-close-btn" onClick={() => setShowExportModal(false)}>
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body
+      )}
+
+      {/* Import Modal */}
+      {showImportModal && createPortal(
+        (
+          <div className="import-modal-overlay">
+            <div className="import-modal">
+              <div className="import-modal-header">
+                <h3>Importer une sauvegarde</h3>
+                <button className="import-modal-close" onClick={() => setShowImportModal(false)}>×</button>
+              </div>
+              <div className="import-modal-body">
+                <p className="import-modal-description">
+                  Collez ici votre code de partage :
+                </p>
+                <textarea
+                  className="import-modal-textarea"
+                  value={importText}
+                  onChange={(e) => {
+                    setImportText(e.target.value);
+                    setImportError(null);
+                  }}
+                  placeholder="Collez votre code de partage ici..."
+                />
+                {importError && (
+                  <div className="import-modal-error">{importError}</div>
+                )}
+                <div className="import-modal-info">
+                  💡 Collez le code de partage que vous avez reçu (format base64)
+                </div>
+                <div className="import-modal-warning">
+                  ⚠️ L'importation remplacera votre progression actuelle !
+                </div>
+              </div>
+              <div className="import-modal-footer">
+                <button className="import-modal-cancel" onClick={() => setShowImportModal(false)}>
+                  Annuler
+                </button>
+                <button className="import-modal-confirm" onClick={handleImport}>
+                  Importer
+                </button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body
+      )}
+    </>
   );
 };

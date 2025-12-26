@@ -40,9 +40,13 @@ export const POPULARS_GEN1: StarterHelper[] = [
     evolutions: [{ level: 25, pokemonId: 143, name: 'Snorlax' }],
   },
   {
-    id: 'mewtwo',
-    name: 'Mewtwo',
-    pokemonId: 150,
+    id: 'abra',
+    name: 'Abra',
+    pokemonId: 63,
+    evolutions: [
+      { level: 16, pokemonId: 64, name: 'Kadabra' },
+      { level: 40, pokemonId: 65, name: 'Alakazam' },
+    ],
   },
 ];
 
