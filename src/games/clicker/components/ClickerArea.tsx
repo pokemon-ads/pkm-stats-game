@@ -120,8 +120,15 @@ export const ClickerArea: React.FC = () => {
     // Clean up particles after animation using requestAnimationFrame for better performance
     const particleIds = new Set(newParticles.map(p => p.id));
     const cleanupTime = Date.now() + 800;
+    let cleanupCount = 0;
     
     const cleanup = () => {
+      // #region agent log
+      cleanupCount++;
+      if (cleanupCount > 50) {
+        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerArea.tsx:124',message:'Particle cleanup loop excessive',data:{cleanupCount,particleCount:newParticles.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      }
+      // #endregion
       const now = Date.now();
       if (now >= cleanupTime) {
         setParticles(prev => prev.filter(p => !particleIds.has(p.id)));

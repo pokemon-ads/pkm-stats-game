@@ -29,6 +29,9 @@ export const HUD: React.FC = () => {
 
   // Animate energy changes
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'HUD.tsx:31',message:'HUD energy effect triggered',data:{energy:state.energy,prevEnergy},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     if (state.energy > prevEnergy) {
       setIsGaining(true);
       const timer = setTimeout(() => setIsGaining(false), 200);
@@ -54,7 +57,7 @@ export const HUD: React.FC = () => {
       return decodeURIComponent(escape(atob(shareCode)));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-      throw new Error('Code de partage invalide');
+      throw new Error(t('clicker.save.invalidCode'));
     }
   };
 
@@ -87,7 +90,7 @@ export const HUD: React.FC = () => {
   const handleImport = () => {
     setImportError(null);
     if (!importText.trim()) {
-      setImportError('Veuillez coller un code de partage valide');
+      setImportError(t('clicker.save.pasteValidCode'));
       return;
     }
 
@@ -101,7 +104,7 @@ export const HUD: React.FC = () => {
       saveData = decodeShareCodeToSave(saveData);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      setImportError('Code de partage invalide. Assurez-vous d\'avoir collé le code complet.');
+      setImportError(t('clicker.save.invalidCodeFull'));
       return;
     }
 
@@ -112,7 +115,7 @@ export const HUD: React.FC = () => {
       // Optionnel: recharger la page pour s'assurer que tout est synchronisé
       window.location.reload();
     } else {
-      setImportError('Échec de l\'import. Vérifiez que le code de partage est valide.');
+      setImportError(t('clicker.save.importFailed'));
     }
   };
 
@@ -175,7 +178,7 @@ export const HUD: React.FC = () => {
       {/* Active Boosts Display */}
       {activeBoostsDisplay.length > 0 && (
         <div className="hud-active-boosts">
-          <div className="active-boosts-label">{t('clicker.shop.activeBoosts', 'Boosts Actifs')}:</div>
+          <div className="active-boosts-label">{t('clicker.shop.activeBoosts')}:</div>
           <div className="active-boosts-list">
             {activeBoostsDisplay.map((boost, index) => (
               <div key={boost?.boostId || index} className="active-boost-badge-hud">
@@ -214,10 +217,10 @@ export const HUD: React.FC = () => {
           <span className="mini-value">{state.clickCount.toLocaleString()}</span>
         </div>
         <div className="hud-action-buttons">
-          <button className="hud-export-btn-mini" onClick={handleExportAsCode} title="Générer un code de partage">
+          <button className="hud-export-btn-mini" onClick={handleExportAsCode} title={t('clicker.save.exportButton')}>
             🔗
           </button>
-          <button className="hud-import-btn-mini" onClick={() => setShowImportModal(true)} title="Importer une sauvegarde">
+          <button className="hud-import-btn-mini" onClick={() => setShowImportModal(true)} title={t('clicker.save.importButton')}>
             📥
           </button>
           <button className="hud-reset-btn-mini" onClick={handleReset} title={t('clicker.resetProgress')}>
@@ -714,12 +717,12 @@ export const HUD: React.FC = () => {
           <div className="export-modal-overlay" onClick={() => setShowExportModal(false)}>
             <div className="export-modal" onClick={(e) => e.stopPropagation()}>
               <div className="export-modal-header">
-                <h3>Code de partage</h3>
+                <h3>{t('clicker.save.exportTitle')}</h3>
                 <button className="export-modal-close" onClick={() => setShowExportModal(false)}>×</button>
               </div>
               <div className="export-modal-body">
                 <p className="export-modal-description">
-                  Copiez ce code pour partager votre sauvegarde :
+                  {t('clicker.save.exportDescription')}
                 </p>
                 <div className="export-modal-code-container">
                   <textarea
@@ -733,16 +736,16 @@ export const HUD: React.FC = () => {
                     className={`export-modal-copy-btn ${copySuccess ? 'success' : ''}`}
                     onClick={handleCopyCode}
                   >
-                    {copySuccess ? '✓ Copié !' : 'Copier'}
+                    {copySuccess ? t('clicker.save.exportCopied') : t('clicker.save.exportCopy')}
                   </button>
                 </div>
                 <div className="export-modal-info">
-                  💡 Vous pouvez partager ce code avec d'autres joueurs ou l'utiliser pour transférer votre sauvegarde sur un autre appareil.
+                  {t('clicker.save.exportInfo')}
                 </div>
               </div>
               <div className="export-modal-footer">
                 <button className="export-modal-close-btn" onClick={() => setShowExportModal(false)}>
-                  Fermer
+                  {t('clicker.save.exportClose')}
                 </button>
               </div>
             </div>
@@ -757,12 +760,12 @@ export const HUD: React.FC = () => {
           <div className="import-modal-overlay">
             <div className="import-modal">
               <div className="import-modal-header">
-                <h3>Importer une sauvegarde</h3>
+                <h3>{t('clicker.save.importTitle')}</h3>
                 <button className="import-modal-close" onClick={() => setShowImportModal(false)}>×</button>
               </div>
               <div className="import-modal-body">
                 <p className="import-modal-description">
-                  Collez ici votre code de partage :
+                  {t('clicker.save.importDescription')}
                 </p>
                 <textarea
                   className="import-modal-textarea"
@@ -771,24 +774,24 @@ export const HUD: React.FC = () => {
                     setImportText(e.target.value);
                     setImportError(null);
                   }}
-                  placeholder="Collez votre code de partage ici..."
+                  placeholder={t('clicker.save.importPlaceholder')}
                 />
                 {importError && (
                   <div className="import-modal-error">{importError}</div>
                 )}
                 <div className="import-modal-info">
-                  💡 Collez le code de partage que vous avez reçu (format base64)
+                  {t('clicker.save.importInfo')}
                 </div>
                 <div className="import-modal-warning">
-                  ⚠️ L'importation remplacera votre progression actuelle !
+                  {t('clicker.save.importWarning')}
                 </div>
               </div>
               <div className="import-modal-footer">
                 <button className="import-modal-cancel" onClick={() => setShowImportModal(false)}>
-                  Annuler
+                  {t('clicker.save.importCancel')}
                 </button>
                 <button className="import-modal-confirm" onClick={handleImport}>
-                  Importer
+                  {t('clicker.save.importConfirm')}
                 </button>
               </div>
             </div>

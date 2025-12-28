@@ -110,7 +110,7 @@ export const GameResult = ({ gameState, totalStats, won, difference, filters, on
                 {totalStats}
               </span>
             </div>
-            <div className="stat-separator-compact">vs</div>
+            <div className="stat-separator-compact">{t('result.vs')}</div>
             <div className="stat-box-compact">
               <span className="stat-label-compact">{t('result.target')}</span>
               <span className="stat-number-compact target">

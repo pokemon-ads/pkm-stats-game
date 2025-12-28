@@ -121,20 +121,21 @@
     "dark": "Dark",
     "fairy": "Fairy"
   },
-  "result": {
-    "victory": "🎉 Victory!",
-    "defeat": "😢 Defeat",
-    "yourTotal": "Your Total",
-    "target": "Target",
-    "wonMessage": "You exceeded the target by {{difference}} points!",
-    "lostMessage": "You missed by {{difference}} points...",
-    "replay": "🔄 Play Again",
-    "config": "⚙️ Config",
-    "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?",
-    "maxPossible": "Max Possible:",
-    "maxPossibleTooltip": "The highest possible score you could have achieved with these Pokémon.",
-    "optimalStrategy": "Optimal Strategy"
-  },
+    "result": {
+      "victory": "🎉 Victory!",
+      "defeat": "😢 Defeat",
+      "yourTotal": "Your Total",
+      "target": "Target",
+      "vs": "vs",
+      "wonMessage": "You exceeded the target by {{difference}} points!",
+      "lostMessage": "You missed by {{difference}} points...",
+      "replay": "🔄 Play Again",
+      "config": "⚙️ Config",
+      "confirmClear": "Are you sure you want to clear the leaderboard for this configuration?",
+      "maxPossible": "Max Possible:",
+      "maxPossibleTooltip": "The highest possible score you could have achieved with these Pokémon.",
+      "optimalStrategy": "Optimal Strategy"
+    },
   "leaderboard": {
     "title": "Leaderboard",
     "empty": "No score recorded for this configuration.",
@@ -192,7 +193,28 @@
     "allGenerations": "All Generations",
     "difficulty": "Difficulty",
     "sound": "Sound",
-    "cryVolume": "Cry Volume"
+    "cryVolume": "Cry Volume",
+    "mode": "Game Mode",
+    "difficulties": {
+      "facile": "Easy",
+      "normale": "Normal",
+      "hyper": "Hyper",
+      "master": "Master"
+    },
+    "gameModes": {
+      "classic": "Classic",
+      "time_attack": "Time Attack",
+      "survival": "Survival",
+      "blur": "Blur",
+      "cry": "Cry"
+    },
+    "gameModeDescriptions": {
+      "classic": "Guess the Pokémon at your own pace",
+      "time_attack": "60 seconds to find as many as possible",
+      "survival": "Game stops at the first mistake",
+      "blur": "Image becomes clearer and clearer",
+      "cry": "Guess the Pokémon by sound only"
+    }
   },
   "stats": {
     "title": "Statistics",
@@ -250,6 +272,84 @@
       "active": "Active",
       "cooldown": "Cooldown",
       "instant": "Instant"
+    },
+    "save": {
+      "exportTitle": "Share Code",
+      "exportDescription": "Copy this code to share your save:",
+      "exportInfo": "💡 You can share this code with other players or use it to transfer your save to another device.",
+      "exportCopy": "Copy",
+      "exportCopied": "✓ Copied!",
+      "exportClose": "Close",
+      "exportButton": "Generate share code",
+      "importTitle": "Import Save",
+      "importDescription": "Paste your share code here:",
+      "importPlaceholder": "Paste your share code here...",
+      "importInfo": "💡 Paste the share code you received (base64 format)",
+      "importWarning": "⚠️ Importing will replace your current progress!",
+      "importCancel": "Cancel",
+      "importConfirm": "Import",
+      "importButton": "Import save",
+      "invalidCode": "Invalid share code",
+      "invalidCodeFull": "Invalid share code. Make sure you pasted the complete code.",
+      "importFailed": "Import failed. Check that the share code is valid.",
+      "pasteValidCode": "Please paste a valid share code"
+    },
+    "pokemonList": {
+      "locked": "Locked",
+      "unlock": "Unlock",
+      "unlockCost": "Unlock:",
+      "maxLevel": "Max Level (252)",
+      "maxByEnergy": "by energy",
+      "notEnoughEnergy": "Not enough energy",
+      "makeShiny": "Make Shiny (×10 production)",
+      "openSkillTree": "Open skill tree",
+      "skills": "Skills",
+      "productionPerHelper": "⚡ Production per helper",
+      "totalProduction": "📊 Total production",
+      "productionShare": "📈 Production share",
+      "evolution": "Evolution:",
+      "evolutionText": "EVOLUTION!",
+      "level": "Level",
+      "evPoints": "EV Points",
+      "skillsCount": "Skills"
+    },
+    "skillTree": {
+      "title": "Skill Tree",
+      "noSkillTree": "No skill tree available.",
+      "bonus": "Bonus",
+      "multiplier": "Multiplier",
+      "specialEffect": "Special effect",
+      "cost": "Cost",
+      "missingEV": "Missing {{amount}} EV",
+      "prerequisites": "Prerequisites",
+      "unlocks": "Unlocks",
+      "unlockButton": "Unlock"
+    },
+    "pokequizz": {
+      "timeLeft": "Time left: {{time}}s",
+      "lives": "Lives: {{lives}}",
+      "closeCall": "Close call!"
+    },
+    "footer": {
+      "aboutTitle": "About PKM Stats",
+      "aboutText": "Free Pokemon games and quizzes to test your knowledge. Challenge yourself with stats guessing, Pokemon identification, and idle clicker games.",
+      "legalTitle": "Legal",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "gamesTitle": "Games",
+      "copyright": "© {{year}} PKM Stats. All rights reserved. This website is not affiliated with, endorsed by, or sponsored by Nintendo, Game Freak, or The Pokémon Company."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: {{date}}"
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: {{date}}"
+    },
+    "language": {
+      "french": "Français",
+      "english": "English"
     }
   }
 }

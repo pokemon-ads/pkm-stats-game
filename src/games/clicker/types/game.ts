@@ -14,6 +14,9 @@ export interface PokemonHelper {
   pokemonId?: number;
   evolutions?: PokemonEvolution[];  // Evolution chain
   isShiny?: boolean;  // Shiny status - gives x10 production
+  level: number;  // Current level (0-252)
+  ev: number;  // Available EV points
+  unlockedSkills: string[];  // IDs of unlocked skills
 }
 
 export type StarterHelper = Pick<PokemonHelper, 'id' | 'name'| 'evolutions'| 'pokemonId'>;
@@ -64,6 +67,23 @@ export interface BoostCooldown {
   availableAt: number; // Timestamp when boost becomes available again
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;  // Cost in EV points
+  type: 'PRODUCTION_BONUS' | 'PRODUCTION_MULTIPLIER' | 'SPECIAL';
+  value: number;  // Effect value
+  prerequisites?: string[];  // IDs of required skills
+  icon?: string;  // Optional icon
+  position?: { x: number; y: number };  // Position in skill tree UI
+}
+
+export interface SkillTree {
+  helperId: string;
+  skills: Skill[];
+}
+
 export interface GameState {
   energy: number;
   totalEnergy: number;
@@ -83,8 +103,9 @@ export type ClickerAction =
   | { type: 'ADD_ENERGY'; payload: { amount: number } }
   | { type: 'LOAD_GAME'; payload: GameState }
   | { type: 'RESET_GAME' }
-  | { type: 'BUY_HELPER'; payload: { helperId: string } }
+  | { type: 'BUY_HELPER'; payload: { helperId: string; quantity?: number } }
   | { type: 'BUY_UPGRADE'; payload: { upgradeId: string } }
   | { type: 'MAKE_SHINY'; payload: { helperId: string } }
   | { type: 'ACTIVATE_BOOST'; payload: { boostId: string } }
-  | { type: 'CLEANUP_EXPIRED_BOOSTS' };
+  | { type: 'CLEANUP_EXPIRED_BOOSTS' }
+  | { type: 'UNLOCK_SKILL'; payload: { helperId: string; skillId: string } };

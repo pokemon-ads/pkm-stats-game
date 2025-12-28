@@ -21,7 +21,6 @@ export const PokeStatsGame = () => {
     startGame,
     drawPokemon,
     selectStatName,
-    confirmSelection,
     resetGame,
     restartWithSameFilters,
     restartWithAdjustedTarget,
@@ -161,10 +160,8 @@ export const PokeStatsGame = () => {
                   : gameState.selectedStatName}
                 statsRevealed={gameState.statsRevealed && !gameState.currentPokemon}
                 onSelectStatName={selectStatName}
-                onConfirmSelection={confirmSelection}
                 round={gameState.currentRound}
                 selectedStats={gameState.selectedStats}
-                skipConfirmation={skipConfirmation}
                 isLoading={loading}
               />
               {gameState.statsRevealed && !gameState.currentPokemon && !loading && (

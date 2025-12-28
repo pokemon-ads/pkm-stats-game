@@ -790,12 +790,25 @@
   flex-direction: column;
   gap: 0.25rem;
   position: relative;
+  -webkit-tap-highlight-color: rgba(255, 179, 71, 0.3);
+  -webkit-touch-callout: none;
+  user-select: none;
+  touch-action: manipulation;
+  /* Pour Safari - s'assurer que les clics fonctionnent */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-.stat-button-blind:hover:not(:disabled) {
+.stat-button-blind:hover:not(:disabled):not(.stat-disabled) {
   background: rgba(255, 179, 71, 0.25);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 179, 71, 0.4);
+}
+
+.stat-button-blind:focus {
+  outline: 2px solid rgba(255, 179, 71, 0.5);
+  outline-offset: 2px;
 }
 
 .stat-button-blind.stat-selected {
@@ -808,6 +821,14 @@
   opacity: 0.3;
   cursor: not-allowed;
   border-color: #555;
+  pointer-events: none;
+}
+
+.stat-button-blind.stat-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #555;
+  pointer-events: none;
 }
 
 .stat-mystery {

@@ -1,10 +1,13 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const PrivacyPolicy: React.FC = () => {
+  const { t, i18n } = useTranslation()
+  
   return (
     <div className="legal-page">
-      <h1>Privacy Policy</h1>
-      <p>Last updated: {new Date().toLocaleDateString()}</p>
+      <h1>{t('privacy.title')}</h1>
+      <p>{t('privacy.lastUpdated', { date: new Date().toLocaleDateString(i18n.language) })}</p>
 
       <h2>1. Introduction</h2>
       <p>

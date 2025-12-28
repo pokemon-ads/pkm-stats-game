@@ -9,13 +9,14 @@ import { ALL_LEGENDARIES } from './helper/legendaries';
 // Formula: baseCost * (1.15^count) * (1 + log(1 + energyPerSecond / baseProduction) * costMultiplier)
 // Combines exponential growth per purchase with logarithmic scaling based on production
 // Adjusted to balance the powerful first helper purchase
-export const calculateHelperCost = (helper: PokemonHelper, energyPerSecond: number): number => {
+export const calculateHelperCost = (helper: PokemonHelper, energyPerSecond: number, countOffset?: number): number => {
+  const offset = countOffset || 0;
   // Base production threshold for scaling (increased to account for higher production)
   const baseProduction = 200;
   
   // Exponential growth per purchase - slightly increased to balance powerful first helper
   // This ensures subsequent helpers remain expensive after the impactful first purchase
-  const countMultiplier = Math.pow(1.18, helper.count);
+  const countMultiplier = Math.pow(1.18, helper.count + offset);
   
   // Logarithmic scaling based on production (similar to boosts but gentler)
   const productionRatio = Math.max(0, energyPerSecond / baseProduction);
@@ -30,6 +31,38 @@ export const calculateHelperCost = (helper: PokemonHelper, energyPerSecond: numb
   const finalCost = helper.baseCost * countMultiplier * productionScaling;
   
   return Math.max(helper.baseCost, Math.floor(finalCost));
+};
+
+// Calculate total cost for buying multiple helpers
+export const calculateBulkHelperCost = (helper: PokemonHelper, energyPerSecond: number, quantity: number): number => {
+  let totalCost = 0;
+  const maxPurchases = Math.min(quantity, 252 - helper.level);
+  
+  for (let i = 0; i < maxPurchases; i++) {
+    totalCost += calculateHelperCost(helper, energyPerSecond, i);
+  }
+  
+  return totalCost;
+};
+
+// Calculate maximum number of helpers that can be bought with available energy
+export const calculateMaxAffordable = (helper: PokemonHelper, energyPerSecond: number, availableEnergy: number): number => {
+  if (helper.level >= 252) return 0;
+  
+  let totalCost = 0;
+  let count = 0;
+  const maxLevel = 252 - helper.level;
+  
+  for (let i = 0; i < maxLevel; i++) {
+    const nextCost = calculateHelperCost(helper, energyPerSecond, i);
+    if (totalCost + nextCost > availableEnergy) {
+      break;
+    }
+    totalCost += nextCost;
+    count++;
+  }
+  
+  return count;
 };
 
 // Get cost multiplier based on helper tier (position in list)
@@ -60,6 +93,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: true,
     pokemonId: 25,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 25, pokemonId: 26, name: 'Raichu' },
     ],
@@ -73,6 +109,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 4,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 5, name: 'Charmeleon' },
       { level: 35, pokemonId: 6, name: 'Charizard' },
@@ -87,6 +126,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 7,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 8, name: 'Wartortle' },
       { level: 35, pokemonId: 9, name: 'Blastoise' },
@@ -101,6 +143,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 1,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 2, name: 'Ivysaur' },
       { level: 35, pokemonId: 3, name: 'Venusaur' },
@@ -115,6 +160,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 52,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 28, pokemonId: 53, name: 'Persian' },
     ],
@@ -128,6 +176,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 66,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 28, pokemonId: 67, name: 'Machoke' },
       { level: 40, pokemonId: 68, name: 'Machamp' },
@@ -142,6 +193,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 63,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 16, pokemonId: 64, name: 'Kadabra' },
       { level: 35, pokemonId: 65, name: 'Alakazam' },
@@ -156,6 +210,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 133,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 10, pokemonId: 134, name: 'Vaporeon' },
       { level: 25, pokemonId: 135, name: 'Jolteon' },
@@ -172,6 +229,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 92,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 93, name: 'Haunter' },
       { level: 35, pokemonId: 94, name: 'Gengar' },
@@ -185,6 +245,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 147,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 148, name: 'Dragonair' },
       { level: 35, pokemonId: 149, name: 'Dragonite' },
@@ -199,6 +262,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 446,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 25, pokemonId: 143, name: 'Snorlax' },
     ],
@@ -211,6 +277,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 246,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 247, name: 'Pupitar' },
       { level: 35, pokemonId: 248, name: 'Tyranitar' },
@@ -224,6 +293,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 371,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
     evolutions: [
       { level: 15, pokemonId: 372, name: 'Shelgon' },
       { level: 35, pokemonId: 373, name: 'Salamence' },
@@ -238,6 +310,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 150,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
   },
   {
     id: 'rayquaza',
@@ -247,6 +322,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 384,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
   },
   {
     id: 'dialga',
@@ -256,6 +334,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 483,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
   },
   // Tier 5 - Mythical Pokemon (no evolutions)
   {
@@ -266,6 +347,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 493,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
   },
   {
     id: 'giratina',
@@ -275,6 +359,9 @@ export const INITIAL_HELPERS_test: PokemonHelper[] = [
     count: 0,
     unlocked: false,
     pokemonId: 487,
+    level: 0,
+    ev: 0,
+    unlockedSkills: [],
   },
 ];
 
