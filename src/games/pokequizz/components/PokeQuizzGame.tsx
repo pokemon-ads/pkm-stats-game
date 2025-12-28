@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePokeQuizz } from '../hooks/usePokeQuizz';
 import { SettingsSidebar } from './SettingsSidebar';
 import { StatsSidebar } from './StatsSidebar';
@@ -6,6 +7,7 @@ import { QuizzCard } from './QuizzCard';
 import '../styles/PokeQuizzGame.css';
 
 export const PokeQuizzGame: React.FC = () => {
+  const { t } = useTranslation();
   const {
     gameState,
     settings,
@@ -27,13 +29,13 @@ export const PokeQuizzGame: React.FC = () => {
       <main className="pokequizz-main">
         {settings.mode === 'time_attack' && gameState.timeLeft !== undefined && (
           <div className="game-timer">
-            Temps restant: {gameState.timeLeft}s
+            {t('quizz.timeLeft', { time: gameState.timeLeft })}
           </div>
         )}
         
         {settings.mode === 'survival' && gameState.lives !== undefined && (
           <div className="game-lives">
-            Vies: {gameState.lives}
+            {t('quizz.lives', { lives: gameState.lives })}
           </div>
         )}
 

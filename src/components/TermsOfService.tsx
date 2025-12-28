@@ -1,10 +1,13 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const TermsOfService: React.FC = () => {
+  const { t, i18n } = useTranslation()
+  
   return (
     <div className="legal-page">
-      <h1>Terms of Service</h1>
-      <p>Last updated: {new Date().toLocaleDateString()}</p>
+      <h1>{t('terms.title')}</h1>
+      <p>{t('terms.lastUpdated', { date: new Date().toLocaleDateString(i18n.language) })}</p>
 
       <h2>1. Terms</h2>
       <p>

@@ -4,6 +4,17 @@ import type { GameState, ClickerAction, Upgrade, PokemonHelper, ActiveBoost } fr
 import { INITIAL_HELPERS, calculateHelperCost } from '../config/helpers';
 import { INITIAL_UPGRADES } from '../config/upgrades';
 import { AVAILABLE_BOOSTS, calculateBoostCost } from '../config/boosts';
+import { getSkillTree, getSkill, createSkillTrees } from '../config/skill-trees';
+
+// Initialize helpers with default level, ev, and unlockedSkills
+const initializeHelpers = (helpers: PokemonHelper[]): PokemonHelper[] => {
+  return helpers.map(helper => ({
+    ...helper,
+    level: helper.level ?? 0,
+    ev: helper.ev ?? 0,
+    unlockedSkills: helper.unlockedSkills ?? [],
+  }));
+};
 
 const initialState: GameState = {
   energy: 0,
@@ -12,7 +23,7 @@ const initialState: GameState = {
   energyPerClick: 1,
   energyPerSecond: 0,
   lastSaveTime: Date.now(),
-  helpers: INITIAL_HELPERS,
+  helpers: initializeHelpers(INITIAL_HELPERS),
   upgrades: INITIAL_UPGRADES,
   activeBoosts: [],
   boostCooldowns: [],
@@ -80,31 +91,65 @@ const getProductionMultiplier = (activeBoosts: ActiveBoost[]): number => {
   return productionBoost ? productionBoost.value : 1;
 };
 
-// Calculate helper production with linear scaling
+// Calculate skill effects for a helper
+const calculateSkillEffects = (helper: PokemonHelper, skillTrees: ReturnType<typeof createSkillTrees>) => {
+  const skillTree = getSkillTree(helper.id, skillTrees);
+  if (!skillTree) {
+    return { productionBonus: 0, productionMultiplier: 1 };
+  }
+
+  let productionBonus = 0;
+  let productionMultiplier = 1;
+
+  for (const skillId of helper.unlockedSkills) {
+    const skill = getSkill(skillId, skillTree);
+    if (!skill) continue;
+
+    switch (skill.type) {
+      case 'PRODUCTION_BONUS':
+        productionBonus += skill.value;
+        break;
+      case 'PRODUCTION_MULTIPLIER':
+        productionMultiplier *= skill.value;
+        break;
+      case 'SPECIAL':
+        // Special skills are treated as production multiplier
+        productionMultiplier *= skill.value;
+        break;
+      // GLOBAL_BONUS removed - all skills are helper-specific now
+    }
+  }
+
+  return { productionBonus, productionMultiplier };
+};
+
+// Calculate helper production with linear scaling and skills
 // Each helper of the same type gives the same production
-// Formula: effectiveBase * count * multipliers
+// Formula: (effectiveBase + skillBonus) * count * multipliers * skillMultipliers
 const calculateHelperProduction = (
   effectiveBase: number,
   count: number,
   helperMultiplier: number,
-  shinyMultiplier: number
+  shinyMultiplier: number,
+  skillBonus: number = 0,
+  skillMultiplier: number = 1
 ): number => {
   if (count === 0) return 0;
   
   // Linear production: each helper gives the same production
-  // count = 1: effectiveBase * 1 * multipliers
-  // count = 2: effectiveBase * 2 * multipliers (each helper gives the same)
-  // count = 10: effectiveBase * 10 * multipliers
-  // This ensures every purchase of the same helper type has the same impact
+  // Apply skill bonus to base, then multiply by count and all multipliers
+  const baseWithBonus = effectiveBase + skillBonus;
   
-  // Apply all multipliers
-  return effectiveBase * count * helperMultiplier * shinyMultiplier;
+  return baseWithBonus * count * helperMultiplier * shinyMultiplier * skillMultiplier;
 };
 
 // Calculate energy per second with new balanced system
 // Global bonus is additive (sum of percentages), not multiplicative
 // Optimized: cache helper multipliers and reduce iterations
 const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[], activeBoosts: ActiveBoost[] = []) => {
+  // #region agent log
+  const calcStart = performance.now();
+  // #endregion
   // Pre-calculate global bonuses once
   let globalPercentBonus = 0;
   let legacyMultiplier = 1;
@@ -127,8 +172,13 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
     }
   }
 
+  // Create skill trees for all helpers
+  const allHelperIds = helpers.map(h => h.id);
+  const skillTrees = createSkillTrees(allHelperIds);
+
   // Calculate base production from all helpers using linear scaling
   let baseProduction = 0;
+  
   for (const h of helpers) {
     if (h.count === 0) continue; // Skip helpers with 0 count
     
@@ -141,18 +191,30 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
     // Get helper multiplier from cache
     const helperMultiplier = helperMultipliers.get(h.id) || 1;
     
-    // Use linear production calculation (each helper gives the same production)
+    // Calculate skill effects (only for this specific helper)
+    const skillEffects = calculateSkillEffects(h, skillTrees);
+    
+    // Use linear production calculation with skills
     baseProduction += calculateHelperProduction(
       effectiveBase,
       h.count,
       helperMultiplier,
-      shinyMultiplier
+      shinyMultiplier,
+      skillEffects.productionBonus,
+      skillEffects.productionMultiplier
     );
   }
 
   // Apply global bonus: base * (1 + percentage/100) * legacyMultiplier
   const baseValue = baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
   const boostMultiplier = getProductionMultiplier(activeBoosts);
+  
+  // #region agent log
+  const calcTime = performance.now() - calcStart;
+  if (calcTime > 5) {
+    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:209',message:'calculateEnergyPerSecond slow',data:{calcTime,helpersCount:helpers.length,upgradesCount:upgrades.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  }
+  // #endregion
   
   return baseValue * boostMultiplier;
 };
@@ -182,21 +244,39 @@ const autoUnlockHelpers = (helpers: PokemonHelper[], totalEnergy: number): Pokem
 const gameReducer = (state: GameState, action: ClickerAction): GameState => {
   switch (action.type) {
     case 'BUY_HELPER': {
-      const { helperId } = action.payload;
+      const { helperId, quantity = 1 } = action.payload;
       const helperIndex = state.helpers.findIndex(h => h.id === helperId);
       
       if (helperIndex === -1) return state;
       
       const helper = state.helpers[helperIndex];
-      // Calculate dynamic cost based on count and production
-      const cost = calculateHelperCost(helper, state.energyPerSecond);
       
-      if (state.energy < cost) return state;
+      // Check if helper has reached max level (252)
+      if (helper.level >= 252) return state;
+      
+      // Calculate how many we can actually buy (limited by level 252)
+      const maxPurchases = Math.min(quantity, 252 - helper.level);
+      if (maxPurchases <= 0) return state;
+      
+      // Calculate total cost for bulk purchase
+      let totalCost = 0;
+      for (let i = 0; i < maxPurchases; i++) {
+        totalCost += calculateHelperCost(helper, state.energyPerSecond, i);
+      }
+      
+      if (state.energy < totalCost) return state;
+      
+      // Increase level, EV, and count
+      const newLevel = Math.min(helper.level + maxPurchases, 252);
+      const newEv = helper.ev + maxPurchases;
+      const newCount = helper.count + maxPurchases;
       
       const newHelpers = [...state.helpers];
       newHelpers[helperIndex] = {
         ...helper,
-        count: helper.count + 1,
+        count: newCount,
+        level: newLevel,
+        ev: newEv,
       };
       
       const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades, state.activeBoosts);
@@ -204,7 +284,7 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       
       return {
         ...state,
-        energy: state.energy - cost,
+        energy: state.energy - totalCost,
         helpers: unlockedHelpers,
         energyPerSecond: newEnergyPerSecond,
       };
@@ -272,10 +352,25 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
       { const savedHelpers = action.payload.helpers || [];
       const mergedHelpers = INITIAL_HELPERS.map(initialHelper => {
         const savedHelper = savedHelpers.find(h => h.id === initialHelper.id);
-        // Merge saved data with initial config to preserve new properties like pokemonId and isShiny
-        return savedHelper
-          ? { ...initialHelper, count: savedHelper.count, unlocked: savedHelper.unlocked, isShiny: savedHelper.isShiny || false }
-          : initialHelper;
+        // Merge saved data with initial config to preserve new properties
+        // Migration: if level/ev/unlockedSkills don't exist, initialize from count
+        if (savedHelper) {
+          return {
+            ...initialHelper,
+            count: savedHelper.count,
+            unlocked: savedHelper.unlocked,
+            isShiny: savedHelper.isShiny || false,
+            level: Math.min(savedHelper.level ?? savedHelper.count ?? 0, 252),
+            ev: savedHelper.ev ?? savedHelper.count ?? 0,
+            unlockedSkills: savedHelper.unlockedSkills ?? [],
+          };
+        }
+        return {
+          ...initialHelper,
+          level: 0,
+          ev: 0,
+          unlockedSkills: [],
+        };
       });
 
       // Merge saved upgrades
@@ -444,6 +539,55 @@ const gameReducer = (state: GameState, action: ClickerAction): GameState => {
         energyPerSecond: newEnergyPerSecond,
       };
     }
+    case 'UNLOCK_SKILL': {
+      const { helperId, skillId } = action.payload;
+      const helperIndex = state.helpers.findIndex(h => h.id === helperId);
+      
+      if (helperIndex === -1) return state;
+      
+      const helper = state.helpers[helperIndex];
+      
+      // Check if skill is already unlocked
+      if (helper.unlockedSkills.includes(skillId)) return state;
+      
+      // Get skill tree and skill
+      const allHelperIds = state.helpers.map(h => h.id);
+      const skillTrees = createSkillTrees(allHelperIds);
+      const skillTree = getSkillTree(helperId, skillTrees);
+      
+      if (!skillTree) return state;
+      
+      const skill = getSkill(skillId, skillTree);
+      if (!skill) return state;
+      
+      // Check prerequisites
+      if (skill.prerequisites && skill.prerequisites.length > 0) {
+        const missingPrereqs = skill.prerequisites.filter(
+          prereq => !helper.unlockedSkills.includes(prereq)
+        );
+        if (missingPrereqs.length > 0) return state;
+      }
+      
+      // Check if enough EV points
+      if (helper.ev < skill.cost) return state;
+      
+      // Unlock the skill
+      const newHelpers = [...state.helpers];
+      newHelpers[helperIndex] = {
+        ...helper,
+        ev: helper.ev - skill.cost,
+        unlockedSkills: [...helper.unlockedSkills, skillId],
+      };
+      
+      // Recalculate production with new skill
+      const newEnergyPerSecond = calculateEnergyPerSecond(newHelpers, state.upgrades, state.activeBoosts);
+      
+      return {
+        ...state,
+        helpers: newHelpers,
+        energyPerSecond: newEnergyPerSecond,
+      };
+    }
     default:
       return state;
   }
@@ -547,9 +691,23 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
       const savedHelpers = parsedState.helpers || [];
       const mergedHelpers = INITIAL_HELPERS.map(initialHelper => {
         const savedHelper = savedHelpers.find((h: PokemonHelper) => h.id === initialHelper.id);
-        return savedHelper
-          ? { ...initialHelper, count: savedHelper.count, unlocked: savedHelper.unlocked, isShiny: savedHelper.isShiny || false }
-          : initialHelper;
+        if (savedHelper) {
+          return {
+            ...initialHelper,
+            count: savedHelper.count,
+            unlocked: savedHelper.unlocked,
+            isShiny: savedHelper.isShiny || false,
+            level: Math.min(savedHelper.level ?? savedHelper.count ?? 0, 252),
+            ev: savedHelper.ev ?? savedHelper.count ?? 0,
+            unlockedSkills: savedHelper.unlockedSkills ?? [],
+          };
+        }
+        return {
+          ...initialHelper,
+          level: 0,
+          ev: 0,
+          unlockedSkills: [],
+        };
       });
 
       // Merge saved upgrades
@@ -616,8 +774,17 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   React.useEffect(() => {
     let animationFrameId: number;
+    let frameCount = 0;
+    let dispatchCount = 0;
+    const startTime = Date.now();
 
     const loop = () => {
+      // #region agent log
+      frameCount++;
+      if (frameCount % 60 === 0) {
+        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:768',message:'Game loop frame',data:{frameCount,dispatchCount,elapsed:Date.now()-startTime},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      }
+      // #endregion
       const now = Date.now();
       const delta = (now - lastTickRef.current) / 1000; // Convert to seconds
       lastTickRef.current = now;
@@ -628,6 +795,10 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
       // Only dispatch if enough time has passed
       const timeSinceLastDispatch = now - lastDispatchRef.current;
       if (timeSinceLastDispatch >= TICK_INTERVAL && accumulatedDeltaRef.current > 0) {
+        // #region agent log
+        dispatchCount++;
+        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:779',message:'TICK dispatch',data:{dispatchCount,delta:accumulatedDeltaRef.current,timeSinceLastDispatch},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         dispatch({ type: 'TICK', payload: { delta: accumulatedDeltaRef.current } });
         accumulatedDeltaRef.current = 0;
         lastDispatchRef.current = now;

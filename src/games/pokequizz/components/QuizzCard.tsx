@@ -41,7 +41,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
   }, [status, pokemon]);
 
   const playCry = () => {
-    if (!pokemon) return;
+    if (!pokemon || !pokemon.cries) return;
     const cryUrl = pokemon.cries.latest || pokemon.cries.legacy;
     if (cryUrl) {
       const audio = new Audio(cryUrl);
@@ -66,7 +66,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
 
     // Check for close match
     if (isCloseMatch(guess, targetName)) {
-      setCloseCallMessage(t('quizz.closeCall', 'C\'est presque ça !'));
+      setCloseCallMessage(t('quizz.closeCall'));
       // Optional: Shake animation or visual cue specifically for close call
       return;
     }
@@ -93,7 +93,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
           mode={mode}
           status={status}
         />
-        {(pokemon?.cries.latest || pokemon?.cries.legacy) && (
+        {(pokemon?.cries && (pokemon.cries.latest || pokemon.cries.legacy)) && (
           <button
             className="play-cry-btn"
             onClick={playCry}

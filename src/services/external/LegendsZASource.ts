@@ -57,6 +57,10 @@ export class LegendsZASource extends ExternalDataSource {
         })),
         species: {
           url: "" // No species URL
+        },
+        cries: {
+          latest: "", // No cry available for external Pokemon
+          legacy: ""
         }
       };
 

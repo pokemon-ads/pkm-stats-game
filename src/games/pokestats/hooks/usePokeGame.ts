@@ -140,68 +140,67 @@ export const usePokeGame = () => {
     filters.regionalForm,
   ]);
 
-  // Select a stat (with or without confirmation based on preference)
+  // Select a stat
   const selectStatName = useCallback(
     (statName: StatName) => {
-      if (skipConfirmation) {
-        // Direct selection without confirmation
-        if (!gameState.currentPokemon) return;
+      console.log('[usePokeGame] selectStatName appelé', {
+        statName,
+        skipConfirmation,
+        hasCurrentPokemon: !!gameState.currentPokemon,
+        currentRound: gameState.currentRound,
+        availableStats: gameState.availableStats
+      })
+      
+      if (!gameState.currentPokemon) return;
 
-        const statData = gameState.currentPokemon.stats.find(
-          (s) => s.stat.name === statName
-        );
+      const statData = gameState.currentPokemon.stats.find(
+        (s) => s.stat.name === statName
+      );
 
-        if (!statData) return;
+      if (!statData) return;
 
-        // Apply shiny bonus if enabled
-        const statValue =
-          shinyBonus && gameState.currentPokemon.isShiny
-            ? statData.base_stat * GAME_CONFIG.SHINY_BONUS_MULTIPLIER
-            : statData.base_stat;
+      // Apply shiny bonus if enabled
+      const statValue =
+        shinyBonus && gameState.currentPokemon.isShiny
+          ? statData.base_stat * GAME_CONFIG.SHINY_BONUS_MULTIPLIER
+          : statData.base_stat;
 
-        const newSelectedStats = [
-          ...gameState.selectedStats,
-          {
-            pokemon: gameState.currentPokemon,
-            statName: statName,
-            value: statValue,
-          },
-        ];
+      const newSelectedStats = [
+        ...gameState.selectedStats,
+        {
+          pokemon: gameState.currentPokemon,
+          statName: statName,
+          value: statValue,
+        },
+      ];
 
-        const newAvailableStats = gameState.availableStats.filter(
-          (s) => s !== statName
-        );
+      const newAvailableStats = gameState.availableStats.filter(
+        (s) => s !== statName
+      );
 
-        if (newSelectedStats.length === GAME_CONFIG.ROUNDS_PER_GAME) {
-          // Game over - calculate result
-          setGameState((prev) => ({
-            ...prev,
-            phase: GAME_PHASES.RESULT,
-            selectedStats: newSelectedStats,
-            availableStats: newAvailableStats,
-            statsRevealed: true,
-            selectedStatName: statName,
-          }));
-        } else {
-          // Continue to next round
-          setGameState((prev) => ({
-            ...prev,
-            selectedStats: newSelectedStats,
-            currentPokemon: null,
-            availableStats: newAvailableStats,
-            selectedStatName: statName,
-            statsRevealed: true,
-          }));
-        }
-      } else {
-        // Show confirmation modal
+      if (newSelectedStats.length === GAME_CONFIG.ROUNDS_PER_GAME) {
+        // Game over - calculate result
         setGameState((prev) => ({
           ...prev,
+          phase: GAME_PHASES.RESULT,
+          selectedStats: newSelectedStats,
+          availableStats: newAvailableStats,
+          statsRevealed: true,
           selectedStatName: statName,
+        }));
+      } else {
+        // Continue to next round
+        setGameState((prev) => ({
+          ...prev,
+          selectedStats: newSelectedStats,
+          currentPokemon: null,
+          availableStats: newAvailableStats,
+          selectedStatName: statName,
+          statsRevealed: true,
         }));
       }
     },
-    [skipConfirmation, shinyBonus, gameState]
+    [shinyBonus, gameState]
   );
 
   // Confirm selection and reveal the value

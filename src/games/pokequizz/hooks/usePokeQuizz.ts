@@ -78,12 +78,24 @@ export const usePokeQuizz = () => {
   }, [getRandomPokemonId]);
 
   const fetchNextPokemon = useCallback(async () => {
+    // #region agent log
+    const fetchStart = Date.now();
+    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:80',message:'fetchNextPokemon called',data:{requestId:requestRef.current+1,hasPreloaded:!!nextPokemonRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     requestRef.current += 1;
     const requestId = requestRef.current;
 
     const applyPokemon = (pokemon: Pokemon) => {
-      if (requestId !== requestRef.current) return;
+      if (requestId !== requestRef.current) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:85',message:'applyPokemon cancelled',data:{requestId,currentRequestId:requestRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:87',message:'applyPokemon success',data:{requestId,pokemonId:pokemon.id,fetchTime:Date.now()-fetchStart},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setGameState(prev => ({
         ...prev,
         status: 'playing',
@@ -116,6 +128,9 @@ export const usePokeQuizz = () => {
         applyPokemon(pokemon);
       };
     } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:119',message:'fetchNextPokemon error',data:{requestId,error:error instanceof Error?error.message:'unknown',willRetry:requestId===requestRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
       console.error('Error fetching pokemon:', error);
       if (requestId === requestRef.current) {
         setTimeout(fetchNextPokemon, 1000);
@@ -125,6 +140,9 @@ export const usePokeQuizz = () => {
 
   // Initial fetch
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:127',message:'Initial fetch effect triggered',data:{hasCurrentPokemon:!!gameState.currentPokemon,status:gameState.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!gameState.currentPokemon) {
       fetchNextPokemon();
     }
@@ -272,12 +290,15 @@ export const usePokeQuizz = () => {
 
   // Effect to handle generation or mode changes
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:274',message:'Generation/mode change effect triggered',data:{generation:settings.generation,mode:settings.mode,status:gameState.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
     // Only fetch if we are not already loading (to avoid double fetch on mount)
     // and if the generation actually changed (handled by dependency array)
     if (gameState.status !== 'loading') {
       fetchNextPokemon();
     }
-  }, [settings.generation, settings.mode]);
+  }, [settings.generation, settings.mode, fetchNextPokemon, gameState.status]);
 
   return {
     gameState,

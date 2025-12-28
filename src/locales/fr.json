@@ -121,20 +121,21 @@
     "dark": "Ténèbres",
     "fairy": "Fée"
   },
-  "result": {
-    "victory": "🎉 Victoire !",
-    "defeat": "😢 Défaite",
-    "yourTotal": "Votre total",
-    "target": "Objectif",
-    "wonMessage": "Vous avez dépassé l'objectif de {{difference}} points !",
-    "lostMessage": "Il vous manquait {{difference}} points...",
-    "replay": "🔄 Rejouer",
-    "config": "⚙️ Config",
-    "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?",
-    "maxPossible": "Max Possible :",
-    "maxPossibleTooltip": "Le score le plus élevé que vous auriez pu obtenir avec ces Pokémon.",
-    "optimalStrategy": "Stratégie Optimale"
-  },
+    "result": {
+      "victory": "🎉 Victoire !",
+      "defeat": "😢 Défaite",
+      "yourTotal": "Votre total",
+      "target": "Objectif",
+      "vs": "vs",
+      "wonMessage": "Vous avez dépassé l'objectif de {{difference}} points !",
+      "lostMessage": "Il vous manquait {{difference}} points...",
+      "replay": "🔄 Rejouer",
+      "config": "⚙️ Config",
+      "confirmClear": "Êtes-vous sûr de vouloir effacer le classement pour cette configuration ?",
+      "maxPossible": "Max Possible :",
+      "maxPossibleTooltip": "Le score le plus élevé que vous auriez pu obtenir avec ces Pokémon.",
+      "optimalStrategy": "Stratégie Optimale"
+    },
   "leaderboard": {
     "title": "Classement",
     "empty": "Aucun score enregistré pour cette configuration.",
@@ -192,7 +193,28 @@
     "allGenerations": "Toutes les générations",
     "difficulty": "Difficulté",
     "sound": "Son",
-    "cryVolume": "Volume du cri"
+    "cryVolume": "Volume du cri",
+    "mode": "Mode de jeu",
+    "difficulties": {
+      "facile": "Facile",
+      "normale": "Normale",
+      "hyper": "Hyper",
+      "master": "Master"
+    },
+    "gameModes": {
+      "classic": "Classique",
+      "time_attack": "Contre-la-montre",
+      "survival": "Survie",
+      "blur": "Flou",
+      "cry": "Cri"
+    },
+    "gameModeDescriptions": {
+      "classic": "Devinez le Pokémon à votre rythme",
+      "time_attack": "60 secondes pour en trouver le plus possible",
+      "survival": "Le jeu s'arrête à la première erreur",
+      "blur": "L'image devient de plus en plus nette",
+      "cry": "Devinez le Pokémon uniquement au son"
+    }
   },
   "stats": {
     "title": "Statistiques",
@@ -250,6 +272,84 @@
       "active": "Actif",
       "cooldown": "Rechargement",
       "instant": "Instantané"
+    },
+    "save": {
+      "exportTitle": "Code de partage",
+      "exportDescription": "Copiez ce code pour partager votre sauvegarde :",
+      "exportInfo": "💡 Vous pouvez partager ce code avec d'autres joueurs ou l'utiliser pour transférer votre sauvegarde sur un autre appareil.",
+      "exportCopy": "Copier",
+      "exportCopied": "✓ Copié !",
+      "exportClose": "Fermer",
+      "exportButton": "Générer un code de partage",
+      "importTitle": "Importer une sauvegarde",
+      "importDescription": "Collez ici votre code de partage :",
+      "importPlaceholder": "Collez votre code de partage ici...",
+      "importInfo": "💡 Collez le code de partage que vous avez reçu (format base64)",
+      "importWarning": "⚠️ L'importation remplacera votre progression actuelle !",
+      "importCancel": "Annuler",
+      "importConfirm": "Importer",
+      "importButton": "Importer une sauvegarde",
+      "invalidCode": "Code de partage invalide",
+      "invalidCodeFull": "Code de partage invalide. Assurez-vous d'avoir collé le code complet.",
+      "importFailed": "Échec de l'import. Vérifiez que le code de partage est valide.",
+      "pasteValidCode": "Veuillez coller un code de partage valide"
+    },
+    "pokemonList": {
+      "locked": "Verrouillé",
+      "unlock": "Débloquer",
+      "unlockCost": "Débloquer:",
+      "maxLevel": "Niveau Max (252)",
+      "maxByEnergy": "selon l'énergie",
+      "notEnoughEnergy": "Pas assez d'énergie",
+      "makeShiny": "Rendre Shiny (×10 production)",
+      "openSkillTree": "Ouvrir l'arbre de compétences",
+      "skills": "Compétences",
+      "productionPerHelper": "⚡ Production par helper",
+      "totalProduction": "📊 Production totale",
+      "productionShare": "📈 Part de la production",
+      "evolution": "Évolution:",
+      "evolutionText": "ÉVOLUTION !",
+      "level": "Niveau",
+      "evPoints": "Points EV",
+      "skillsCount": "Compétences"
+    },
+    "skillTree": {
+      "title": "Arbre de compétences",
+      "noSkillTree": "Aucun arbre de compétences disponible.",
+      "bonus": "Bonus",
+      "multiplier": "Multiplicateur",
+      "specialEffect": "Effet spécial",
+      "cost": "Coût",
+      "missingEV": "Manque {{amount}} EV",
+      "prerequisites": "Prérequis",
+      "unlocks": "Débloque",
+      "unlockButton": "Débloquer"
+    },
+    "pokequizz": {
+      "timeLeft": "Temps restant: {{time}}s",
+      "lives": "Vies: {{lives}}",
+      "closeCall": "C'est presque ça !"
+    },
+    "footer": {
+      "aboutTitle": "À propos de PKM Stats",
+      "aboutText": "Jeux et quiz Pokémon gratuits pour tester vos connaissances. Défiez-vous avec les devinettes de stats, l'identification de Pokémon et les jeux idle clicker.",
+      "legalTitle": "Légal",
+      "privacyPolicy": "Politique de confidentialité",
+      "termsOfService": "Conditions d'utilisation",
+      "gamesTitle": "Jeux",
+      "copyright": "© {{year}} PKM Stats. Tous droits réservés. Ce site web n'est pas affilié à, approuvé par ou sponsorisé par Nintendo, Game Freak ou The Pokémon Company."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "lastUpdated": "Dernière mise à jour : {{date}}"
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "lastUpdated": "Dernière mise à jour : {{date}}"
+    },
+    "language": {
+      "french": "Français",
+      "english": "English"
     }
   }
 }

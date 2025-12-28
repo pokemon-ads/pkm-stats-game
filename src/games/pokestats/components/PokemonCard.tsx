@@ -9,14 +9,12 @@ interface PokemonCardProps {
   selectedStatName: StatName | null
   statsRevealed: boolean
   onSelectStatName: (stat: StatName) => void
-  onConfirmSelection: () => void
   round: number
   selectedStats: Array<{
     pokemon: Pokemon
     statName: StatName
     value: number
   }>
-  skipConfirmation: boolean
   isLoading?: boolean
 }
 
@@ -38,10 +36,8 @@ export const PokemonCard = ({
   selectedStatName,
   statsRevealed,
   onSelectStatName,
-  onConfirmSelection,
   round,
   selectedStats,
-  skipConfirmation,
   isLoading = false
 }: PokemonCardProps) => {
   const { t, i18n } = useTranslation()
@@ -176,17 +172,51 @@ export const PokemonCard = ({
                 )
               } else {
                 // This stat hasn't been selected yet - show mystery card
+                // Utiliser un div pour meilleure compatibilité Safari
+                const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+                  console.log('[PokemonCard] handleClick appelé', {
+                    statName,
+                    isAvailable,
+                    eventType: e.type,
+                    target: e.target,
+                    currentTarget: e.currentTarget
+                  })
+                  
+                  if (!isAvailable) {
+                    console.log('[PokemonCard] Stat non disponible, clic ignoré')
+                    e.preventDefault()
+                    e.stopPropagation()
+                    return
+                  }
+                  
+                  console.log('[PokemonCard] Appel de onSelectStatName avec', statName)
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onSelectStatName(statName)
+                }
+                
+                const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (!isAvailable) return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onSelectStatName(statName)
+                  }
+                }
+                
                 return (
-                  <button
+                  <div
                     key={statName}
-                    onClick={() => onSelectStatName(statName)}
-                    disabled={!isAvailable}
+                    onClick={handleClick}
+                    onKeyDown={handleKeyDown}
+                    role="button"
+                    tabIndex={isAvailable ? 0 : -1}
+                    aria-disabled={!isAvailable}
                     className={`stat-button-blind ${!isAvailable ? 'stat-disabled' : ''} ${isSelected ? 'stat-selected' : ''}`}
-                    type="button"
                   >
                     <span className="stat-name">{STAT_LABELS[statName]}</span>
                     <span className="stat-mystery">?</span>
-                  </button>
+                  </div>
                 )
               }
             }

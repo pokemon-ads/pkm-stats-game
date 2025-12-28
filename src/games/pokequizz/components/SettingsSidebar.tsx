@@ -58,12 +58,12 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
           >
             {Object.entries(GAME_MODES).map(([key, mode]) => (
               <option key={key} value={key}>
-                {mode.label}
+                {t(`settings.gameModes.${key}`, mode.label)}
               </option>
             ))}
           </select>
           <div className="setting-description">
-            {GAME_MODES[settings.mode].description}
+            {t(`settings.gameModeDescriptions.${settings.mode}`, GAME_MODES[settings.mode].description)}
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
           >
             {Object.entries(DIFFICULTIES).map(([key, diff]) => (
               <option key={key} value={key}>
-                {diff.label}
+                {t(`settings.difficulties.${key}`, diff.label)}
               </option>
             ))}
           </select>
