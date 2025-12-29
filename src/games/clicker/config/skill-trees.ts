@@ -29,8 +29,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   // Tier 1: Compétences de base (niveau 1-50) - Total: 12 EV
   skills.push(createSkill(
     `${helperId}_base_1`,
-    'Amélioration Base',
-    '+25% production',
+    'Fondations Solides',
+    'Augmente la production de base de 25%',
     2,
     'PRODUCTION_MULTIPLIER',
     1.25,
@@ -40,8 +40,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_base_2`,
-    'Amélioration Avancée',
-    '+50% production',
+    'Entraînement Intensif',
+    'Augmente la production de base de 50%',
     4,
     'PRODUCTION_MULTIPLIER',
     1.5,
@@ -51,8 +51,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_base_3`,
-    'Amélioration Expert',
-    '+75% production',
+    'Discipline de Fer',
+    'Augmente la production de base de 75%',
     6,
     'PRODUCTION_MULTIPLIER',
     1.75,
@@ -63,8 +63,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   // Tier 2: Bonus de production (niveau 51-100) - Total: 34 EV
   skills.push(createSkill(
     `${helperId}_bonus_1`,
-    'Bonus Production I',
-    '+100 production base',
+    'Récolte Abondante I',
+    '+100 production de base',
     7,
     'PRODUCTION_BONUS',
     100,
@@ -74,8 +74,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_bonus_2`,
-    'Bonus Production II',
-    '+250 production base',
+    'Récolte Abondante II',
+    '+250 production de base',
     11,
     'PRODUCTION_BONUS',
     250,
@@ -85,8 +85,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_bonus_3`,
-    'Bonus Production III',
-    '+500 production base',
+    'Flux Énergétique',
+    '+500 production de base',
     16,
     'PRODUCTION_BONUS',
     500,
@@ -97,8 +97,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   // Tier 2: Multiplicateurs (niveau 51-100) - Total: 43 EV
   skills.push(createSkill(
     `${helperId}_mult_1`,
-    'Multiplicateur I',
-    '×2.0 production',
+    'Synergie Élémentaire',
+    'Double la production actuelle',
     9,
     'PRODUCTION_MULTIPLIER',
     2.0,
@@ -108,8 +108,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_mult_2`,
-    'Multiplicateur II',
-    '×2.5 production',
+    'Harmonie Naturelle',
+    'Multiplie la production par 2.5',
     14,
     'PRODUCTION_MULTIPLIER',
     2.5,
@@ -119,8 +119,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_mult_3`,
-    'Multiplicateur III',
-    '×3.0 production',
+    'Résonance Spirituelle',
+    'Triple la production',
     20,
     'PRODUCTION_MULTIPLIER',
     3.0,
@@ -131,8 +131,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   // Tier 3: Compétences spéciales (niveau 101-150) - Total: 51 EV
   skills.push(createSkill(
     `${helperId}_special_1`,
-    'Puissance I',
-    '×3.5 production',
+    'Puissance Cachée',
+    'Multiplie la production par 3.5',
     22,
     'PRODUCTION_MULTIPLIER',
     3.5,
@@ -142,8 +142,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_special_2`,
-    'Puissance II',
-    '×4.0 production',
+    'Force Intérieure',
+    'Quadruple la production',
     29,
     'PRODUCTION_MULTIPLIER',
     4.0,
@@ -154,8 +154,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   // Tier 4: Compétences ultimes (niveau 151-252) - Total: 112 EV
   skills.push(createSkill(
     `${helperId}_ultimate_1`,
-    'Maîtrise',
-    '×5.0 production',
+    'Éveil Ancestral',
+    'Multiplie la production par 5.0',
     32,
     'PRODUCTION_MULTIPLIER',
     5.0,
@@ -165,8 +165,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_ultimate_2`,
-    'Perfection',
-    '×6.0 production',
+    'Transcendance',
+    'Multiplie la production par 6.0',
     38,
     'PRODUCTION_MULTIPLIER',
     6.0,
@@ -176,8 +176,8 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
 
   skills.push(createSkill(
     `${helperId}_ultimate_3`,
-    'Légende',
-    '×7.5 production',
+    'Ascension Divine',
+    'Multiplie la production par 7.5',
     42,
     'PRODUCTION_MULTIPLIER',
     7.5,

@@ -1,19 +1,28 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClickerContext } from '../context/ClickerContext';
-import { getSkillTree, getSkill, createSkillTrees, canUnlockSkill } from '../config/skill-trees';
-import type { PokemonHelper, Skill } from '../types/game';
+import { getSkillTree, createSkillTrees, canUnlockSkill } from '../config/skill-trees';
+import { getCurrentEvolution } from '../config/helpers';
+import type { PokemonHelper } from '../types/game';
 import '../styles/SkillTree.css';
 
-// Format large numbers
-const formatNumber = (num: number): string => {
-  if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qi';
-  if (num >= 1e15) return (num / 1e15).toFixed(1) + 'Qa';
-  if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
-  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-  return Math.floor(num).toLocaleString();
+// --- CONSTANTS ---
+const GRID_SIZE_X = 180;
+const GRID_SIZE_Y = 140;
+
+// --- SPRITE HELPERS ---
+const getAnimatedSprite = (pokemonId: number, isShiny: boolean = false): string => {
+  if (isShiny) {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/shiny/${pokemonId}.gif`;
+  }
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokemonId}.gif`;
+};
+
+const getStaticSprite = (pokemonId: number, isShiny: boolean = false): string => {
+  if (isShiny) {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
+  }
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
 };
 
 interface SkillTreeProps {
@@ -24,8 +33,14 @@ interface SkillTreeProps {
 export const SkillTree: React.FC<SkillTreeProps> = ({ helper, onClose }) => {
   const { t } = useTranslation();
   const { state, dispatch } = useContext(ClickerContext);
+  
+  const [offset, setOffset] = useState({ x: 0, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  
+  const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Get skill tree for this helper
   const skillTree = useMemo(() => {
     const allHelperIds = state.helpers.map(h => h.id);
     const skillTrees = createSkillTrees(allHelperIds);
@@ -34,227 +49,313 @@ export const SkillTree: React.FC<SkillTreeProps> = ({ helper, onClose }) => {
 
   if (!skillTree) {
     return (
-      <div className="skill-tree-modal">
-      <div className="skill-tree-content">
-        <div className="skill-tree-header">
-          <h2>{t('clicker.skillTree.title')} - {helper.name}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+      <div className="poke-skill-modal">
+        <button className="poke-close-btn" onClick={onClose}>✕</button>
+        <div className="poke-empty-state">
+          <div className="poke-empty-icon">?</div>
+          <p>{t('clicker.skillTree.noSkillTree')}</p>
         </div>
-        <p>{t('clicker.skillTree.noSkillTree')}</p>
-      </div>
       </div>
     );
   }
 
-  const handleUnlockSkill = (skillId: string) => {
+  const selectedSkill = useMemo(() => 
+    skillTree.skills.find(s => s.id === selectedSkillId),
+  [skillTree, selectedSkillId]);
+
+  const currentEvolution = useMemo(() => getCurrentEvolution(helper), [helper]);
+
+  // Calculate EV spent
+  const evSpent = useMemo(() => {
+    let spent = 0;
+    for (const skillId of helper.unlockedSkills) {
+      const skill = skillTree.skills.find(s => s.id === skillId);
+      if (skill) spent += skill.cost;
+    }
+    return spent;
+  }, [helper.unlockedSkills, skillTree.skills]);
+
+  const evRemaining = Math.max(0, helper.ev - evSpent);
+
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    setOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  useEffect(() => {
+    if (viewportRef.current) {
+      const vw = viewportRef.current.clientWidth;
+      const vh = viewportRef.current.clientHeight;
+      setOffset({ x: vw / 2 - GRID_SIZE_X, y: vh * 0.15 });
+    }
+  }, []);
+
+  const handleUnlock = (skillId: string) => {
     dispatch({ type: 'UNLOCK_SKILL', payload: { helperId: helper.id, skillId } });
   };
 
-  // Find skills unlocked by this skill
-  const getUnlockedSkills = (skillId: string): Skill[] => {
-    return skillTree.skills.filter(skill => 
-      skill.prerequisites?.includes(skillId)
-    );
+  const formatNum = (num: number) => {
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return Math.floor(num).toLocaleString();
   };
 
-  // Organize skills by tier/row
-  const skillsByRow = useMemo(() => {
-    const rows: { [y: number]: Skill[] } = {};
-    skillTree.skills.forEach(skill => {
-      const y = skill.position?.y || 0;
-      if (!rows[y]) rows[y] = [];
-      rows[y].push(skill);
-    });
-    return rows;
-  }, [skillTree]);
+  // Get skill icon based on type
+  const getSkillIcon = (skill: typeof skillTree.skills[0]) => {
+    if (skill.name.includes("Légende") || skill.name.includes("Ultime") || skill.name.includes("Ascension")) return "⭐";
+    if (skill.type === 'PRODUCTION_MULTIPLIER') return "⚡";
+    if (skill.type === 'PRODUCTION_BONUS') return "➕";
+    return "◆";
+  };
 
-  const maxRow = Math.max(...Object.keys(skillsByRow).map(Number));
+  // Get rarity based on skill
+  const getSkillRarity = (skill: typeof skillTree.skills[0]) => {
+    if (skill.name.includes("Légende") || skill.name.includes("Ultime")) return "legendary";
+    if (skill.name.includes("Ascension") || skill.cost >= 50) return "rare";
+    if (skill.cost >= 20) return "uncommon";
+    return "common";
+  };
 
   return (
-    <div className="skill-tree-modal" onClick={(e) => {
-      if (e.target === e.currentTarget) onClose();
-    }}>
-      <div className="skill-tree-content">
-        <div className="skill-tree-header">
-          <div className="header-left">
-            <h2>{helper.name}</h2>
-            <div className="header-subtitle">{t('clicker.skillTree.title')}</div>
+    <div className="poke-skill-modal">
+      {/* Header Bar */}
+      <div className="poke-header-bar">
+        <div className="poke-header-left">
+          <div className={`poke-pokemon-frame ${helper.isShiny ? 'shiny' : ''}`}>
+            <img 
+              src={getAnimatedSprite(currentEvolution.pokemonId, helper.isShiny)} 
+              alt={currentEvolution.name}
+              onError={(e) => { 
+                (e.target as HTMLImageElement).src = getStaticSprite(currentEvolution.pokemonId, helper.isShiny); 
+              }}
+            />
           </div>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-
-        <div className="skill-tree-info">
-          <div className="info-card">
-            <div className="info-item">
-              <span className="info-label">{t('clicker.pokemonList.level')}</span>
-              <span className="info-value">{helper.level}/252</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">{t('clicker.pokemonList.evPoints')}</span>
-              <span className="info-value highlight">{formatNumber(helper.ev)}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">{t('clicker.pokemonList.skillsCount')}</span>
-              <span className="info-value">{helper.unlockedSkills.length}/{skillTree.skills.length}</span>
-            </div>
+          <div className="poke-pokemon-info">
+            <span className="poke-pokemon-name">
+              {currentEvolution.name}
+              {helper.isShiny && <span className="poke-shiny-badge">✦</span>}
+            </span>
+            <span className="poke-pokemon-level">Lv. {helper.level}</span>
           </div>
         </div>
+        <div className="poke-header-center">
+          <span className="poke-title">ARBRE DE TALENTS</span>
+        </div>
+        <div className="poke-header-right">
+          <div className="poke-ev-display">
+            <div className="poke-ev-icon">EV</div>
+            <div className="poke-ev-info">
+              <span className="poke-ev-value">{evRemaining}</span>
+              <span className="poke-ev-label">disponibles</span>
+            </div>
+          </div>
+          <button className="poke-close-btn" onClick={onClose}>✕</button>
+        </div>
+      </div>
 
-        <div className="skill-tree-wrapper">
-          <div className="skill-tree-canvas">
-            {/* SVG for connections */}
-            <svg className="skill-connections" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid meet">
-              {skillTree.skills.map((skill) => {
-                if (!skill.prerequisites || skill.prerequisites.length === 0 || !skill.position) return null;
+      {/* Main Content */}
+      <div className="poke-content">
+        {/* Tree Viewport */}
+        <div 
+          className="poke-tree-viewport" 
+          ref={viewportRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          {/* Grid Background */}
+          <div className="poke-grid-bg" />
+          
+          {/* Tree World */}
+          <div 
+            className="poke-tree-world"
+            style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
+          >
+            {/* Connections */}
+            <svg className="poke-connections" width="1" height="1" style={{ overflow: 'visible' }}>
+              {skillTree.skills.map(skill => {
+                if (!skill.prerequisites || !skill.position) return null;
                 
-                return skill.prerequisites.map((prereqId) => {
-                  const prereqSkill = skillTree.skills.find(s => s.id === prereqId);
-                  if (!prereqSkill || !prereqSkill.position) return null;
-                  
-                  const isPrereqUnlocked = helper.unlockedSkills.includes(prereqId);
-                  const isSkillUnlocked = helper.unlockedSkills.includes(skill.id);
-                  const connectionClass = isPrereqUnlocked && isSkillUnlocked ? 'unlocked' : 
-                                         isPrereqUnlocked ? 'available' : 'locked';
-                  
-                  // Calculate positions (scaled to viewBox)
-                  // Adjusted for better visual spacing
-                  const fromX = (prereqSkill.position.x * 350 + 160) * 10;
-                  const fromY = (prereqSkill.position.y * 180 + 160) * 10;
-                  const toX = (skill.position.x * 350 + 160) * 10;
-                  const toY = (skill.position.y * 180 + 160) * 10;
-                  
+                const targetX = skill.position.x * GRID_SIZE_X;
+                const targetY = skill.position.y * GRID_SIZE_Y;
+
+                return skill.prerequisites.map(prereqId => {
+                  const parent = skillTree.skills.find(s => s.id === prereqId);
+                  if (!parent || !parent.position) return null;
+
+                  const startX = parent.position.x * GRID_SIZE_X;
+                  const startY = parent.position.y * GRID_SIZE_Y;
+                  const controlY = (startY + targetY) / 2;
+                  const d = `M ${startX} ${startY} C ${startX} ${controlY}, ${targetX} ${controlY}, ${targetX} ${targetY}`;
+
+                  const isUnlocked = helper.unlockedSkills.includes(skill.id) && helper.unlockedSkills.includes(parent.id);
+                  const isAvailable = helper.unlockedSkills.includes(parent.id);
+
                   return (
-                    <line
-                      key={`${prereqId}-${skill.id}`}
-                      x1={fromX}
-                      y1={fromY}
-                      x2={toX}
-                      y2={toY}
-                      className={`connection-line ${connectionClass}`}
-                      strokeWidth="40"
+                    <path 
+                      key={`${parent.id}-${skill.id}`}
+                      d={d}
+                      className={`poke-path ${isUnlocked ? 'unlocked' : isAvailable ? 'available' : 'locked'}`}
                     />
                   );
                 });
               })}
             </svg>
 
-            {/* Skill nodes organized by rows */}
-            {Object.entries(skillsByRow).map(([row, skills]) => {
-              const rowNum = parseInt(row);
+            {/* Skill Nodes */}
+            {skillTree.skills.map(skill => {
+              if (!skill.position) return null;
+              
+              const isUnlocked = helper.unlockedSkills.includes(skill.id);
+              const check = canUnlockSkill(skill, helper);
+              const isAvailable = !isUnlocked && check.canUnlock;
+              const isLocked = !isUnlocked && !check.canUnlock;
+              const isSelected = selectedSkillId === skill.id;
+              const rarity = getSkillRarity(skill);
+
               return (
-                <div key={row} className="skill-row" style={{ gridRow: rowNum + 1 }}>
-                  {skills.map((skill, skillIndex) => {
-                    const isUnlocked = helper.unlockedSkills.includes(skill.id);
-                    const unlockCheck = canUnlockSkill(skill, helper);
-                    const canUnlock = unlockCheck.canUnlock;
-                    const unlockedByThis = getUnlockedSkills(skill.id);
-
-                    return (
-                      <div
-                        key={skill.id}
-                        className={`skill-node ${isUnlocked ? 'unlocked' : canUnlock ? 'available' : 'locked'}`}
-                      >
-                        <div className="skill-node-inner">
-                          <div className="skill-header">
-                            <div className="skill-icon-wrapper">
-                              <div className="skill-icon">
-                                {skill.icon || (isUnlocked ? '★' : '☆')}
-                              </div>
-                              {isUnlocked && <div className="skill-checkmark">✓</div>}
-                            </div>
-                            <div className="skill-title-section">
-                              <div className="skill-name">{skill.name}</div>
-                              {isUnlocked && <div className="skill-status-badge unlocked-badge">✓</div>}
-                            </div>
-                          </div>
-
-                          <div className="skill-description">{skill.description}</div>
-
-                          <div className="skill-effect">
-                            {skill.type === 'PRODUCTION_BONUS' && (
-                              <div className="effect-display">
-                                <span className="effect-label">{t('clicker.skillTree.bonus')}</span>
-                                <span className="effect-value">+{formatNumber(skill.value)}</span>
-                              </div>
-                            )}
-                            {skill.type === 'PRODUCTION_MULTIPLIER' && (
-                              <div className="effect-display">
-                                <span className="effect-label">{t('clicker.skillTree.multiplier')}</span>
-                                <span className="effect-value">×{skill.value.toFixed(1)}</span>
-                              </div>
-                            )}
-                            {skill.type === 'SPECIAL' && (
-                              <div className="effect-display">
-                                <span className="effect-label">{t('clicker.skillTree.specialEffect')}</span>
-                                <span className="effect-value">×{skill.value.toFixed(1)}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {!isUnlocked && (
-                            <div className="skill-cost-section">
-                              <div className="cost-display">
-                                <span className="cost-label">{t('clicker.skillTree.cost')}</span>
-                                <span className={`cost-value ${helper.ev < skill.cost ? 'insufficient' : ''}`}>
-                                  {formatNumber(skill.cost)} EV
-                                </span>
-                              </div>
-                              {helper.ev < skill.cost && (
-                                <div className="cost-warning">
-                                  {t('clicker.skillTree.missingEV', { amount: formatNumber(skill.cost - helper.ev) })}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {skill.prerequisites && skill.prerequisites.length > 0 && (
-                            <div className="skill-prereqs">
-                              <div className="prereqs-label">{t('clicker.skillTree.prerequisites')}</div>
-                              <div className="prereqs-list">
-                                {skill.prerequisites.map(prereqId => {
-                                  const prereq = skillTree.skills.find(s => s.id === prereqId);
-                                  const isPrereqUnlocked = helper.unlockedSkills.includes(prereqId);
-                                  return prereq ? (
-                                    <div key={prereqId} className={`prereq-badge ${isPrereqUnlocked ? 'unlocked' : 'missing'}`}>
-                                      {isPrereqUnlocked ? '✓' : '○'} {prereq.name}
-                                    </div>
-                                  ) : null;
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {unlockedByThis.length > 0 && (
-                            <div className="skill-unlocks">
-                              <div className="unlocks-label">{t('clicker.skillTree.unlocks')}</div>
-                              <div className="unlocks-list">
-                                {unlockedByThis.map(unlockedSkill => (
-                                  <div key={unlockedSkill.id} className="unlock-badge">
-                                    {unlockedSkill.name} ({formatNumber(unlockedSkill.cost)} EV)
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {!isUnlocked && canUnlock && (
-                            <button
-                              className="skill-unlock-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUnlockSkill(skill.id);
-                              }}
-                            >
-                              {t('clicker.skillTree.unlockButton')}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <button
+                  key={skill.id}
+                  className={`poke-skill-node ${rarity} ${isUnlocked ? 'unlocked' : ''} ${isAvailable ? 'available' : ''} ${isLocked ? 'locked' : ''} ${isSelected ? 'selected' : ''}`}
+                  style={{
+                    left: skill.position.x * GRID_SIZE_X,
+                    top: skill.position.y * GRID_SIZE_Y,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedSkillId(skill.id);
+                  }}
+                >
+                  <span className="poke-node-icon">{getSkillIcon(skill)}</span>
+                  <span className="poke-node-cost">{skill.cost}</span>
+                </button>
               );
             })}
+          </div>
+
+          {/* Instructions */}
+          <div className="poke-instructions">
+            <span>🖱️ Glisser pour naviguer</span>
+            <span>👆 Cliquer pour sélectionner</span>
+          </div>
+        </div>
+
+        {/* Detail Sidebar */}
+        <div className="poke-sidebar">
+          {selectedSkill ? (
+            <div className="poke-skill-detail">
+              {/* Skill Header */}
+              <div className={`poke-skill-header ${getSkillRarity(selectedSkill)}`}>
+                <div className="poke-skill-icon-large">
+                  {getSkillIcon(selectedSkill)}
+                </div>
+                <div className="poke-skill-title">
+                  <span className="poke-skill-name">{selectedSkill.name}</span>
+                  <span className={`poke-skill-status ${helper.unlockedSkills.includes(selectedSkill.id) ? 'active' : 'inactive'}`}>
+                    {helper.unlockedSkills.includes(selectedSkill.id) ? '● ACTIF' : '○ INACTIF'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="poke-skill-desc">
+                <p>{selectedSkill.description}</p>
+              </div>
+
+              {/* Effect */}
+              <div className="poke-skill-effect">
+                <div className="poke-effect-label">EFFET</div>
+                <div className="poke-effect-value">
+                  {selectedSkill.type === 'PRODUCTION_MULTIPLIER' 
+                    ? `Production ×${selectedSkill.value.toFixed(1)}` 
+                    : `Production +${formatNum(selectedSkill.value)}/s`}
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="poke-skill-stats">
+                <div className="poke-stat-row">
+                  <span className="poke-stat-label">Coût</span>
+                  <span className={`poke-stat-value ${evRemaining < selectedSkill.cost && !helper.unlockedSkills.includes(selectedSkill.id) ? 'insufficient' : ''}`}>
+                    {selectedSkill.cost} EV
+                  </span>
+                </div>
+                <div className="poke-stat-row">
+                  <span className="poke-stat-label">Type</span>
+                  <span className="poke-stat-value type">
+                    {selectedSkill.type === 'PRODUCTION_MULTIPLIER' ? 'Multiplicateur' : 'Bonus'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action */}
+              <div className="poke-skill-action">
+                {helper.unlockedSkills.includes(selectedSkill.id) ? (
+                  <div className="poke-already-unlocked">
+                    <span className="poke-check">✓</span>
+                    <span>Talent débloqué</span>
+                  </div>
+                ) : (
+                  <>
+                    <button 
+                      className="poke-unlock-btn"
+                      disabled={!canUnlockSkill(selectedSkill, helper).canUnlock}
+                      onClick={() => handleUnlock(selectedSkill.id)}
+                    >
+                      <span className="poke-btn-icon">◆</span>
+                      <span>{t('clicker.skillTree.unlockButton')}</span>
+                    </button>
+                    {!canUnlockSkill(selectedSkill, helper).canUnlock && (
+                      <div className="poke-unlock-reason">
+                        {canUnlockSkill(selectedSkill, helper).reason || "Prérequis manquants"}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="poke-no-selection">
+              <div className="poke-no-selection-icon">◇</div>
+              <p>Sélectionnez un talent</p>
+              <span>Cliquez sur un nœud de l'arbre pour voir les détails</span>
+            </div>
+          )}
+
+          {/* Legend */}
+          <div className="poke-legend">
+            <div className="poke-legend-title">LÉGENDE</div>
+            <div className="poke-legend-items">
+              <div className="poke-legend-item">
+                <span className="poke-legend-dot common" />
+                <span>Commun</span>
+              </div>
+              <div className="poke-legend-item">
+                <span className="poke-legend-dot uncommon" />
+                <span>Peu commun</span>
+              </div>
+              <div className="poke-legend-item">
+                <span className="poke-legend-dot rare" />
+                <span>Rare</span>
+              </div>
+              <div className="poke-legend-item">
+                <span className="poke-legend-dot legendary" />
+                <span>Légendaire</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,966 +1,833 @@
 /* ============================================
-   ARBRE DE COMPÉTENCES - DESIGN MODERNE
+   ARBRE DE TALENTS - STYLE POKÉMON
    ============================================ */
 
-.skill-tree-modal {
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ===== MODAL ===== */
+.poke-skill-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 10, 20, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.skill-tree-content {
-  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
-  border-radius: 24px;
-  padding: 0;
-  max-width: 95vw;
-  max-height: 95vh;
-  width: 1200px;
+  inset: 0;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(168, 85, 247, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-  position: relative;
+  font-family: 'Share Tech Mono', monospace;
+  animation: pokeModalFade 0.3s ease;
+  background: #1a1a2e;
 }
 
-.skill-tree-content::before {
+@keyframes pokeModalFade {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== HEADER BAR ===== */
+.poke-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  border-bottom: 4px solid #7f1d1d;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 10;
+}
+
+.poke-header-bar::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    #a855f7 20%,
-    #e94560 50%,
-    #a855f7 80%,
-    transparent 100%
-  );
-  animation: shimmer 3s linear infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skill-tree-header {
+.poke-header-left {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 24px 32px;
-  background: linear-gradient(135deg, 
-    rgba(168, 85, 247, 0.15) 0%, 
-    rgba(233, 69, 96, 0.15) 100%
-  );
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
+  gap: 12px;
 }
 
-.skill-tree-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    rgba(168, 85, 247, 0.5) 50%,
-    transparent 100%
-  );
-}
-
-.header-left h2 {
-  margin: 0;
-  color: #fff;
-  font-size: 28px;
-  font-weight: 800;
-  text-shadow: 0 2px 10px rgba(168, 85, 247, 0.5);
-  letter-spacing: -0.5px;
-}
-
-.header-subtitle {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 13px;
-  margin-top: 6px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 600;
-}
-
-.close-btn {
-  background: rgba(239, 68, 68, 0.15);
-  border: 2px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
-  width: 40px;
-  height: 40px;
+.poke-pokemon-frame {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
   border-radius: 12px;
-  cursor: pointer;
-  font-size: 22px;
+  border: 3px solid #fbbf24;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: bold;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 
+    0 0 0 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 0 20px rgba(251, 191, 36, 0.1);
 }
 
-.close-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(239, 68, 68, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
+.poke-pokemon-frame.shiny {
+  border-color: #fcd34d;
+  box-shadow: 
+    0 0 0 2px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(251, 191, 36, 0.4),
+    inset 0 0 20px rgba(251, 191, 36, 0.2);
 }
 
-.close-btn:hover::before {
-  width: 100px;
-  height: 100px;
+.poke-pokemon-frame img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
-.close-btn:hover {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.7);
-  transform: scale(1.05) rotate(90deg);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-}
-
-.skill-tree-info {
-  padding: 20px 32px;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-.info-card {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
-  width: 100%;
-  max-width: 100%;
-}
-
-.info-item {
+.poke-pokemon-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.poke-pokemon-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  min-width: 90px;
-  max-width: 150px;
-  flex: 1 1 auto;
-  transition: all 0.3s;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.poke-shiny-badge {
+  color: #fcd34d;
+  text-shadow: 0 0 10px rgba(252, 211, 77, 0.8);
+  animation: shinyPulse 2s ease-in-out infinite;
+}
+
+@keyframes shinyPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.poke-pokemon-level {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.poke-header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.poke-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 3px;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.poke-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.poke-ev-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.poke-ev-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(145deg, #8b5cf6, #6d28d9);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+.poke-ev-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.poke-ev-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-shadow: 0 0 10px rgba(196, 181, 253, 0.5);
+}
+
+.poke-ev-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.poke-close-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.poke-close-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  transform: rotate(90deg);
+}
+
+/* ===== MAIN CONTENT ===== */
+.poke-content {
+  flex: 1;
+  display: flex;
   overflow: hidden;
 }
 
-.info-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(168, 85, 247, 0.3);
-  transform: translateY(-2px);
-}
-
-.info-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-weight: 600;
-}
-
-.info-value {
-  font-size: 22px;
-  font-weight: 800;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  word-break: break-word;
-  text-align: center;
-  line-height: 1.2;
-  min-width: 0;
-  flex-shrink: 1;
-}
-
-.info-value.highlight {
-  color: #4ade80;
-  text-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Responsive font sizes for large numbers */
-@media (max-width: 1200px) {
-  .info-value {
-    font-size: 18px;
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    text-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-  }
-  50% {
-    text-shadow: 0 0 25px rgba(74, 222, 128, 0.9);
-  }
-}
-
-.skill-tree-wrapper {
+/* ===== TREE VIEWPORT ===== */
+.poke-tree-viewport {
   flex: 1;
-  overflow: auto;
-  padding: 40px 30px;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(233, 69, 96, 0.08) 0%, transparent 50%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 100%);
   position: relative;
-  min-height: 0;
+  overflow: hidden;
+  cursor: grab;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
 }
 
-.skill-tree-wrapper::-webkit-scrollbar {
-  width: 10px;
+.poke-tree-viewport:active {
+  cursor: grabbing;
 }
 
-.skill-tree-wrapper::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+.poke-grid-bg {
+  position: absolute;
+  inset: -100%;
+  background-image: 
+    radial-gradient(circle at center, rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px, 30px 30px, 30px 30px;
+  pointer-events: none;
 }
 
-.skill-tree-wrapper::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a855f7 0%, #e94560 100%);
-  border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-}
-
-.skill-tree-wrapper::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9333ea 0%, #dc2626 100%);
-}
-
-.skill-tree-canvas {
-  position: relative;
-  min-height: 700px;
-  display: grid;
-  grid-template-rows: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 40px;
-  justify-items: center;
-  width: 100%;
-  max-width: 100%;
-}
-
-.skill-connections {
+.poke-tree-world {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  overflow: visible;
+  will-change: transform;
 }
 
-.connection-line {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 0 3px currentColor);
-}
-
-.connection-line.locked {
-  stroke: rgba(100, 100, 100, 0.15);
-  stroke-dasharray: 10, 5;
-  stroke-width: 2;
-}
-
-.connection-line.available {
-  stroke: rgba(233, 69, 96, 0.5);
-  stroke-width: 3;
-  animation: connectionPulse 2s ease-in-out infinite;
-}
-
-.connection-line.unlocked {
-  stroke: rgba(74, 222, 128, 0.6);
-  stroke-width: 3;
-  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.5));
-}
-
-@keyframes connectionPulse {
-  0%, 100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.skill-row {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 24px;
-  position: relative;
-  z-index: 10;
-  flex-wrap: wrap;
-  width: 100%;
-  padding: 0 10px;
-}
-
-.skill-node {
-  position: relative;
-  width: 320px;
-  min-height: auto;
-  max-width: 100%;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
-}
-
-.skill-node-inner {
-  background: linear-gradient(145deg, 
-    rgba(30, 30, 50, 0.95) 0%, 
-    rgba(20, 20, 35, 0.95) 100%
-  );
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.skill-node-inner::before {
-  content: '';
+/* ===== CONNECTIONS ===== */
+.poke-connections {
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
-  transition: left 0.5s;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.skill-node:hover .skill-node-inner::before {
-  left: 100%;
+.poke-path {
+  fill: none;
+  stroke-width: 4px;
+  stroke-linecap: round;
+  transition: all 0.4s ease;
 }
 
-.skill-node.locked .skill-node-inner {
-  opacity: 0.4;
-  background: linear-gradient(145deg, 
-    rgba(15, 15, 25, 0.8) 0%, 
-    rgba(10, 10, 15, 0.9) 100%
-  );
-  filter: grayscale(0.8);
-  border-color: rgba(100, 100, 100, 0.2);
+.poke-path.locked {
+  stroke: rgba(255, 255, 255, 0.08);
 }
 
-.skill-node.available .skill-node-inner {
-  border-color: rgba(233, 69, 96, 0.6);
-  box-shadow: 
-    0 0 30px rgba(233, 69, 96, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  animation: availablePulse 2.5s ease-in-out infinite;
+.poke-path.available {
+  stroke: rgba(251, 191, 36, 0.3);
+  stroke-dasharray: 8 4;
+  animation: pathDash 20s linear infinite;
 }
 
-.skill-node.available:hover .skill-node-inner {
-  border-color: rgba(233, 69, 96, 0.9);
-  box-shadow: 
-    0 0 40px rgba(233, 69, 96, 0.6),
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transform: translateY(-4px) scale(1.02);
+.poke-path.unlocked {
+  stroke: #a855f7;
+  stroke-width: 5px;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6));
 }
 
-.skill-node.unlocked .skill-node-inner {
-  border-color: rgba(74, 222, 128, 0.7);
-  background: linear-gradient(145deg, 
-    rgba(34, 197, 94, 0.15) 0%, 
-    rgba(20, 20, 35, 0.95) 100%
-  );
-  box-shadow: 
-    0 0 30px rgba(74, 222, 128, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+@keyframes pathDash {
+  to { stroke-dashoffset: -240; }
 }
 
-.skill-node.unlocked:hover .skill-node-inner {
-  border-color: rgba(74, 222, 128, 0.95);
-  box-shadow: 
-    0 0 40px rgba(74, 222, 128, 0.6),
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transform: translateY(-4px) scale(1.02);
-}
-
-@keyframes availablePulse {
-  0%, 100% {
-    box-shadow: 
-      0 0 30px rgba(233, 69, 96, 0.4),
-      0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-  50% {
-    box-shadow: 
-      0 0 40px rgba(233, 69, 96, 0.6),
-      0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.skill-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 2px;
-}
-
-.skill-icon-wrapper {
-  position: relative;
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.skill-icon {
-  font-size: 28px;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle, 
-    rgba(168, 85, 247, 0.3) 0%, 
-    rgba(168, 85, 247, 0.1) 50%,
-    transparent 100%
-  );
-  border-radius: 14px;
-  border: 2px solid rgba(168, 85, 247, 0.3);
-  transition: all 0.3s;
-}
-
-.skill-node.unlocked .skill-icon {
-  background: radial-gradient(circle, 
-    rgba(74, 222, 128, 0.4) 0%, 
-    rgba(74, 222, 128, 0.15) 50%,
-    transparent 100%
-  );
-  border-color: rgba(74, 222, 128, 0.4);
-}
-
-.skill-node.available .skill-icon {
-  border-color: rgba(233, 69, 96, 0.5);
-  animation: iconPulse 2s ease-in-out infinite;
-}
-
-@keyframes iconPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.skill-checkmark {
+/* ===== SKILL NODES ===== */
+.poke-skill-node {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 22px;
-  height: 22px;
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000;
-  font-weight: bold;
-  font-size: 12px;
-  box-shadow: 
-    0 0 15px rgba(74, 222, 128, 0.8),
-    0 2px 8px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  animation: checkmarkPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes checkmarkPop {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.skill-title-section {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.skill-name {
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.3;
-  letter-spacing: -0.3px;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  flex: 1;
-  min-width: 0;
-}
-
-.skill-status-badge {
-  font-size: 10px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.unlocked-badge {
-  background: linear-gradient(135deg, 
-    rgba(74, 222, 128, 0.25) 0%, 
-    rgba(34, 197, 94, 0.25) 100%
-  );
-  color: #4ade80;
-  border: 1px solid rgba(74, 222, 128, 0.4);
-  box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-}
-
-.skill-description {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
-  margin-top: -2px;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.skill-effect {
-  padding: 10px 14px;
-  background: linear-gradient(135deg, 
-    rgba(74, 222, 128, 0.15) 0%, 
-    rgba(34, 197, 94, 0.1) 100%
-  );
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
-}
-
-
-
-.effect-value {
-  font-size: 15px;
-  font-weight: 800;
-  color: #4ade80;
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-align: right;
-  min-width: fit-content;
-}
-
-.effect-display {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
-
-.effect-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.skill-cost-section {
-  padding: 10px 14px;
-  background: linear-gradient(135deg, 
-    rgba(96, 165, 250, 0.15) 0%, 
-    rgba(59, 130, 246, 0.1) 100%
-  );
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
-}
-
-
-.cost-value {
-  font-size: 15px;
-  font-weight: 800;
-  color: #60a5fa;
-  text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-align: right;
-  min-width: fit-content;
-}
-
-.cost-value.insufficient {
-  color: #ef4444;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-}
-
-.cost-display {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
-}
-
-.cost-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.cost-warning {
-  font-size: 10px;
-  color: #ef4444;
-  margin-top: 6px;
-  font-weight: 700;
-  text-align: right;
-  word-break: break-word;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.skill-prereqs,
-.skill-unlocks {
-  padding: 8px 12px;
-  background: linear-gradient(135deg, 
-    rgba(168, 85, 247, 0.15) 0%, 
-    rgba(147, 51, 234, 0.1) 100%
-  );
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
-  flex-shrink: 0;
-}
-
-.prereqs-label,
-.unlocks-label {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  font-weight: 800;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-
-.prereqs-list,
-.unlocks-list {
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  border-radius: 16px;
+  border: 3px solid;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-height: 120px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+}
+
+.poke-skill-node::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 20px;
+  background: transparent;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+/* Rarity Colors */
+.poke-skill-node.common {
+  border-color: #64748b;
+}
+
+.poke-skill-node.uncommon {
+  border-color: #22c55e;
+}
+
+.poke-skill-node.rare {
+  border-color: #3b82f6;
+}
+
+.poke-skill-node.legendary {
+  border-color: #f59e0b;
+}
+
+/* States */
+.poke-skill-node.locked {
+  opacity: 0.4;
+  filter: grayscale(0.5);
+}
+
+.poke-skill-node.available {
+  animation: nodeGlow 2s ease-in-out infinite;
+}
+
+.poke-skill-node.available.common::before {
+  background: rgba(100, 116, 139, 0.2);
+  box-shadow: 0 0 20px rgba(100, 116, 139, 0.3);
+}
+
+.poke-skill-node.available.uncommon::before {
+  background: rgba(34, 197, 94, 0.2);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.poke-skill-node.available.rare::before {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.poke-skill-node.available.legendary::before {
+  background: rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+@keyframes nodeGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.poke-skill-node.unlocked {
+  background: linear-gradient(145deg, #6d28d9, #4c1d95);
+  border-color: #a855f7;
+  box-shadow: 
+    0 0 20px rgba(168, 85, 247, 0.5),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.poke-skill-node:hover:not(.locked) {
+  transform: scale(1.15);
+  z-index: 20;
+}
+
+.poke-skill-node.selected {
+  transform: scale(1.2);
+  z-index: 25;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4), 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.poke-node-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.poke-node-cost {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.poke-skill-node.unlocked .poke-node-cost {
+  display: none;
+}
+
+/* ===== INSTRUCTIONS ===== */
+.poke-instructions {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.poke-instructions span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== SIDEBAR ===== */
+.poke-sidebar {
+  width: 340px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-left: 3px solid #334155;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Skill Detail */
+.poke-skill-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
   overflow-y: auto;
 }
 
-.prereqs-list::-webkit-scrollbar,
-.unlocks-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.prereqs-list::-webkit-scrollbar-track,
-.unlocks-list::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-}
-
-.prereqs-list::-webkit-scrollbar-thumb,
-.unlocks-list::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.5);
-  border-radius: 2px;
-}
-
-.prereq-badge,
-.unlock-badge {
-  font-size: 11px;
-  padding: 5px 8px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.2s;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  line-height: 1.3;
-  white-space: normal;
-}
-
-.prereq-badge.unlocked {
-  background: linear-gradient(135deg, 
-    rgba(74, 222, 128, 0.2) 0%, 
-    rgba(34, 197, 94, 0.15) 100%
-  );
-  color: #4ade80;
-  border: 1px solid rgba(74, 222, 128, 0.4);
-}
-
-.prereq-badge.missing {
-  background: rgba(100, 100, 100, 0.2);
-  color: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(100, 100, 100, 0.3);
-}
-
-.unlock-badge {
-  background: linear-gradient(135deg, 
-    rgba(168, 85, 247, 0.2) 0%, 
-    rgba(147, 51, 234, 0.15) 100%
-  );
-  color: #fff;
-  border: 1px solid rgba(168, 85, 247, 0.4);
-}
-
-.skill-unlock-btn {
-  background: linear-gradient(135deg, #e94560 0%, #dc2626 100%);
-  border: none;
-  color: white;
-  padding: 12px 20px;
+.poke-skill-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
   border-radius: 12px;
-  cursor: pointer;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid;
+}
+
+.poke-skill-header.common { border-left-color: #64748b; }
+.poke-skill-header.uncommon { border-left-color: #22c55e; }
+.poke-skill-header.rare { border-left-color: #3b82f6; }
+.poke-skill-header.legendary { 
+  border-left-color: #f59e0b;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(0, 0, 0, 0.3));
+}
+
+.poke-skill-icon-large {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.poke-skill-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.poke-skill-name {
+  font-family: 'Orbitron', sans-serif;
   font-size: 14px;
-  font-weight: 800;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 6px;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.poke-skill-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.poke-skill-status.active {
+  color: #4ade80;
+}
+
+.poke-skill-status.inactive {
+  color: #94a3b8;
+}
+
+.poke-skill-desc {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.poke-skill-desc p {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.poke-skill-effect {
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.05));
+  border-radius: 10px;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.poke-effect-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.poke-effect-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-shadow: 0 0 10px rgba(196, 181, 253, 0.3);
+}
+
+.poke-skill-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.poke-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.poke-stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.poke-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.poke-stat-value.insufficient {
+  color: #f87171;
+}
+
+.poke-stat-value.type {
+  color: #a855f7;
+}
+
+.poke-skill-action {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.poke-unlock-btn {
   width: 100%;
-  box-shadow: 
-    0 4px 12px rgba(233, 69, 96, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  border: none;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: relative;
-  overflow: hidden;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
 }
 
-.skill-unlock-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.4s, height 0.4s;
-}
-
-.skill-unlock-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.skill-unlock-btn:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+.poke-unlock-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 
-    0 6px 20px rgba(233, 69, 96, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+  filter: brightness(1.1);
 }
 
-.skill-unlock-btn:active {
-  transform: translateY(0);
-  box-shadow: 
-    0 2px 8px rgba(233, 69, 96, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.poke-unlock-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .skill-tree-content {
-    width: 98vw;
-  }
-
-  .skill-node {
-    width: 300px;
-  }
-
-  .info-value {
-    font-size: 18px;
-  }
+.poke-btn-icon {
+  font-size: 16px;
 }
 
-@media (max-width: 768px) {
-  .skill-tree-content {
-    width: 95vw;
-    max-height: 90vh;
-    border-radius: 20px;
-  }
+.poke-unlock-reason {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: #f87171;
+}
 
-  .skill-tree-header {
-    padding: 20px;
-  }
+.poke-already-unlocked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: rgba(74, 222, 128, 0.1);
+  border: 2px solid #4ade80;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4ade80;
+  letter-spacing: 1px;
+}
 
-  .header-left h2 {
-    font-size: 22px;
-  }
+.poke-check {
+  font-size: 18px;
+}
 
-  .header-subtitle {
-    font-size: 11px;
-  }
+/* No Selection */
+.poke-no-selection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
 
-  .skill-tree-info {
-    padding: 16px 20px;
-  }
+.poke-no-selection-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+  animation: noSelectPulse 3s ease-in-out infinite;
+}
 
-  .skill-tree-wrapper {
-    padding: 20px 15px;
-  }
+@keyframes noSelectPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.5; }
+}
 
-  .skill-tree-canvas {
-    gap: 25px;
-    min-height: 500px;
-  }
+.poke-no-selection p {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #94a3b8;
+}
 
-  .skill-row {
-    gap: 16px;
-    padding: 0 5px;
-  }
+.poke-no-selection span {
+  font-size: 12px;
+  opacity: 0.7;
+}
 
-  .skill-node {
+/* Legend */
+.poke-legend {
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.poke-legend-title {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.poke-legend-items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.poke-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.poke-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.poke-legend-dot.common { background: #64748b; }
+.poke-legend-dot.uncommon { background: #22c55e; }
+.poke-legend-dot.rare { background: #3b82f6; }
+.poke-legend-dot.legendary { background: #f59e0b; }
+
+/* Empty State */
+.poke-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.poke-empty-icon {
+  font-size: 80px;
+  color: #334155;
+  margin-bottom: 20px;
+}
+
+.poke-empty-state p {
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .poke-content {
+    flex-direction: column;
+  }
+  
+  .poke-sidebar {
     width: 100%;
-    max-width: 100%;
-    min-width: 0;
+    height: 45%;
+    border-left: none;
+    border-top: 3px solid #334155;
   }
-
-  .skill-node-inner {
-    padding: 16px;
-    gap: 10px;
+  
+  .poke-tree-viewport {
+    height: 55%;
   }
-
-  .info-card {
+  
+  .poke-header-center {
+    display: none;
+  }
+  
+  .poke-skill-detail {
+    padding: 15px;
     gap: 12px;
   }
-
-  .info-item {
-    min-width: 70px;
-    max-width: 120px;
-    padding: 10px 12px;
-  }
-
-  .info-value {
-    font-size: 16px;
-  }
-
-  .info-label {
-    font-size: 10px;
-  }
-
-  .skill-name {
-    font-size: 16px;
-  }
-
-  .effect-value,
-  .cost-value {
-    font-size: 13px;
-  }
-
-  .skill-icon {
-    width: 45px;
-    height: 45px;
-    font-size: 24px;
-  }
-
-  .skill-icon-wrapper {
-    width: 45px;
-    height: 45px;
+  
+  .poke-legend {
+    display: none;
   }
 }
 
-@media (max-width: 480px) {
-  .skill-tree-content {
-    width: 100vw;
-    max-height: 100vh;
-    border-radius: 0;
+@media (max-width: 600px) {
+  .poke-header-bar {
+    padding: 10px 15px;
   }
-
-  .skill-tree-header {
-    padding: 16px;
+  
+  .poke-pokemon-frame {
+    width: 44px;
+    height: 44px;
   }
-
-  .header-left h2 {
-    font-size: 20px;
+  
+  .poke-pokemon-frame img {
+    width: 36px;
+    height: 36px;
   }
-
-  .skill-tree-wrapper {
-    padding: 15px 10px;
+  
+  .poke-pokemon-name {
+    font-size: 13px;
   }
-
-  .skill-tree-canvas {
-    gap: 20px;
+  
+  .poke-ev-display {
+    padding: 6px 10px;
   }
-
-  .skill-node-inner {
-    padding: 14px;
+  
+  .poke-ev-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 8px;
   }
-
-  .info-item {
-    min-width: 60px;
-    max-width: 100px;
-    padding: 8px 10px;
-  }
-
-  .info-value {
+  
+  .poke-ev-value {
     font-size: 14px;
+  }
+  
+  .poke-close-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+  
+  .poke-skill-node {
+    width: 52px;
+    height: 52px;
+    margin-left: -26px;
+    margin-top: -26px;
+    border-radius: 12px;
+  }
+  
+  .poke-node-icon {
+    font-size: 18px;
+  }
+  
+  .poke-instructions {
+    padding: 8px 14px;
+    gap: 12px;
+  }
+  
+  .poke-instructions span {
+    font-size: 10px;
+  }
+  
+  .poke-sidebar {
+    height: 50%;
+  }
+  
+  .poke-tree-viewport {
+    height: 50%;
   }
 }
