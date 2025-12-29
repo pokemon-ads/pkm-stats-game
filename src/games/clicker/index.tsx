@@ -4,7 +4,7 @@ import { ClickerProvider } from './context/ClickerContext';
 import { HUD } from './components/HUD';
 import { ClickerArea } from './components/ClickerArea';
 import { PokemonList } from './components/PokemonList';
-import { UpgradesList } from './components/UpgradesList';
+import { Shop } from './components/Shop';
 import { BackgroundEffects } from './components/BackgroundEffects';
 import './styles/ClickerGame.css';
 
@@ -18,9 +18,9 @@ const PokeClickerGame: React.FC = () => {
         <h1 className="clicker-game-title">{t('clicker.title')}</h1>
         
         <div className="clicker-layout">
-          {/* Left Column - Upgrades & Shop */}
+          {/* Left Column - Shop (Boosts & Upgrades) */}
           <div className="clicker-left-column">
-            <UpgradesList />
+            <Shop />
           </div>
 
           {/* Center Column - Stats & Clicker */}

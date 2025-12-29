@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useClickerGame } from '../hooks/useClickerGame';
-import { getCurrentEvolution } from '../config/helpers';
+import { getCurrentEvolution, getNextEvolution } from '../config/helpers';
+import type { PokemonHelper } from '../types/game';
+import '../styles/ClickerArea.css';
 
 interface FloatingTextItem {
   id: number;
@@ -17,6 +19,7 @@ interface Particle {
   color: string;
   tx: number;
   ty: number;
+  type: 'star' | 'sparkle' | 'energy';
 }
 
 // Default Pokemon (Pikachu) if no helpers unlocked
@@ -24,39 +27,131 @@ const DEFAULT_POKEMON_ID = 25;
 
 // Performance limits
 const MAX_FLOATING_TEXTS = 5;
-const MAX_PARTICLES = 16;
-const CLICK_BATCH_INTERVAL = 100; // ms - batch clicks within this window
-const MIN_EFFECT_INTERVAL = 50; // ms - minimum time between visual effects
+const MAX_PARTICLES = 20;
+const CLICK_BATCH_INTERVAL = 100;
+const MIN_EFFECT_INTERVAL = 50;
 
-// Get animated sprite URL for a Pokemon
-const getAnimatedSprite = (pokemonId: number) =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokemonId}.gif`;
+// Get animated sprite URL for a Pokemon (with shiny support)
+const getAnimatedSprite = (pokemonId: number, isShiny: boolean = false) => {
+  const shinyPath = isShiny ? 'shiny/' : '';
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${shinyPath}${pokemonId}.gif`;
+};
 
-// Get static sprite URL as fallback
-const getStaticSprite = (pokemonId: number) =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`;
+// Get static sprite URL as fallback (with shiny support)
+const getStaticSprite = (pokemonId: number, isShiny: boolean = false) => {
+  const shinyPath = isShiny ? 'shiny/' : '';
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${shinyPath}${pokemonId}.png`;
+};
+
+// Get mini sprite for Pokemon selector
+const getMiniSprite = (pokemonId: number, isShiny: boolean = false) => {
+  // Gen 8 icons don't have shiny variants, use regular sprites for shiny
+  if (isShiny) {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
+  }
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
+};
+
+// Format large numbers with K/M/B suffixes
+const formatNumber = (num: number): string => {
+  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+  return num.toFixed(num >= 10 ? 0 : 1);
+};
+
+// Get type color based on Pokemon
+const getTypeColor = (pokemonId: number): string => {
+  const typeColors: Record<number, string> = {
+    25: '#F8D030', // Pikachu - Electric
+    26: '#F8D030', // Raichu
+    4: '#F08030', // Charmander - Fire
+    5: '#F08030',
+    6: '#F08030',
+    7: '#6890F0', // Squirtle - Water
+    8: '#6890F0',
+    9: '#6890F0',
+    1: '#78C850', // Bulbasaur - Grass
+    2: '#78C850',
+    3: '#78C850',
+    52: '#A8A878', // Meowth - Normal
+    53: '#A8A878',
+    66: '#C03028', // Machop - Fighting
+    67: '#C03028',
+    68: '#C03028',
+    63: '#F85888', // Abra - Psychic
+    64: '#F85888',
+    65: '#F85888',
+    133: '#A8A878', // Eevee
+    134: '#6890F0', // Vaporeon
+    135: '#F8D030', // Jolteon
+    136: '#F08030', // Flareon
+    196: '#F85888', // Espeon
+    197: '#705848', // Umbreon
+    92: '#705898', // Gastly - Ghost
+    93: '#705898',
+    94: '#705898',
+    147: '#7038F8', // Dratini - Dragon
+    148: '#7038F8',
+    149: '#7038F8',
+    446: '#A8A878', // Munchlax
+    143: '#A8A878', // Snorlax
+    246: '#B8A038', // Larvitar - Rock
+    247: '#B8A038',
+    248: '#B8A038',
+    371: '#7038F8', // Bagon - Dragon
+    372: '#7038F8',
+    373: '#7038F8',
+    150: '#F85888', // Mewtwo
+    384: '#7038F8', // Rayquaza
+    483: '#B8B8D0', // Dialga - Steel
+    493: '#A8A878', // Arceus
+    487: '#705898', // Giratina
+  };
+  return typeColors[pokemonId] || '#A8A878';
+};
 
 export const ClickerArea: React.FC = () => {
   const { handleClick, state } = useClickerGame();
   
-  // Find the last unlocked helper with count > 0 and get its evolved form
-  // Optimized: iterate backwards to find last purchased helper without filtering all
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const { displayPokemonId, displayPokemonName } = useMemo(() => {
-    // Find last helper with count > 0 by iterating backwards
-    for (let i = state.helpers.length - 1; i >= 0; i--) {
-      const helper = state.helpers[i];
-      if (helper.count > 0) {
-        const evolution = getCurrentEvolution(helper);
-        return {
-          displayPokemonId: evolution.pokemonId,
-          displayPokemonName: evolution.name
-        };
-      }
+  // Get all owned helpers
+  const ownedHelpers = useMemo(() => {
+    return state.helpers.filter(h => h.count > 0);
+  }, [state.helpers]);
+  
+  // Selected Pokemon index (for switching)
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showPokemonSelector, setShowPokemonSelector] = useState(false);
+  
+  // Get currently selected helper or default to last owned
+  const selectedHelper = useMemo((): PokemonHelper | null => {
+    if (ownedHelpers.length === 0) return null;
+    const validIndex = Math.min(selectedIndex, ownedHelpers.length - 1);
+    return ownedHelpers[validIndex];
+  }, [ownedHelpers, selectedIndex]);
+  
+  const { displayPokemonId, displayPokemonName, displayLevel, nextEvolution, typeColor } = useMemo(() => {
+    if (!selectedHelper) {
+      return { 
+        displayPokemonId: DEFAULT_POKEMON_ID, 
+        displayPokemonName: 'Pikachu',
+        displayLevel: 1,
+        nextEvolution: null,
+        typeColor: '#F8D030'
+      };
     }
     
-    return { displayPokemonId: DEFAULT_POKEMON_ID, displayPokemonName: 'Pikachu' };
-  }, [state.helpers]);
+    const evolution = getCurrentEvolution(selectedHelper);
+    const next = getNextEvolution(selectedHelper);
+    
+    return {
+      displayPokemonId: evolution.pokemonId,
+      displayPokemonName: evolution.name,
+      displayLevel: Math.max(1, selectedHelper.level),
+      nextEvolution: next,
+      typeColor: getTypeColor(evolution.pokemonId)
+    };
+  }, [selectedHelper]);
 
   const [floatingTexts, setFloatingTexts] = useState<FloatingTextItem[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -64,13 +159,11 @@ export const ClickerArea: React.FC = () => {
   const [showBurst, setShowBurst] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
-  // Click batching refs
   const pendingClicksRef = useRef(0);
   const lastEffectTimeRef = useRef(0);
   const batchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastClickPosRef = useRef({ x: 0, y: 0 });
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (batchTimeoutRef.current) {
@@ -80,75 +173,47 @@ export const ClickerArea: React.FC = () => {
   }, []);
 
   const createParticles = useCallback((centerX: number, centerY: number, intensity: number = 1) => {
-    const colors = ['#ffcb05', '#a855f7', '#3b4cca', '#e94560', '#4ade80', '#ffd700', '#f0abfc'];
-    const particleCount = Math.min(Math.ceil(6 * intensity), 12);
+    const particleCount = Math.min(Math.ceil(8 * intensity), 15);
     const newParticles: Particle[] = [];
     const baseId = Date.now();
-    const colorCount = colors.length;
     
-    // Pre-calculate reusable values
-    const angleStep = (Math.PI * 2) / particleCount;
-    const baseDistance = 60;
-    const distanceRange = 40 * intensity;
+    const types: Array<'star' | 'sparkle' | 'energy'> = ['star', 'sparkle', 'energy'];
+    const colors = [typeColor, '#ffcb05', '#ffffff', '#ff6b6b', '#4ecdc4'];
     
     for (let i = 0; i < particleCount; i++) {
-      const angle = angleStep * i + Math.random() * 0.5;
-      const distance = baseDistance + Math.random() * distanceRange;
-      const cosAngle = Math.cos(angle);
-      const sinAngle = Math.sin(angle);
+      const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+      const distance = 50 + Math.random() * 80 * intensity;
       
       newParticles.push({
         id: baseId + i,
         x: centerX,
         y: centerY,
-        color: colors[Math.floor(Math.random() * colorCount)],
-        tx: cosAngle * distance,
-        ty: sinAngle * distance,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        tx: Math.cos(angle) * distance,
+        ty: Math.sin(angle) * distance,
+        type: types[Math.floor(Math.random() * types.length)],
       });
     }
     
-    // Use functional update to avoid closure issues
     setParticles(prev => {
       const combined = [...prev, ...newParticles];
-      // Keep only the most recent particles
-      if (combined.length > MAX_PARTICLES) {
-        return combined.slice(-MAX_PARTICLES);
-      }
-      return combined;
+      return combined.slice(-MAX_PARTICLES);
     });
     
-    // Clean up particles after animation using requestAnimationFrame for better performance
     const particleIds = new Set(newParticles.map(p => p.id));
-    const cleanupTime = Date.now() + 800;
-    let cleanupCount = 0;
-    
-    const cleanup = () => {
-      // #region agent log
-      cleanupCount++;
-      if (cleanupCount > 50) {
-        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerArea.tsx:124',message:'Particle cleanup loop excessive',data:{cleanupCount,particleCount:newParticles.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      }
-      // #endregion
-      const now = Date.now();
-      if (now >= cleanupTime) {
-        setParticles(prev => prev.filter(p => !particleIds.has(p.id)));
-      } else {
-        requestAnimationFrame(cleanup);
-      }
-    };
-    requestAnimationFrame(cleanup);
-  }, []);
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !particleIds.has(p.id)));
+    }, 1000);
+  }, [typeColor]);
 
   const showVisualEffects = useCallback((clickCount: number, x: number, y: number) => {
     const now = Date.now();
     
-    // Throttle visual effects
     if (now - lastEffectTimeRef.current < MIN_EFFECT_INTERVAL) {
       return;
     }
     lastEffectTimeRef.current = now;
 
-    // Get button center for particles
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -156,11 +221,10 @@ export const ClickerArea: React.FC = () => {
       createParticles(centerX, centerY, Math.min(clickCount, 3));
     }
     
-    // Create floating text with accumulated amount
     const totalAmount = state.energyPerClick * clickCount;
     const displayText = clickCount > 1 
-      ? `+${totalAmount.toFixed(totalAmount >= 10 ? 0 : 1)} (x${clickCount})`
-      : `+${totalAmount.toFixed(totalAmount >= 10 ? 0 : 1)}`;
+      ? `+${formatNumber(totalAmount)} (x${clickCount})`
+      : `+${formatNumber(totalAmount)}`;
     
     const newText: FloatingTextItem = {
       id: now + Math.random(),
@@ -170,20 +234,14 @@ export const ClickerArea: React.FC = () => {
       amount: totalAmount
     };
     
-    setFloatingTexts(prev => {
-      const updated = [...prev, newText];
-      // Keep only the most recent texts
-      return updated.slice(-MAX_FLOATING_TEXTS);
-    });
+    setFloatingTexts(prev => [...prev, newText].slice(-MAX_FLOATING_TEXTS));
     
-    // Trigger click animation
     setIsClicking(true);
     setShowBurst(true);
     
     setTimeout(() => setIsClicking(false), 150);
     setTimeout(() => setShowBurst(false), 400);
     
-    // Auto-remove floating text after animation
     setTimeout(() => {
       setFloatingTexts(prev => prev.filter(item => item.id !== newText.id));
     }, 800);
@@ -199,163 +257,227 @@ export const ClickerArea: React.FC = () => {
   }, [showVisualEffects]);
 
   const handleAreaClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    // Always process the game click immediately
     handleClick();
-    
-    // Store click position
     lastClickPosRef.current = { x: e.clientX, y: e.clientY };
-    
-    // Batch visual effects
     pendingClicksRef.current += 1;
     
-    // If no batch timeout is pending, start one
     if (!batchTimeoutRef.current) {
       batchTimeoutRef.current = setTimeout(processBatchedClicks, CLICK_BATCH_INTERVAL);
     }
   }, [handleClick, processBatchedClicks]);
 
+  // Switch to next Pokemon
+  const handleNextPokemon = useCallback(() => {
+    if (ownedHelpers.length <= 1) return;
+    setSelectedIndex(prev => (prev + 1) % ownedHelpers.length);
+  }, [ownedHelpers.length]);
+
+  // Switch to previous Pokemon
+  const handlePrevPokemon = useCallback(() => {
+    if (ownedHelpers.length <= 1) return;
+    setSelectedIndex(prev => prev === 0 ? ownedHelpers.length - 1 : prev - 1);
+  }, [ownedHelpers.length]);
+
+  // Calculate HP bar percentage (based on progress to next evolution)
+  const hpPercentage = useMemo(() => {
+    if (!selectedHelper || !nextEvolution) return 100;
+    const current = selectedHelper.count;
+    const prevLevel = selectedHelper.evolutions?.find(e => e.level <= current)?.level || 0;
+    const progress = ((current - prevLevel) / (nextEvolution.level - prevLevel)) * 100;
+    return Math.min(100, Math.max(0, progress));
+  }, [selectedHelper, nextEvolution]);
+
+  // Get HP bar color class
+  const hpBarClass = hpPercentage > 50 ? '' : hpPercentage > 20 ? 'low' : 'critical';
+
   return (
-    <div className="clicker-area">
-      <div className="clicker-pokemon-container">
-        {/* Energy rings */}
-        <div className="energy-ring" />
+    <div className="battle-screen" style={{ '--type-color': typeColor } as React.CSSProperties}>
+      {/* Terrain background */}
+      <div className="battle-terrain">
+        <div className="terrain-grass" />
+        <div className="terrain-shadow" />
+      </div>
+      
+      {/* Enemy info box (top right style) */}
+      <div className="pokemon-info-box enemy-box">
+        <div className="info-box-inner">
+          <div className="pokemon-name-row">
+            <span className="pokemon-name">
+              {selectedHelper?.isShiny && <span className="shiny-star">✦</span>}
+              {displayPokemonName}
+            </span>
+            <span className="pokemon-level">Lv.{displayLevel}</span>
+          </div>
+          <div className="hp-bar-container">
+            <span className="hp-label">EXP</span>
+            <div className="hp-bar-bg">
+              <div 
+                className={`hp-bar-fill ${hpBarClass}`}
+                style={{ width: `${hpPercentage}%` }}
+              />
+            </div>
+          </div>
+          {nextEvolution && (
+            <div className="evolution-hint">
+              → {nextEvolution.name} (Lv.{nextEvolution.level})
+            </div>
+          )}
+        </div>
+        <div className="info-box-decoration" />
+      </div>
+
+      {/* Pokemon battle area */}
+      <div className="pokemon-battle-area">
+        {/* Energy burst effect */}
+        {showBurst && <div className="battle-burst" style={{ '--burst-color': typeColor } as React.CSSProperties} />}
         
-        {/* Energy burst effect on click */}
-        {showBurst && <div className="energy-burst" />}
-        
-        {/* Main clicker button with Pokemon */}
+        {/* Main Pokemon button */}
         <button
           ref={buttonRef}
           onClick={handleAreaClick}
-          className={`clicker-button ${isClicking ? 'clicking' : ''}`}
+          className={`pokemon-battle-button ${isClicking ? 'attacking' : ''} ${selectedHelper?.isShiny ? 'shiny' : ''}`}
         >
+          {/* Shiny sparkles */}
+          {selectedHelper?.isShiny && (
+            <>
+              <span className="shiny-sparkle">✦</span>
+              <span className="shiny-sparkle">✦</span>
+              <span className="shiny-sparkle">✧</span>
+              <span className="shiny-sparkle">✦</span>
+            </>
+          )}
+          <div className="pokemon-platform">
+            <div className="platform-glow" style={{ background: `radial-gradient(ellipse, ${typeColor}40 0%, transparent 60%)` }} />
+          </div>
           <img
-            src={getAnimatedSprite(displayPokemonId)}
+            src={getAnimatedSprite(displayPokemonId, selectedHelper?.isShiny || false)}
             alt={displayPokemonName}
-            className={`clicker-pokemon-sprite ${isClicking ? 'clicking' : ''}`}
+            className={`battle-pokemon-sprite ${isClicking ? 'attacking' : ''} ${selectedHelper?.isShiny ? 'shiny' : ''}`}
             onError={(e) => {
-              (e.target as HTMLImageElement).src = getStaticSprite(displayPokemonId);
+              (e.target as HTMLImageElement).src = getStaticSprite(displayPokemonId, selectedHelper?.isShiny || false);
             }}
           />
         </button>
       </div>
-      
-      {/* Click info */}
-      <div className="click-info">
-        <span className="click-power">⚡ {state.energyPerClick.toFixed(1)} per click</span>
+
+      {/* Action menu - Floating left */}
+      <div className="action-menu">
+        <div className="action-button active" onClick={handleAreaClick as unknown as React.MouseEventHandler}>
+          <span>ATTAQUE</span>
+          <small className="action-detail">+{formatNumber(state.energyPerClick)}</small>
+        </div>
+        <div 
+          className={`action-button ${ownedHelpers.length > 1 ? '' : 'disabled'}`}
+          onClick={() => ownedHelpers.length > 1 && setShowPokemonSelector(!showPokemonSelector)}
+        >
+          <span>POKÉMON</span>
+          <small className="action-detail">{ownedHelpers.length}/15</small>
+        </div>
+        <div className="action-button">
+          <span>STATS</span>
+          <small className="action-detail">{formatNumber(state.energyPerSecond)}/s</small>
+        </div>
+        <div className="action-button">
+          <span>INFO</span>
+          <small className="action-detail">Lv.{displayLevel}</small>
+        </div>
       </div>
-      
-      {/* Floating texts - using CSS-only animation for performance */}
-      {floatingTexts.length > 0 && floatingTexts.map(item => (
+
+      {/* Player stats box - Floating right */}
+      <div className="pokemon-info-box player-box">
+        <div className="info-box-inner">
+          <div className="pokemon-name-row">
+            <span className="pokemon-name">Dresseur</span>
+          </div>
+          <div className="hp-bar-container">
+            <span className="hp-label">EP</span>
+            <div className="hp-bar-bg energy-bar">
+              <div 
+                className="hp-bar-fill energy-fill" 
+                style={{ width: '100%' }}
+              />
+            </div>
+          </div>
+          <div className="energy-display">
+            <span className="energy-current">{formatNumber(state.energy)}</span>
+            <span className="energy-label">ÉNERGIE</span>
+          </div>
+          <div className="click-power-display">
+            <span className="click-power-value">⚡{formatNumber(state.energyPerClick)}/clic</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Pokemon Selector Overlay */}
+      {showPokemonSelector && (
+        <div className="pokemon-selector-overlay" onClick={() => setShowPokemonSelector(false)}>
+          <div className="pokemon-selector" onClick={e => e.stopPropagation()}>
+            <div className="selector-header">
+              <span>Choisir un Pokémon</span>
+              <button className="selector-close" onClick={() => setShowPokemonSelector(false)}>✕</button>
+            </div>
+            <div className="selector-grid">
+              {ownedHelpers.map((helper, index) => {
+                const evo = getCurrentEvolution(helper);
+                return (
+                  <button
+                    key={helper.id}
+                    className={`selector-pokemon ${index === selectedIndex ? 'selected' : ''} ${helper.isShiny ? 'shiny' : ''}`}
+                    onClick={() => {
+                      setSelectedIndex(index);
+                      setShowPokemonSelector(false);
+                    }}
+                  >
+                    <img 
+                      src={getMiniSprite(evo.pokemonId, helper.isShiny)} 
+                      alt={evo.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getStaticSprite(evo.pokemonId, helper.isShiny);
+                      }}
+                    />
+                    <span className="selector-name">{evo.name}</span>
+                    <span className="selector-level">Lv.{helper.level}</span>
+                    {helper.isShiny && <span className="selector-shiny">✦</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="selector-nav">
+              <button onClick={handlePrevPokemon}>◀ Préc.</button>
+              <button onClick={handleNextPokemon}>Suiv. ▶</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating texts */}
+      {floatingTexts.map(item => (
         <div
           key={item.id}
-          className="floating-text-container"
+          className="battle-floating-text"
           style={{
-            position: 'fixed',
             left: item.x,
             top: item.y,
-            pointerEvents: 'none',
-            zIndex: 1000,
           }}
         >
-          <span className="floating-text-value">{item.text}</span>
+          <span className="floating-damage">{item.text}</span>
         </div>
       ))}
       
       {/* Particles */}
-      {particles.length > 0 && (
-        <div className="click-particles">
-          {particles.map(particle => (
-            <div
-              key={particle.id}
-              className="particle"
-              style={{
-                left: particle.x,
-                top: particle.y,
-                backgroundColor: particle.color,
-                '--tx': `${particle.tx}px`,
-                '--ty': `${particle.ty}px`,
-                width: '14px',
-                height: '14px',
-                boxShadow: `0 0 15px ${particle.color}, 0 0 25px ${particle.color}`,
-              } as React.CSSProperties}
-            />
-          ))}
-        </div>
-      )}
-      
-      <style>{`
-        .click-info {
-          margin-top: 1.5rem;
-          text-align: center;
-        }
-        
-        .click-power {
-          font-size: 1rem;
-          font-weight: 600;
-          color: rgba(255, 255, 255, 0.7);
-          background: rgba(0, 0, 0, 0.3);
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-        }
-        
-        .particle {
-          position: fixed;
-          border-radius: 50%;
-          pointer-events: none;
-          animation: particleFly 0.8s ease-out forwards;
-          z-index: 100;
-          will-change: transform, opacity;
-        }
-        
-        @keyframes particleFly {
-          0% {
-            transform: translate(-50%, -50%) scale(1) rotate(0deg);
-            opacity: 1;
-          }
-          50% {
-            transform: translate(calc(-50% + var(--tx) * 0.5), calc(-50% + var(--ty) * 0.5)) scale(1.2) rotate(180deg);
-            opacity: 0.8;
-          }
-          100% {
-            transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0) rotate(360deg);
-            opacity: 0;
-          }
-        }
-        
-        .floating-text-container {
-          animation: floatUpFade 0.8s ease-out forwards;
-          will-change: transform, opacity;
-        }
-        
-        .floating-text-value {
-          font-weight: 900;
-          font-size: 1.8rem;
-          color: #ffcb05;
-          text-shadow: 
-            0 0 10px rgba(255, 203, 5, 0.8),
-            0 0 20px rgba(255, 203, 5, 0.5),
-            2px 2px 0 #3b4cca,
-            -1px -1px 0 #3b4cca;
-          transform: translate(-50%, -50%);
-          display: block;
-          white-space: nowrap;
-        }
-        
-        @keyframes floatUpFade {
-          0% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(0.5);
-          }
-          20% {
-            transform: translate(-50%, -70%) scale(1.2);
-          }
-          100% {
-            opacity: 0;
-            transform: translate(-50%, -150%) scale(1);
-          }
-        }
-      `}</style>
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className={`battle-particle particle-${particle.type}`}
+          style={{
+            left: particle.x,
+            top: particle.y,
+            backgroundColor: particle.color,
+            '--tx': `${particle.tx}px`,
+            '--ty': `${particle.ty}px`,
+          } as React.CSSProperties}
+        />
+      ))}
     </div>
   );
 };

@@ -19,6 +19,12 @@ export const Navbar = () => {
         <NavLink
           to="/pokestats"
           className={({ isActive }) => `nav-button ${isActive ? 'active' : ''}`}
+          onClick={() => {
+            // Dispatch event to reset game if already on pokestats
+            if (window.location.pathname === '/pokestats') {
+              window.dispatchEvent(new CustomEvent('pokestats-reset'))
+            }
+          }}
         >
           📊 {t('nav.pokestats')}
         </NavLink>

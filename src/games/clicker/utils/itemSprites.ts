@@ -7,115 +7,194 @@ export const getItemSpriteUrl = (itemName: string): string => {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${formattedName}.png`;
 };
 
-// Mapping of upgrade IDs to Pokemon item names
-export const UPGRADE_ITEM_MAP: Record<string, string> = {
-  // Click upgrades
-  'better_mouse': 'poke-ball',
-  'gaming_mouse': 'great-ball',
-  'super_mouse': 'ultra-ball',
-  'mega_mouse': 'master-ball',
-  'ultra_mouse': 'premier-ball',
-  'master_mouse': 'cherish-ball',
-  'legendary_mouse': 'luxury-ball',
-  'mythical_mouse': 'safari-ball',
+// ============================================
+// ITEM CATEGORIES FOR PC BOX DISPLAY
+// ============================================
+export type ItemCategory = 'balls' | 'medicine' | 'held' | 'evolution' | 'battle' | 'mega' | 'plates' | 'gems';
+
+export const ITEM_CATEGORIES: Record<string, ItemCategory> = {
+  // ============================================
+  // POKÉ BALLS
+  // ============================================
+  'poke-ball': 'balls',
+  'great-ball': 'balls',
+  'ultra-ball': 'balls',
+  'master-ball': 'balls',
+  'premier-ball': 'balls',
+  'cherish-ball': 'balls',
+  'luxury-ball': 'balls',
+  'safari-ball': 'balls',
   
-  // Global upgrades
-  'energy_drink': 'fresh-water',
-  'coffee_break': 'moomoo-milk',
-  'pokemon_center': 'full-heal',
-  'power_plant': 'thunder-stone',
-  'pokemon_league': 'rare-candy',
-  'elite_four': 'max-revive',
-  'champion': 'master-ball',
-  'pokemon_master': 'rare-candy',
+  // ============================================
+  // MEDICINE & CONSUMABLES
+  // ============================================
+  'fresh-water': 'medicine',
+  'moomoo-milk': 'medicine',
+  'full-heal': 'medicine',
+  'rare-candy': 'medicine',
+  'pp-max': 'medicine',
+  'pp-up': 'medicine',
+  'ether': 'medicine',
+  'max-ether': 'medicine',
+  'max-elixir': 'medicine',
+  'protein': 'medicine',
+  'ability-capsule': 'medicine',
   
-  // Helper upgrades - Stones
-  'pikachu_t2': 'thunder-stone',
-  'charmander_t2': 'fire-stone',
-  'squirtle_t2': 'water-stone',
-  'bulbasaur_t2': 'leaf-stone',
-  'eevee_t2': 'moon-stone',
-  'dragonite_t2': 'dragon-scale',
-  'tyranitar_t2': 'dusk-stone',
-  'salamence_t2': 'dragon-fang',
-  'mewtwo_t2': 'mewtwonite-x',
-  'rayquaza_t2': 'jade-orb',
-  'dialga_t2': 'adamant-orb',
-  'arceus_t2': 'flame-plate',
-  'giratina_t2': 'griseous-orb',
+  // ============================================
+  // HELD ITEMS
+  // ============================================
+  'light-ball': 'held',
+  'charcoal': 'held',
+  'mystic-water': 'held',
+  'miracle-seed': 'held',
+  'amulet-coin': 'held',
+  'black-belt': 'held',
+  'twisted-spoon': 'held',
+  'soothe-bell': 'held',
+  'spell-tag': 'held',
+  'dragon-fang': 'held',
+  'leftovers': 'held',
+  'black-glasses': 'held',
+  'sharp-beak': 'held',
+  'life-orb': 'held',
+  'metal-coat': 'held',
+  'silk-scarf': 'held',
+  'reaper-cloth': 'held',
+  'quick-claw': 'held',
+  'exp-share': 'held',
+  'lucky-egg': 'held',
+  'oval-charm': 'held',
+  'nugget': 'held',
+  'wise-glasses': 'held',
+  'expert-belt': 'held',
+  'magnet': 'held',
+  'heat-rock': 'held',
+  'damp-rock': 'held',
+  'wave-incense': 'held',
+  'luck-incense': 'held',
+  'chesto-berry': 'held',
+  'haban-berry': 'held',
   
-  // Helper upgrades - Training (use various items)
-  'pikachu_t1': 'light-ball',
-  'charmander_t1': 'charcoal',
-  'squirtle_t1': 'mystic-water',
-  'bulbasaur_t1': 'miracle-seed',
-  'eevee_t1': 'soothe-bell',
-  'gengar_t1': 'spell-tag',
-  'gengar_t2': 'spell-tag',
-  'dragonite_t1': 'dragon-scale',
-  'snorlax_t1': 'leftovers',
-  'snorlax_t2': 'leftovers',
-  'tyranitar_t1': 'black-glasses',
-  'salamence_t1': 'dragon-fang',
-  'mewtwo_t1': 'twisted-spoon',
-  'rayquaza_t1': 'sharp-beak',
-  'dialga_t1': 'metal-coat',
-  'arceus_t1': 'silk-scarf',
-  'giratina_t1': 'spell-tag',
-  'meowth_t1': 'amulet-coin',
-  'meowth_t2': 'nugget',
-  'machop_t1': 'black-belt',
-  'machop_t2': 'muscle-band',
-  'abra_t1': 'twisted-spoon',
-  'abra_t2': 'wise-glasses',
+  // ============================================
+  // EVOLUTION ITEMS
+  // ============================================
+  'thunder-stone': 'evolution',
+  'fire-stone': 'evolution',
+  'water-stone': 'evolution',
+  'leaf-stone': 'evolution',
+  'moon-stone': 'evolution',
+  'sun-stone': 'evolution',
+  'dusk-stone': 'evolution',
+  'dragon-scale': 'evolution',
+  'electirizer': 'evolution',
   
-  // Evolution upgrades
-  'raichu_power': 'thunder-stone',
-  'charmeleon_fury': 'fire-stone',
-  'charizard_blaze': 'fire-stone',
-  'wartortle_shell': 'water-stone',
-  'blastoise_hydro': 'water-stone',
-  'ivysaur_growth': 'leaf-stone',
-  'venusaur_solar': 'leaf-stone',
-  'vaporeon_aqua': 'water-stone',
-  'jolteon_thunder': 'thunder-stone',
-  'flareon_flare': 'fire-stone',
-  'espeon_psychic': 'sun-stone',
-  'umbreon_dark': 'moon-stone',
-  'haunter_curse': 'dusk-stone',
-  'gengar_shadow': 'dusk-stone',
-  'dragonair_grace': 'dragon-scale',
-  'dragonite_outrage': 'dragon-scale',
-  'snorlax_rest': 'leftovers',
-  'pupitar_harden': 'dusk-stone',
-  'tyranitar_crunch': 'dusk-stone',
-  'shelgon_protect': 'dragon-fang',
-  'salamence_fly': 'dragon-fang',
-  'persian_payday': 'amulet-coin',
-  'machoke_strength': 'black-belt',
-  'machamp_might': 'muscle-band',
-  'kadabra_psychic': 'twisted-spoon',
-  'alakazam_mind': 'wise-glasses',
+  // ============================================
+  // PLATES (Arceus type-changing items)
+  // ============================================
+  'flame-plate': 'plates',
+  'splash-plate': 'plates',
+  'zap-plate': 'plates',
+  'meadow-plate': 'plates',
+  'icicle-plate': 'plates',
+  'fist-plate': 'plates',
+  'toxic-plate': 'plates',
+  'earth-plate': 'plates',
+  'sky-plate': 'plates',
+  'mind-plate': 'plates',
+  'insect-plate': 'plates',
+  'stone-plate': 'plates',
+  'spooky-plate': 'plates',
+  'draco-plate': 'plates',
+  'dread-plate': 'plates',
+  'iron-plate': 'plates',
+  'pixie-plate': 'plates',
+  'blank-plate': 'plates',
+  
+  // ============================================
+  // GEMS (type-boosting consumables)
+  // ============================================
+  'normal-gem': 'gems',
+  'fire-gem': 'gems',
+  'water-gem': 'gems',
+  'electric-gem': 'gems',
+  'grass-gem': 'gems',
+  'ice-gem': 'gems',
+  'fighting-gem': 'gems',
+  'poison-gem': 'gems',
+  'ground-gem': 'gems',
+  'flying-gem': 'gems',
+  'psychic-gem': 'gems',
+  'bug-gem': 'gems',
+  'rock-gem': 'gems',
+  'ghost-gem': 'gems',
+  'dragon-gem': 'gems',
+  'dark-gem': 'gems',
+  'steel-gem': 'gems',
+  'fairy-gem': 'gems',
+  
+  // ============================================
+  // BATTLE ITEMS
+  // ============================================
+  'power-anklet': 'battle',
+  'power-band': 'battle',
+  'power-weight': 'battle',
+  'muscle-band': 'battle',
+  'full-incense': 'battle',
+  'hard-stone': 'battle',
+  'razor-claw': 'battle',
+  'focus-sash': 'battle',
+  'eviolite': 'battle',
+  
+  // ============================================
+  // MEGA STONES & LEGENDARY ORBS
+  // ============================================
+  'mewtwonite-x': 'mega',
+  'mewtwonite-y': 'mega',
+  'charizardite-x': 'mega',
+  'charizardite-y': 'mega',
+  'blastoisinite': 'mega',
+  'venusaurite': 'mega',
+  'alakazite': 'mega',
+  'gengarite': 'mega',
+  'tyranitarite': 'mega',
+  'salamencite': 'mega',
+  'jade-orb': 'mega',
+  'adamant-orb': 'mega',
+  'lustrous-orb': 'mega',
+  'griseous-orb': 'mega',
 };
 
-// Mapping of boost IDs to Pokemon item names
+// ============================================
+// BOOST ITEM MAP - Unique items for each boost
+// ============================================
 export const BOOST_ITEM_MAP: Record<string, string> = {
-  // Click boosts
-  'click_boost_2x': 'zap-plate',
-  'click_boost_5x': 'magnet',
-  'click_boost_10x': 'light-ball',
+  // Click boosts - Power items
+  'click_boost_2x': 'power-anklet',
+  'click_boost_5x': 'power-band',
+  'click_boost_10x': 'power-weight',
   
-  // Production boosts
+  // Production boosts - Experience items
   'production_boost_2x': 'exp-share',
   'production_boost_5x': 'lucky-egg',
-  'production_boost_10x': 'amulet-coin',
+  'production_boost_10x': 'oval-charm',
   
-  // Instant energy
-  'instant_energy_small': 'rare-candy',
-  'instant_energy_medium': 'max-revive',
-  'instant_energy_large': 'master-ball',
+  // Instant energy - Restore items
+  'instant_energy_small': 'ether',
+  'instant_energy_medium': 'max-ether',
+  'instant_energy_large': 'max-elixir',
   
   // Auto-clicker
   'auto_clicker': 'quick-claw',
 };
 
+// Category display info
+export const CATEGORY_INFO: Record<ItemCategory, { name: string; color: string; icon: string }> = {
+  balls: { name: 'Poké Balls', color: '#ef4444', icon: '🔴' },
+  medicine: { name: 'Médecine', color: '#22c55e', icon: '💊' },
+  held: { name: 'Objets Tenus', color: '#3b82f6', icon: '📿' },
+  evolution: { name: 'Évolution', color: '#a855f7', icon: '✨' },
+  battle: { name: 'Combat', color: '#f97316', icon: '⚔️' },
+  mega: { name: 'Méga/Légendaire', color: '#fbbf24', icon: '💎' },
+  plates: { name: 'Plaques', color: '#8b5cf6', icon: '🔮' },
+  gems: { name: 'Joyaux', color: '#ec4899', icon: '💠' },
+};

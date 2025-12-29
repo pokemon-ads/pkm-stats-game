@@ -158,7 +158,7 @@
 
 .clicker-layout {
   display: grid;
-  grid-template-columns: 400px 1fr 380px;
+  grid-template-columns: 380px 1fr 420px;
   gap: 1.5rem;
   width: 100%;
   max-width: 1600px;
@@ -191,7 +191,7 @@
 
 .clicker-right-column {
   height: calc(100vh - 200px);
-  max-height: 700px;
+  max-height: 650px;
   position: sticky;
   top: 20px;
 }
@@ -647,17 +647,14 @@
 }
 
 /* HELPERS - Container wrapper styles only, card styles in PokemonList.css */
-.clicker-right-column .helpers-container {
-  background: linear-gradient(135deg, rgba(59, 76, 202, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 76, 202, 0.3);
-  border-radius: 20px;
-  padding: 1.5rem;
+.clicker-right-column .helpers-container,
+.clicker-right-column .pokedex-container {
   height: 100%;
   max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  overflow-x: hidden;
+  /* overflow: hidden; Removed to prevent cutting off shadows */
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .clicker-right-column .helpers-container::-webkit-scrollbar {
@@ -677,14 +674,14 @@
 /* RESPONSIVE */
 @media (max-width: 1400px) {
   .clicker-layout {
-    grid-template-columns: 350px 1fr 350px;
+    grid-template-columns: 350px 1fr 380px;
     gap: 1rem;
   }
 }
 
 @media (max-width: 1200px) {
   .clicker-layout {
-    grid-template-columns: 320px 1fr 320px;
+    grid-template-columns: 320px 1fr 350px;
     gap: 1rem;
   }
 }
