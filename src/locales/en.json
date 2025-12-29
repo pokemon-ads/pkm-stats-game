@@ -99,7 +99,8 @@
     "alola": "Alola",
     "galar": "Galar",
     "hisui": "Hisui",
-    "paldea": "Paldea"
+    "paldea": "Paldea",
+    "noPokemonFound": "No Pokémon match these criteria. Try relaxing your filters."
   },
   "types": {
     "normal": "Normal",

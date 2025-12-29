@@ -13,9 +13,10 @@ import { pokemonService } from '../../../services/pokemon.service'
 
 interface GameSetupProps {
   onStart: (targetTotal: number, filters: FilterOptions, skipConfirmation: boolean) => void
+  poolError?: string | null
 }
 
-export const GameSetup = ({ onStart }: GameSetupProps) => {
+export const GameSetup = ({ onStart, poolError }: GameSetupProps) => {
   const { t } = useTranslation()
   const [targetTotal, setTargetTotal] = useState<number>(GAME_CONFIG.DEFAULT_TARGET_TOTAL)
   const [selectedGenerations, setSelectedGenerations] = useState<number[]>([])
@@ -393,6 +394,13 @@ export const GameSetup = ({ onStart }: GameSetupProps) => {
           </div>
         </div>
       </div>
+
+      {poolError === 'no_pokemon_found' && (
+        <div className="filter-warning">
+          <span className="warning-icon">⚠️</span>
+          <span>{t('setup.noPokemonFound')}</span>
+        </div>
+      )}
 
       <button onClick={handleStart} className="start-button-dashboard">
         {t('setup.play')}

@@ -26,7 +26,8 @@ export const PokeStatsGame = () => {
     restartWithAdjustedTarget,
     calculateResult,
     updateSkipConfirmation,
-    updateShinyBonus
+    updateShinyBonus,
+    poolError
   } = usePokeGame()
 
   // Auto-draw Pokemon when starting a new round
@@ -46,6 +47,15 @@ export const PokeStatsGame = () => {
     }
   }, [gameState.phase, gameState.statsRevealed, gameState.currentPokemon, drawPokemon])
 
+  // Listen for reset event from Navbar
+  useEffect(() => {
+    const handleReset = () => {
+      resetGame()
+    }
+    window.addEventListener('pokestats-reset', handleReset)
+    return () => window.removeEventListener('pokestats-reset', handleReset)
+  }, [resetGame])
+
   return (
     <div className="pokestats-game">
       <WelcomePopup forceShow={showWelcome} onClose={() => setShowWelcome(false)} />
@@ -61,7 +71,7 @@ export const PokeStatsGame = () => {
       </div>
 
       {gameState.phase === GAME_PHASES.SETUP && (
-        <GameSetup onStart={startGame} />
+        <GameSetup onStart={startGame} poolError={poolError} />
       )}
 
       {gameState.phase === GAME_PHASES.RESULT && (() => {
@@ -83,21 +93,45 @@ export const PokeStatsGame = () => {
       {gameState.phase === GAME_PHASES.PLAYING && (
         <>
       <div className="game-header">
-        <h1>{t('app.title')}</h1>
-        <div className="game-progress">
-          <div className="progress-info">
-            <div className="info-item">
-              <span className="label">{t('gameProgress.target')}</span>
-              <span className="value">{gameState.targetTotal}</span>
+        <div className="header-content">
+          <div className="header-left">
+            <h1>{t('app.title')}</h1>
+            <div className="round-badge">
+              <span className="round-label">{t('gameProgress.round')}</span>
+              <span className="round-value">{gameState.selectedStats.length} / {GAME_CONFIG.ROUNDS_PER_GAME}</span>
             </div>
-            <div className="info-item filter-info-container">
-              <span className="label">{t('gameProgress.filters')}</span>
-              <span className="value">
-                {filters.generations && filters.generations.length > 0 ? t('gameProgress.gen', { generations: filters.generations.join(', ') }) : t('gameProgress.allGen')}
-                {filters.types && filters.types.length > 0 ? ` ${t('gameProgress.types', { count: filters.types.length })}` : ''}
-                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) ? ` ${t('gameProgress.special')}` : ''}
-                {filters.filterMode === 'AND' ? ` ${t('gameProgress.restrictive')}` : ` ${t('gameProgress.additive')}`}
+          </div>
+
+          <div className="game-hud">
+            <div className="hud-card target-card">
+              <span className="hud-label">{t('gameProgress.target')}</span>
+              <span className="hud-value">{gameState.targetTotal}</span>
+            </div>
+
+            <div className="hud-card total-card">
+              <span className="hud-label">{t('gameProgress.total')}</span>
+              <span className="hud-value highlight">
+                {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
               </span>
+            </div>
+
+            <div className="hud-card filters-card filter-info-container">
+              <span className="hud-label">{t('gameProgress.filters')}</span>
+              <div className="filters-preview">
+                <span className="filter-summary">
+                  {filters.generations && filters.generations.length > 0 ? t('gameProgress.gen', { generations: filters.generations.join(', ') }) : t('gameProgress.allGen')}
+                </span>
+                {filters.types && filters.types.length > 0 && (
+                  <span className="filter-tag">
+                    {t('gameProgress.types', { count: filters.types.length }).replace('• ', '')}
+                  </span>
+                )}
+                {(filters.legendary || filters.mythical || filters.ultraBeast || filters.paradox || filters.mega || filters.gigantamax || filters.legendsZA || (filters.regionalForms && filters.regionalForms.length > 0)) && (
+                  <span className="filter-tag special">
+                    {t('gameProgress.special').replace('• ', '')}
+                  </span>
+                )}
+              </div>
               
               <div className="filter-tooltip">
                 <div className="tooltip-row">
@@ -137,14 +171,21 @@ export const PokeStatsGame = () => {
                 )}
               </div>
             </div>
-            <div className="info-item">
-              <span className="label">{t('gameProgress.round')}</span>
-              <span className="value">{gameState.selectedStats.length} / {GAME_CONFIG.ROUNDS_PER_GAME}</span>
-            </div>
           </div>
-          <div className="current-total">
-            {t('gameProgress.total')} {gameState.selectedStats.reduce((sum, s) => sum + s.value, 0)}
-          </div>
+        </div>
+        
+        <div className="progress-bar-container">
+          <div
+            className="progress-bar-fill"
+            style={{
+              width: `${Math.min(100, (gameState.selectedStats.reduce((sum, s) => sum + s.value, 0) / gameState.targetTotal) * 100)}%`
+            }}
+          />
+          <div
+            className="progress-bar-target-marker"
+            style={{ left: '100%' }}
+            title={t('gameProgress.target')}
+          />
         </div>
       </div>
 

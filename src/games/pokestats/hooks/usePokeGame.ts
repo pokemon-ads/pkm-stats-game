@@ -49,6 +49,7 @@ export const usePokeGame = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [poolError, setPoolError] = useState<string | null>(null);
 
   // --- Actions ---
 
@@ -60,10 +61,17 @@ export const usePokeGame = () => {
       skipConfirmationMode: boolean
     ) => {
       setLoading(true);
+      setPoolError(null);
       
       // Initialize pool via the sub-hook
-      await initializePool(filterOptions);
+      const pool = await initializePool(filterOptions);
       
+      if (!pool || pool.length === 0) {
+        setPoolError("no_pokemon_found");
+        setLoading(false);
+        return;
+      }
+
       setSkipConfirmation(skipConfirmationMode);
 
       setGameState({
@@ -318,6 +326,8 @@ export const usePokeGame = () => {
     filters,
     skipConfirmation,
     shinyBonus,
+    poolError,
+    setPoolError,
     startGame,
     drawPokemon,
     selectStatName,

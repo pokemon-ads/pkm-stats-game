@@ -20,9 +20,11 @@ export const usePokemonPool = () => {
       const pool = await generatePokemonPool(filterOptions);
       setPokemonPool(pool);
       setFilters(filterOptions);
+      return pool;
     } catch (error) {
       console.error("Error generating Pokemon pool:", error);
       setPokemonPool([]);
+      return [];
     } finally {
       setIsGeneratingPool(false);
     }
