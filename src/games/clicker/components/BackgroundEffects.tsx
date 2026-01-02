@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 
 interface Particle {
   id: number;
@@ -8,23 +8,27 @@ interface Particle {
   size: number;
 }
 
-export const BackgroundEffects: React.FC = () => {
-  const [particles, setParticles] = useState<Particle[]>([]);
+// Generate particles once at module level to avoid recreating on every render
+const generateParticles = (): Particle[] => {
+  const particles: Particle[] = [];
+  // Reduced from 15 to 8 particles for better performance
+  for (let i = 0; i < 8; i++) {
+    particles.push({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 20,
+      duration: 15 + Math.random() * 10,
+      size: 20 + Math.random() * 30,
+    });
+  }
+  return particles;
+};
 
-  useEffect(() => {
-    // Create floating particles
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < 15; i++) {
-      newParticles.push({
-        id: i,
-        x: Math.random() * 100,
-        delay: Math.random() * 20,
-        duration: 15 + Math.random() * 10,
-        size: 20 + Math.random() * 30,
-      });
-    }
-    setParticles(newParticles);
-  }, []);
+const STATIC_PARTICLES = generateParticles();
+
+export const BackgroundEffects: React.FC = memo(() => {
+  // Use static particles instead of state
+  const particles = useMemo(() => STATIC_PARTICLES, []);
 
   return (
     <div className="background-pokeballs">
@@ -145,4 +149,6 @@ export const BackgroundEffects: React.FC = () => {
       `}</style>
     </div>
   );
-};
+});
+
+BackgroundEffects.displayName = 'BackgroundEffects';

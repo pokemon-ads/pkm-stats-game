@@ -20,6 +20,7 @@ export const PokemonDisplay: React.FC<PokemonDisplayProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentBlur, setCurrentBlur] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   // Initialize blur for Blur mode
   useEffect(() => {
@@ -34,10 +35,15 @@ export const PokemonDisplay: React.FC<PokemonDisplayProps> = ({
 
     const interval = setInterval(() => {
       setCurrentBlur(prev => Math.max(0, prev - (MAX_BLUR / BLUR_STEPS)));
-    }, 2000); // Reduce blur every 2 seconds
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [mode, status]);
+
+  // Reset image loaded state when pokemon changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+  }, [pokemon]);
 
   useEffect(() => {
     if (!pokemon || !canvasRef.current) return;
@@ -51,6 +57,8 @@ export const PokemonDisplay: React.FC<PokemonDisplayProps> = ({
     img.src = pokemon.sprites.front_default;
     
     img.onload = () => {
+      setIsImageLoaded(true);
+      
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -62,26 +70,39 @@ export const PokemonDisplay: React.FC<PokemonDisplayProps> = ({
       // Handle rotation
       if (!isRevealed && diffConfig.rotate) {
         ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(Math.PI); // 180 degrees
+        ctx.rotate(Math.PI);
         ctx.translate(-canvas.width / 2, -canvas.height / 2);
       }
 
-      // Draw image
       // Center the image in the canvas
-      const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.8;
+      const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.85;
       const x = (canvas.width - img.width * scale) / 2;
       const y = (canvas.height - img.height * scale) / 2;
       
       // Apply filters
       if (!isRevealed) {
         if (mode === 'cry') {
-          // Hide image completely in Cry mode
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Optional: Draw a question mark or sound icon
-          ctx.font = '48px Arial';
-          ctx.fillStyle = '#ccc';
+          // Hide image completely in Cry mode - show mystery silhouette
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw question mark
+          ctx.font = 'bold 80px "Press Start 2P", cursive';
+          ctx.fillStyle = '#475569';
           ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
           ctx.fillText('?', canvas.width / 2, canvas.height / 2);
+          
+          // Add sound wave effect
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 3;
+          for (let i = 1; i <= 3; i++) {
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 60 + i * 25, -Math.PI / 4, Math.PI / 4);
+            ctx.stroke();
+          }
+          
+          ctx.restore();
           return;
         }
 
@@ -100,13 +121,25 @@ export const PokemonDisplay: React.FC<PokemonDisplayProps> = ({
 
   return (
     <div className="quizz-image-container">
+      {/* Loading indicator */}
+      {!isImageLoaded && status === 'loading' && (
+        <div className="loading-pokeball">
+          <div className="pokeball-spinner" />
+        </div>
+      )}
+      
       <canvas
         ref={canvasRef}
-        width={300}
-        height={300}
-        className={`quizz-canvas ${isRevealed ? 'reveal-flash' : ''}`}
+        width={280}
+        height={280}
+        className={`quizz-canvas ${isRevealed ? 'reveal-flash' : ''} ${!isImageLoaded ? 'loading' : ''}`}
         onContextMenu={(e) => e.preventDefault()}
       />
+      
+      {/* Battle effect overlay */}
+      {isRevealed && (
+        <div className="reveal-overlay" />
+      )}
     </div>
   );
 };

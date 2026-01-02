@@ -1,9 +1,32 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useClickerGame } from '../hooks/useClickerGame';
 import { AVAILABLE_BOOSTS } from '../config/boosts';
+import { formatNumber, formatTime } from '../utils/formatNumber';
 import '../styles/HUD.css';
+
+// Memoized boost badge component
+const BoostBadge = memo(({ boost }: { boost: { icon?: string; name: string; remaining: string; boostId: string } }) => (
+  <div className="boost-badge">
+    {boost.icon && boost.icon.startsWith('http') ? (
+      <img
+        src={boost.icon}
+        alt={boost.name}
+        className="boost-badge-icon-img"
+        loading="lazy"
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none';
+        }}
+      />
+    ) : (
+      <span className="boost-badge-icon">{boost.icon || '⚡'}</span>
+    )}
+    <span className="boost-badge-timer">{boost.remaining}</span>
+  </div>
+));
+
+BoostBadge.displayName = 'BoostBadge';
 
 // Item sprites from PokeAPI
 const getItemSprite = (itemName: string) =>
@@ -20,21 +43,10 @@ const SPRITE_ICONS = {
   reset: getItemSprite('ability-patch'),        // Ability Patch (rare)
 };
 
-// Format large numbers
-const formatNumber = (num: number): string => {
-  if (num >= 1e18) return (num / 1e18).toFixed(2) + 'Qi';
-  if (num >= 1e15) return (num / 1e15).toFixed(2) + 'Qa';
-  if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-  return Math.floor(num).toLocaleString();
-};
-
-export const HUD: React.FC = () => {
+export const HUD: React.FC = memo(() => {
   const { t } = useTranslation();
   const { state, resetGame, exportSave, importSave } = useClickerGame();
-  const [prevEnergy, setPrevEnergy] = useState(state.energy);
+  const prevEnergyRef = useRef(state.energy);
   const [isGaining, setIsGaining] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -43,15 +55,16 @@ export const HUD: React.FC = () => {
   const [shareCode, setShareCode] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // Animate energy changes
+  // Animate energy changes - optimized to reduce state updates
   useEffect(() => {
-    if (state.energy > prevEnergy) {
+    if (state.energy > prevEnergyRef.current) {
       setIsGaining(true);
       const timer = setTimeout(() => setIsGaining(false), 200);
+      prevEnergyRef.current = state.energy;
       return () => clearTimeout(timer);
     }
-    setPrevEnergy(state.energy);
-  }, [state.energy, prevEnergy]);
+    prevEnergyRef.current = state.energy;
+  }, [state.energy]);
 
   const handleReset = () => {
     if (window.confirm(t('clicker.resetConfirm'))) {
@@ -127,26 +140,23 @@ export const HUD: React.FC = () => {
     }
   };
 
-  // Format time in seconds to readable string
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    if (minutes < 60) {
-      return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-  };
+  // Force update for boost timers - only when there are active boosts
+  const [boostTick, setBoostTick] = useState(0);
+  const hasActiveBoosts = state.activeBoosts.length > 0;
+  
+  useEffect(() => {
+    if (!hasActiveBoosts) return;
+    const timer = setInterval(() => setBoostTick(n => n + 1), 1000);
+    return () => clearInterval(timer);
+  }, [hasActiveBoosts]);
 
   // Get active boosts with remaining time
   const activeBoostsDisplay = useMemo(() => {
+    const now = Date.now();
     return state.activeBoosts.map(activeBoost => {
       const boost = AVAILABLE_BOOSTS.find(b => b.id === activeBoost.boostId);
       if (!boost) return null;
-      // eslint-disable-next-line react-hooks/purity
-      const remaining = Math.ceil((activeBoost.expiresAt - Date.now()) / 1000);
+      const remaining = Math.ceil((activeBoost.expiresAt - now) / 1000);
       if (remaining <= 0) return null;
       
       return {
@@ -157,7 +167,7 @@ export const HUD: React.FC = () => {
         boostId: boost.id,
       };
     }).filter(Boolean);
-  }, [state.activeBoosts]);
+  }, [state.activeBoosts, boostTick]);
 
   return (
     <>
@@ -237,23 +247,8 @@ export const HUD: React.FC = () => {
           <div className="trainer-boosts">
             <div className="boosts-title">{t('clicker.shop.activeBoosts')}</div>
             <div className="boosts-list">
-              {activeBoostsDisplay.map((boost, index) => (
-                <div key={boost?.boostId || index} className="boost-badge">
-                  {boost?.icon && boost.icon.startsWith('http') ? (
-                    <img 
-                      src={boost.icon} 
-                      alt={boost.name}
-                      className="boost-badge-icon-img"
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <span className="boost-badge-icon">{boost?.icon || '⚡'}</span>
-                  )}
-                  <span className="boost-badge-timer">{boost?.remaining}</span>
-                </div>
+              {activeBoostsDisplay.map((boost) => boost && (
+                <BoostBadge key={boost.boostId} boost={boost} />
               ))}
             </div>
           </div>
@@ -349,4 +344,6 @@ export const HUD: React.FC = () => {
       )}
     </>
   );
-};
+});
+
+HUD.displayName = 'HUD';

@@ -1,14 +1,65 @@
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { GameState } from '../games/clicker/types/game'
-import { pokemonService } from '../services/pokemon.service'
 import '../styles/Home.css'
 
-// Animated Pokemon sprites for the hero section
-const HERO_POKEMON = [25, 1, 4, 7, 150, 151, 133, 143, 94, 130];
+// Game configuration with distinct colors and Pokemon mascots
+const GAMES_CONFIG = {
+  pokestats: {
+    id: 'pokestats',
+    path: '/pokestats',
+    title: 'PokéStats',
+    mascotId: 448, // Lucario - known for balanced stats
+    backgroundPokemon: [150, 384, 445, 376, 248], // Mewtwo, Rayquaza, Garchomp, Metagross, Tyranitar
+    primaryColor: '#EF4444', // Red
+    secondaryColor: '#DC2626',
+    accentColor: '#FCA5A5',
+    gradientStart: '#EF4444',
+    gradientEnd: '#B91C1C',
+    glowColor: 'rgba(239, 68, 68, 0.4)',
+    badgeKey: 'popular',
+    badgeColor: '#EF4444',
+    stats: { players: '2.5K+', games: '50K+' }
+  },
+  pokequizz: {
+    id: 'pokequizz',
+    path: '/pokequizz',
+    title: 'PokéQuizz',
+    mascotId: 94, // Gengar - mysterious and quiz-like
+    backgroundPokemon: [201, 132, 352, 292, 94], // Unown, Ditto, Kecleon, Shedinja, Gengar
+    primaryColor: '#8B5CF6', // Purple
+    secondaryColor: '#7C3AED',
+    accentColor: '#C4B5FD',
+    gradientStart: '#8B5CF6',
+    gradientEnd: '#6D28D9',
+    glowColor: 'rgba(139, 92, 246, 0.4)',
+    badgeKey: 'classic',
+    badgeColor: '#8B5CF6',
+    stats: { players: '3.2K+', games: '120K+' }
+  },
+  pokeclicker: {
+    id: 'pokeclicker',
+    path: '/clicker',
+    title: 'PokéClicker',
+    mascotId: 25, // Pikachu - iconic and energetic
+    backgroundPokemon: [6, 9, 3, 149, 143], // Charizard, Blastoise, Venusaur, Dragonite, Snorlax
+    primaryColor: '#F59E0B', // Amber/Gold
+    secondaryColor: '#D97706',
+    accentColor: '#FCD34D',
+    gradientStart: '#F59E0B',
+    gradientEnd: '#B45309',
+    glowColor: 'rgba(245, 158, 11, 0.4)',
+    badgeKey: 'new',
+    badgeColor: '#10B981',
+    stats: { players: '1.8K+', games: '∞' }
+  }
+}
 
 const SAVE_KEY = 'pokeclicker_save'
+
+// Featured Pokemon for hero section animation
+const HERO_POKEMON = [25, 6, 150, 384, 94, 448, 149, 131, 143, 133]
 
 const formatNumber = (num: number): string => {
   if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qi'
@@ -33,54 +84,49 @@ const getClickerGameState = (): GameState | null => {
 }
 
 export const Home = () => {
-  const { t } = useTranslation()
   const navigate = useNavigate()
-  const [currentPokemon, setCurrentPokemon] = useState(0)
+  const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(false)
   const [clickerGameState, setClickerGameState] = useState<GameState | null>(null)
-  const [gameSprites, setGameSprites] = useState<Record<string, string>>({})
+  const [activeGame, setActiveGame] = useState<string | null>(null)
+  const [heroIndex, setHeroIndex] = useState(0)
+  const [bgPokemonIndices, setBgPokemonIndices] = useState<Record<string, number>>({
+    pokestats: 0,
+    pokequizz: 0,
+    pokeclicker: 0,
+  })
 
+  // Initialize visibility
   useEffect(() => {
-    setIsVisible(true)
+    const timer = setTimeout(() => setIsVisible(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Hero Pokemon rotation
+  useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentPokemon(prev => (prev + 1) % HERO_POKEMON.length)
+      setHeroIndex(prev => (prev + 1) % HERO_POKEMON.length)
     }, 3000)
     return () => clearInterval(interval)
   }, [])
 
-  // Load game sprites from API (same as in the game)
+  // Background Pokemon rotation for cards
   useEffect(() => {
-    const loadGameSprites = async () => {
-      const sprites: Record<string, string> = {}
-      
-      try {
-        // PokéStats: Use a different Pokemon (e.g., Mewtwo for stats)
-        const pokestatsPokemon = await pokemonService.getPokemon(150) // Mewtwo
-        sprites.pokestats = pokestatsPokemon.sprites.front_default
-        
-        // PokéQuizz: Use a different Pokemon (e.g., Unown for quiz)
-        const pokequizzPokemon = await pokemonService.getPokemon(201) // Unown
-        sprites.pokequizz = pokequizzPokemon.sprites.front_default
-        
-        // PokéClicker: Keep Pikachu
-        const pokeclickerPokemon = await pokemonService.getPokemon(25) // Pikachu
-        sprites.pokeclicker = pokeclickerPokemon.sprites.front_default
-      } catch (error) {
-        console.warn('Failed to load game sprites:', error)
-      }
-      
-      setGameSprites(sprites)
-    }
-    
-    loadGameSprites()
+    const interval = setInterval(() => {
+      setBgPokemonIndices(prev => ({
+        pokestats: (prev.pokestats + 1) % GAMES_CONFIG.pokestats.backgroundPokemon.length,
+        pokequizz: (prev.pokequizz + 1) % GAMES_CONFIG.pokequizz.backgroundPokemon.length,
+        pokeclicker: (prev.pokeclicker + 1) % GAMES_CONFIG.pokeclicker.backgroundPokemon.length,
+      }))
+    }, 5000)
+    return () => clearInterval(interval)
   }, [])
 
+  // Load clicker game state
   useEffect(() => {
-    // Load clicker game state
     const gameState = getClickerGameState()
     setClickerGameState(gameState)
     
-    // Update periodically to show latest stats
     const updateInterval = setInterval(() => {
       const updatedState = getClickerGameState()
       setClickerGameState(updatedState)
@@ -89,366 +135,227 @@ export const Home = () => {
     return () => clearInterval(updateInterval)
   }, [])
 
-  const games = [
-    {
-      id: 'pokestats',
-      path: '/pokestats',
-      icon: gameSprites.pokestats || '',
-      iconType: 'sprite',
-      badge: t('home.popular'),
-      badgeType: 'popular',
-      title: t('nav.pokestats'),
-      description: t('home.pokestatsDesc'),
-      features: [
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/exp-share.png', iconType: 'sprite', label: t('home.featureStats') },
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png', iconType: 'sprite', label: t('home.featureLeaderboard') }
-      ],
-      gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%)',
-      glowColor: 'rgba(255, 107, 107, 0.3)'
-    },
-    {
-      id: 'pokequizz',
-      path: '/pokequizz',
-      icon: gameSprites.pokequizz || '',
-      iconType: 'sprite',
-      badge: t('home.popular'),
-      badgeType: 'popular',
-      title: t('nav.pokequizz'),
-      description: t('home.pokequizzDesc'),
-      features: [
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/twisted-spoon.png', iconType: 'sprite', label: t('home.featureKnowledge') },
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/quick-claw.png', iconType: 'sprite', label: t('home.featureSpeed') }
-      ],
-      gradient: 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)',
-      glowColor: 'rgba(155, 89, 182, 0.3)'
-    },
-    {
-      id: 'pokeclicker',
-      path: '/clicker',
-      icon: gameSprites.pokeclicker || '',
-      iconType: 'sprite',
-      badge: t('home.new'),
-      badgeType: 'new',
-      title: t('nav.pokeclicker'),
-      description: t('home.pokeclickerDesc'),
-      features: [
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leftovers.png', iconType: 'sprite', label: t('home.featureIdle') },
-        { icon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/fire-stone.png', iconType: 'sprite', label: t('home.featureEvolution') }
-      ],
-      gradient: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
-      glowColor: 'rgba(168, 85, 247, 0.3)'
-    }
-  ]
+  const handleGameClick = useCallback((path: string) => {
+    navigate(path)
+  }, [navigate])
+
+  const games = Object.values(GAMES_CONFIG)
 
   return (
-    <div className={`home-container ${isVisible ? 'visible' : ''}`}>
+    <div className={`game-portal ${isVisible ? 'visible' : ''}`}>
       {/* Animated Background */}
-      <div className="home-background">
-        <div className="bg-gradient-1"></div>
-        <div className="bg-gradient-2"></div>
-        <div className="bg-gradient-3"></div>
-        <div className="floating-pokeballs">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className={`floating-pokeball pokeball-${i + 1}`}></div>
+      <div className="portal-background">
+        <div className="bg-gradient"></div>
+        <div className="bg-pattern"></div>
+        <div className="floating-pokemon">
+          {HERO_POKEMON.slice(0, 6).map((id, index) => (
+            <img
+              key={id}
+              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
+              alt=""
+              className={`floating-sprite floating-sprite-${index + 1}`}
+              style={{ animationDelay: `${index * -2}s` }}
+            />
           ))}
         </div>
       </div>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-pokemon-showcase">
-            <div className="pokemon-ring">
-              <img 
-                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${HERO_POKEMON[currentPokemon]}.gif`}
-                alt="Pokemon"
-                className="hero-pokemon-sprite"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${HERO_POKEMON[currentPokemon]}.png`
-                }}
-              />
-            </div>
-            <div className="pokemon-dots">
-              {HERO_POKEMON.map((_, i) => (
-                <span 
-                  key={i} 
-                  className={`dot ${i === currentPokemon ? 'active' : ''}`}
-                  onClick={() => setCurrentPokemon(i)}
-                ></span>
-              ))}
-            </div>
-          </div>
-          
+      {/* Main Content */}
+      <div className="portal-content">
+        {/* Hero Section */}
+        <section className="hero-section">
           <div className="hero-text">
             <h1 className="hero-title">
-              <span className="title-line">
-                <span className="wave-emoji">👋</span>
-                <span className="title-word">{t('home.welcome')}</span>
-              </span>
+              <span className="title-line">{t('home.hero.welcomeTo')}</span>
+              <span className="title-brand">{t('home.hero.brand')}</span>
             </h1>
-            <p className="hero-subtitle">{t('home.subtitle')}</p>
-            <p className="hero-description">
-              Discover three exciting Pokemon games: test your knowledge of Pokemon statistics, identify Pokemon from silhouettes and clues, or enjoy an addictive idle clicker experience. All games are completely free to play, no registration required!
+            <p className="hero-subtitle">
+              {t('home.hero.subtitle')}
             </p>
-            <div className="hero-cta">
-              <button className="cta-button primary" onClick={() => navigate('/pokestats')}>
-                <span className="cta-icon">🎮</span>
-                <span>{t('home.letsPlay')}</span>
-              </button>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                  alt=""
+                  className="stat-icon"
+                />
+                <div className="stat-info">
+                  <span className="stat-value">3</span>
+                  <span className="stat-label">{t('home.hero.games')}</span>
+                </div>
+              </div>
+              <div className="hero-stat">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pokedex.png"
+                  alt=""
+                  className="stat-icon"
+                />
+                <div className="stat-info">
+                  <span className="stat-value">1025</span>
+                  <span className="stat-label">{t('home.hero.pokemon')}</span>
+                </div>
+              </div>
+              <div className="hero-stat">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png"
+                  alt=""
+                  className="stat-icon"
+                />
+                <div className="stat-info">
+                  <span className="stat-value">100%</span>
+                  <span className="stat-label">{t('home.hero.free')}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+          <div className="hero-mascot">
+            <div className="mascot-glow"></div>
+            <img
+              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${HERO_POKEMON[heroIndex]}.png`}
+              alt="Featured Pokemon"
+              className="mascot-image"
+            />
+          </div>
+        </section>
 
-      {/* Games Section */}
-      <section className="games-section">
-        <div className="section-header">
-          <h2 className="section-title">
-            <span className="title-icon">🎯</span>
-            {t('home.gamesTitle')}
-          </h2>
-          <div className="section-line"></div>
-        </div>
-        
-        <div className="games-grid">
-          {games.map((game, index) => (
-            <article 
-              key={game.id}
-              className={`game-card game-card-${game.id}`}
-              onClick={() => navigate(game.path)}
-              style={{ 
-                '--card-gradient': game.gradient,
-                '--card-glow': game.glowColor,
-                '--animation-delay': `${index * 0.1}s`
-              } as React.CSSProperties}
-            >
-              <div className="card-background">
-                <div className="card-glow"></div>
-                <div className="card-pattern"></div>
-              </div>
-              
-              <div className="card-content">
-                <header className="card-header">
-                  <div className="card-icon-wrapper" style={{ background: game.gradient }}>
-                    {game.iconType === 'sprite' && game.icon ? (
-                      <img src={game.icon} alt={game.title} className="card-icon-sprite" onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        const fallbackEmoji = game.id === 'pokestats' ? '📊' : game.id === 'pokequizz' ? '❓' : '⚡';
-                        target.outerHTML = `<span class="card-icon">${fallbackEmoji}</span>`;
-                      }} />
-                    ) : (
-                      <span className="card-icon">{game.id === 'pokestats' ? '📊' : game.id === 'pokequizz' ? '❓' : '⚡'}</span>
+        {/* Games Library Section */}
+        <section className="games-library">
+          <div className="library-header">
+            <h2 className="library-title">
+              <img
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/vs-recorder.png"
+                alt=""
+                className="title-icon"
+              />
+              {t('home.library.title')}
+            </h2>
+            <p className="library-subtitle">{t('home.library.subtitle')}</p>
+          </div>
+
+          <div className="games-grid">
+            {games.map((game) => (
+              <article
+                key={game.id}
+                className={`game-card ${activeGame === game.id ? 'active' : ''}`}
+                onClick={() => handleGameClick(game.path)}
+                onMouseEnter={() => setActiveGame(game.id)}
+                onMouseLeave={() => setActiveGame(null)}
+                style={{
+                  '--primary': game.primaryColor,
+                  '--secondary': game.secondaryColor,
+                  '--accent': game.accentColor,
+                  '--glow': game.glowColor,
+                  '--gradient-start': game.gradientStart,
+                  '--gradient-end': game.gradientEnd,
+                } as React.CSSProperties}
+              >
+                {/* Card Background */}
+                <div className="card-background">
+                  <img
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${game.backgroundPokemon[bgPokemonIndices[game.id]]}.png`}
+                    alt=""
+                    className="card-bg-pokemon"
+                  />
+                  <div className="card-bg-overlay"></div>
+                  <div className="card-bg-gradient"></div>
+                </div>
+
+                {/* Badge */}
+                <div
+                  className="card-badge"
+                  style={{ backgroundColor: game.badgeColor }}
+                >
+                  {t(`home.${game.badgeKey}`).toUpperCase()}
+                </div>
+
+                {/* Mascot */}
+                <div className="card-mascot">
+                  <img
+                    src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${game.mascotId}.png`}
+                    alt={game.title}
+                    className="mascot-sprite"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="card-content">
+                  <div className="card-header">
+                    <h3 className="card-title">{game.title}</h3>
+                    <span className="card-subtitle">{t(`home.games.${game.id}.subtitle`)}</span>
+                  </div>
+
+                  <p className="card-description">{t(`home.games.${game.id}.description`)}</p>
+
+                  {/* Features */}
+                  <div className="card-features">
+                    {game.id === 'pokestats' && (
+                      <>
+                        <span className="feature-tag">{t('home.games.pokestats.features.compareStats')}</span>
+                        <span className="feature-tag">{t('home.games.pokestats.features.leaderboard')}</span>
+                        <span className="feature-tag">{t('home.games.pokestats.features.allGenerations')}</span>
+                      </>
+                    )}
+                    {game.id === 'pokequizz' && (
+                      <>
+                        <span className="feature-tag">{t('home.games.pokequizz.features.silhouetteMode')}</span>
+                        <span className="feature-tag">{t('home.games.pokequizz.features.speedChallenge')}</span>
+                        <span className="feature-tag">{t('home.games.pokequizz.features.hintsSystem')}</span>
+                      </>
+                    )}
+                    {game.id === 'pokeclicker' && (
+                      <>
+                        <span className="feature-tag">{t('home.games.pokeclicker.features.idleProgress')}</span>
+                        <span className="feature-tag">{t('home.games.pokeclicker.features.upgrades')}</span>
+                        <span className="feature-tag">{t('home.games.pokeclicker.features.pokemonCollection')}</span>
+                      </>
                     )}
                   </div>
-                  <span className={`card-badge ${game.badgeType}`}>{game.badge}</span>
-                </header>
-                
-                <div className="card-body">
-                  <h3 className="card-title">{game.title}</h3>
-                  <p className="card-description">{game.description}</p>
-                  
-                  {/* Game progress preview for PokeClicker */}
+
+                  {/* Clicker Progress */}
                   {game.id === 'pokeclicker' && clickerGameState && (
-                    <div className="game-progress-preview">
-                      <div className="progress-stats">
-                        <div className="progress-stat">
-                          <span className="progress-icon">⚡</span>
-                          <div className="progress-info">
-                            <span className="progress-label">Énergie</span>
-                            <span className="progress-value">{formatNumber(clickerGameState.energy)}</span>
-                          </div>
-                        </div>
-                        <div className="progress-stat">
-                          <span className="progress-icon">📊</span>
-                          <div className="progress-info">
-                            <span className="progress-label">Total</span>
-                            <span className="progress-value">{formatNumber(clickerGameState.totalEnergy)}</span>
-                          </div>
-                        </div>
-                        <div className="progress-stat">
-                          <span className="progress-icon">👥</span>
-                          <div className="progress-info">
-                            <span className="progress-label">Pokémon</span>
-                            <span className="progress-value">
-                              {clickerGameState.helpers.reduce((sum, h) => sum + h.count, 0)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="progress-stat">
-                          <span className="progress-icon">⚡</span>
-                          <div className="progress-info">
-                            <span className="progress-label">/s</span>
-                            <span className="progress-value">{formatNumber(clickerGameState.energyPerSecond)}</span>
-                          </div>
-                        </div>
+                    <div className="card-progress">
+                      <div className="progress-item">
+                        <img
+                          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/thunder-stone.png"
+                          alt=""
+                          className="progress-icon"
+                        />
+                        <span className="progress-value">{formatNumber(clickerGameState.energy)}</span>
+                        <span className="progress-label">{t('home.progress.energy')}</span>
+                      </div>
+                      <div className="progress-item">
+                        <img
+                          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
+                          alt=""
+                          className="progress-icon"
+                        />
+                        <span className="progress-value">{formatNumber(clickerGameState.energyPerSecond)}/s</span>
+                        <span className="progress-label">{t('home.progress.perSecond')}</span>
                       </div>
                     </div>
                   )}
-                </div>
-                
-                <footer className="card-footer">
-                  <div className="card-features">
-                    {game.features.map((feature, i) => (
-                      <span key={i} className="feature-tag">
-                        {feature.iconType === 'sprite' ? (
-                          <img 
-                            src={feature.icon} 
-                            alt={feature.label} 
-                            className="feature-icon-sprite" 
-                            onError={(e) => {
-                              // Fallback to emoji if sprite fails to load
-                              const target = e.target as HTMLImageElement;
-                              let fallbackEmoji = '📊';
-                              if (feature.label === t('home.featureStats')) fallbackEmoji = '📊';
-                              else if (feature.label === t('home.featureLeaderboard')) fallbackEmoji = '🏆';
-                              else if (feature.label === t('home.featureKnowledge')) fallbackEmoji = '🧠';
-                              else if (feature.label === t('home.featureSpeed')) fallbackEmoji = '⚡';
-                              else if (feature.label === t('home.featureIdle')) fallbackEmoji = '🎮';
-                              else if (feature.label === t('home.featureEvolution')) fallbackEmoji = '✨';
-                              if (target.parentNode) {
-                                const span = document.createElement('span');
-                                span.className = 'feature-icon';
-                                span.textContent = fallbackEmoji;
-                                target.parentNode.replaceChild(span, target);
-                              }
-                            }} 
-                          />
-                        ) : (
-                          <span className="feature-icon">{feature.icon}</span>
-                        )}
-                        <span className="feature-label">{feature.label}</span>
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <button className="card-button" style={{ background: game.gradient }}>
-                    <span>{clickerGameState && game.id === 'pokeclicker' ? t('home.continue') : t('home.letsPlay')}</span>
-                    <span className="button-arrow">→</span>
+
+                  {/* Play Button */}
+                  <button className="card-play-button">
+                    <span className="play-text">
+                      {game.id === 'pokeclicker' && clickerGameState ? t('home.continue') : t('home.playNow')}
+                    </span>
+                    <span className="play-arrow">→</span>
                   </button>
-                </footer>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+                </div>
 
-      {/* About Section */}
-      <section className="about-section">
-        <div className="section-header">
-          <h2 className="section-title">
-            <span className="title-icon">⚡</span>
-            {t('home.about.title')}
-          </h2>
-          <div className="section-line"></div>
-        </div>
-        
-        <div className="about-content">
-          <div className="about-hero">
-            <div className="about-hero-sprites">
-              {HERO_POKEMON.slice(0, 5).map((id, index) => (
-                <img
-                  key={id}
-                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`}
-                  alt="Pokemon"
-                  className="about-hero-sprite"
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none'
-                  }}
-                />
-              ))}
-            </div>
-            <div className="about-hero-text">
-              <h3>Trois jeux, une passion</h3>
-              <p>
-                Créé par des fans de Pokémon pour des fans de Pokémon. Testez vos connaissances, 
-                défiez vos amis, et découvrez les statistiques de vos Pokémon préférés. 
-                <strong> 100% gratuit, sans inscription.</strong>
-              </p>
-            </div>
+                {/* Decorative Elements */}
+                <div className="card-decorations">
+                  <div className="deco-circle deco-circle-1"></div>
+                  <div className="deco-circle deco-circle-2"></div>
+                  <div className="deco-line deco-line-1"></div>
+                  <div className="deco-line deco-line-2"></div>
+                </div>
+              </article>
+            ))}
           </div>
-          
-          <div className="about-grid">
-            <div className="about-card">
-              <div className="about-card-header">
-                <div className="about-card-icon">
-                  {gameSprites.pokestats ? (
-                    <img 
-                      src={gameSprites.pokestats} 
-                      alt="PokéStats" 
-                      className="about-card-icon-sprite"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.outerHTML = '<span>📊</span>';
-                      }}
-                    />
-                  ) : (
-                    <span>📊</span>
-                  )}
-                </div>
-                <div className="about-card-badges">
-                  <span className="about-badge">📊 Stats</span>
-                  <span className="about-badge">🏆 Classement</span>
-                </div>
-              </div>
-              <h3>{t('home.about.pokestatsTitle')}</h3>
-              <p>{t('home.about.pokestatsText')}</p>
-            </div>
-            
-            <div className="about-card">
-              <div className="about-card-header">
-                <div className="about-card-icon">
-                  {gameSprites.pokequizz ? (
-                    <img 
-                      src={gameSprites.pokequizz} 
-                      alt="PokéQuizz" 
-                      className="about-card-icon-sprite"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.outerHTML = '<span>❓</span>';
-                      }}
-                    />
-                  ) : (
-                    <span>❓</span>
-                  )}
-                </div>
-                <div className="about-card-badges">
-                  <span className="about-badge">🧠 Connaissance</span>
-                  <span className="about-badge">⚡ Rapidité</span>
-                </div>
-              </div>
-              <h3>{t('home.about.pokequizzTitle')}</h3>
-              <p>{t('home.about.pokequizzText')}</p>
-            </div>
-
-            <div className="about-card">
-              <div className="about-card-header">
-                <div className="about-card-icon">
-                  {gameSprites.pokeclicker ? (
-                    <img 
-                      src={gameSprites.pokeclicker} 
-                      alt="PokéClicker" 
-                      className="about-card-icon-sprite"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.outerHTML = '<span>⚡</span>';
-                      }}
-                    />
-                  ) : (
-                    <span>⚡</span>
-                  )}
-                </div>
-                <div className="about-card-badges">
-                  <span className="about-badge">🎮 Idle</span>
-                  <span className="about-badge">✨ Évolution</span>
-                </div>
-              </div>
-              <h3>{t('home.about.pokeclickerTitle')}</h3>
-              <p>{t('home.about.pokeclickerText')}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   )
 }

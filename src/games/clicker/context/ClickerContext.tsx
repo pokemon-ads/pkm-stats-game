@@ -1,10 +1,14 @@
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useReducer, useMemo, useCallback } from 'react';
 import type { ReactNode, Dispatch } from 'react';
 import type { GameState, ClickerAction, Upgrade, PokemonHelper, ActiveBoost } from '../types/game';
 import { INITIAL_HELPERS, calculateHelperCost } from '../config/helpers';
 import { INITIAL_UPGRADES } from '../config/upgrades';
 import { AVAILABLE_BOOSTS, calculateBoostCost } from '../config/boosts';
 import { getSkillTree, getSkill, createSkillTrees } from '../config/skill-trees';
+
+// Cache for expensive calculations
+let cachedSkillTrees: ReturnType<typeof createSkillTrees> | null = null;
+let cachedHelperIds: string[] = [];
 
 // Initialize helpers with default level, ev, and unlockedSkills
 const initializeHelpers = (helpers: PokemonHelper[]): PokemonHelper[] => {
@@ -91,8 +95,32 @@ const getProductionMultiplier = (activeBoosts: ActiveBoost[]): number => {
   return productionBoost ? productionBoost.value : 1;
 };
 
-// Calculate skill effects for a helper
+// Get or create cached skill trees
+const getCachedSkillTrees = (helperIds: string[]): ReturnType<typeof createSkillTrees> => {
+  // Check if we need to recreate (only if helper IDs changed)
+  const idsMatch = cachedHelperIds.length === helperIds.length &&
+    cachedHelperIds.every((id, i) => id === helperIds[i]);
+  
+  if (!cachedSkillTrees || !idsMatch) {
+    cachedHelperIds = helperIds;
+    cachedSkillTrees = createSkillTrees(helperIds);
+  }
+  return cachedSkillTrees;
+};
+
+// Cache for skill effects per helper
+const skillEffectsCache = new Map<string, { productionBonus: number; productionMultiplier: number; skillsHash: string }>();
+
+// Calculate skill effects for a helper (with caching)
 const calculateSkillEffects = (helper: PokemonHelper, skillTrees: ReturnType<typeof createSkillTrees>) => {
+  // Create a hash of unlocked skills for cache invalidation
+  const skillsHash = helper.unlockedSkills.join(',');
+  const cached = skillEffectsCache.get(helper.id);
+  
+  if (cached && cached.skillsHash === skillsHash) {
+    return { productionBonus: cached.productionBonus, productionMultiplier: cached.productionMultiplier };
+  }
+
   const skillTree = getSkillTree(helper.id, skillTrees);
   if (!skillTree) {
     return { productionBonus: 0, productionMultiplier: 1 };
@@ -120,6 +148,9 @@ const calculateSkillEffects = (helper: PokemonHelper, skillTrees: ReturnType<typ
     }
   }
 
+  // Cache the result
+  skillEffectsCache.set(helper.id, { productionBonus, productionMultiplier, skillsHash });
+
   return { productionBonus, productionMultiplier };
 };
 
@@ -143,38 +174,61 @@ const calculateHelperProduction = (
   return baseWithBonus * count * helperMultiplier * shinyMultiplier * skillMultiplier;
 };
 
-// Calculate energy per second with new balanced system
-// Global bonus is additive (sum of percentages), not multiplicative
-// Optimized: cache helper multipliers and reduce iterations
-const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[], activeBoosts: ActiveBoost[] = []) => {
-  // #region agent log
-  const calcStart = performance.now();
-  // #endregion
-  // Pre-calculate global bonuses once
+// Cache for upgrade calculations
+let upgradeCalcCache: {
+  purchasedUpgrades: Upgrade[];
+  globalPercentBonus: number;
+  legacyMultiplier: number;
+  helperMultipliers: Map<string, number>;
+  upgradesHash: string;
+} | null = null;
+
+// Get cached upgrade calculations
+const getCachedUpgradeCalcs = (upgrades: Upgrade[]) => {
+  // Create a hash based on purchased status
+  const upgradesHash = upgrades.map(u => u.purchased ? '1' : '0').join('');
+  
+  if (upgradeCalcCache && upgradeCalcCache.upgradesHash === upgradesHash) {
+    return upgradeCalcCache;
+  }
+
+  const purchasedUpgrades = upgrades.filter(u => u.purchased);
   let globalPercentBonus = 0;
   let legacyMultiplier = 1;
-  const purchasedUpgrades = upgrades.filter(u => u.purchased);
+  const helperMultipliers = new Map<string, number>();
   
   for (const u of purchasedUpgrades) {
     if (u.type === 'GLOBAL_PERCENT') {
       globalPercentBonus += u.value;
     } else if (u.type === 'GLOBAL_MULTIPLIER') {
       legacyMultiplier *= u.value;
-    }
-  }
-  
-  // Pre-calculate helper multipliers map for performance
-  const helperMultipliers = new Map<string, number>();
-  for (const u of purchasedUpgrades) {
-    if (u.type === 'HELPER_MULTIPLIER' && u.targetId) {
+    } else if (u.type === 'HELPER_MULTIPLIER' && u.targetId) {
       const current = helperMultipliers.get(u.targetId) || 1;
       helperMultipliers.set(u.targetId, current * u.value);
     }
   }
 
-  // Create skill trees for all helpers
+  upgradeCalcCache = {
+    purchasedUpgrades,
+    globalPercentBonus,
+    legacyMultiplier,
+    helperMultipliers,
+    upgradesHash,
+  };
+
+  return upgradeCalcCache;
+};
+
+// Calculate energy per second with new balanced system
+// Global bonus is additive (sum of percentages), not multiplicative
+// Optimized: cache helper multipliers and reduce iterations
+const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[], activeBoosts: ActiveBoost[] = []) => {
+  // Get cached upgrade calculations
+  const { purchasedUpgrades, globalPercentBonus, legacyMultiplier, helperMultipliers } = getCachedUpgradeCalcs(upgrades);
+
+  // Get cached skill trees
   const allHelperIds = helpers.map(h => h.id);
-  const skillTrees = createSkillTrees(allHelperIds);
+  const skillTrees = getCachedSkillTrees(allHelperIds);
 
   // Calculate base production from all helpers using linear scaling
   let baseProduction = 0;
@@ -191,7 +245,7 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
     // Get helper multiplier from cache
     const helperMultiplier = helperMultipliers.get(h.id) || 1;
     
-    // Calculate skill effects (only for this specific helper)
+    // Calculate skill effects (only for this specific helper, cached)
     const skillEffects = calculateSkillEffects(h, skillTrees);
     
     // Use linear production calculation with skills
@@ -208,13 +262,6 @@ const calculateEnergyPerSecond = (helpers: PokemonHelper[], upgrades: Upgrade[],
   // Apply global bonus: base * (1 + percentage/100) * legacyMultiplier
   const baseValue = baseProduction * (1 + globalPercentBonus / 100) * legacyMultiplier;
   const boostMultiplier = getProductionMultiplier(activeBoosts);
-  
-  // #region agent log
-  const calcTime = performance.now() - calcStart;
-  if (calcTime > 5) {
-    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:209',message:'calculateEnergyPerSecond slow',data:{calcTime,helpersCount:helpers.length,upgradesCount:upgrades.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  }
-  // #endregion
   
   return baseValue * boostMultiplier;
 };
@@ -614,7 +661,7 @@ export const ClickerContext = createContext<{
 
 const SAVE_KEY = 'pokeclicker_save';
 const SAVE_INTERVAL = 5000; // 5 seconds
-const TICK_INTERVAL = 100; // 10 ticks per second
+const TICK_INTERVAL = 200; // 5 ticks per second (reduced from 10 for better performance)
 
 export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
@@ -767,51 +814,23 @@ export const ClickerProvider: React.FC<{ children: ReactNode }> = ({ children })
     return () => clearInterval(autoClickInterval);
   }, [state.activeBoosts, dispatch]);
 
-  // Game Loop
-  const lastTickRef = React.useRef<number>(Date.now());
-  const lastDispatchRef = React.useRef<number>(Date.now());
-  const accumulatedDeltaRef = React.useRef<number>(0);
-
+  // Game Loop - Optimized with setInterval instead of requestAnimationFrame
+  // This reduces CPU usage when the tab is in background and provides more consistent timing
   React.useEffect(() => {
-    let animationFrameId: number;
-    let frameCount = 0;
-    let dispatchCount = 0;
-    const startTime = Date.now();
-
-    const loop = () => {
-      // #region agent log
-      frameCount++;
-      if (frameCount % 60 === 0) {
-        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:768',message:'Game loop frame',data:{frameCount,dispatchCount,elapsed:Date.now()-startTime},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      }
-      // #endregion
+    let lastTick = Date.now();
+    
+    const tickInterval = setInterval(() => {
       const now = Date.now();
-      const delta = (now - lastTickRef.current) / 1000; // Convert to seconds
-      lastTickRef.current = now;
-
-      // Accumulate delta time
-      accumulatedDeltaRef.current += delta;
-
-      // Only dispatch if enough time has passed
-      const timeSinceLastDispatch = now - lastDispatchRef.current;
-      if (timeSinceLastDispatch >= TICK_INTERVAL && accumulatedDeltaRef.current > 0) {
-        // #region agent log
-        dispatchCount++;
-        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClickerContext.tsx:779',message:'TICK dispatch',data:{dispatchCount,delta:accumulatedDeltaRef.current,timeSinceLastDispatch},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        dispatch({ type: 'TICK', payload: { delta: accumulatedDeltaRef.current } });
-        accumulatedDeltaRef.current = 0;
-        lastDispatchRef.current = now;
+      const delta = (now - lastTick) / 1000; // Convert to seconds
+      lastTick = now;
+      
+      if (delta > 0) {
+        dispatch({ type: 'TICK', payload: { delta } });
       }
-
-      animationFrameId = requestAnimationFrame(loop);
-    };
-
-    lastTickRef.current = Date.now();
-    animationFrameId = requestAnimationFrame(loop);
+    }, TICK_INTERVAL);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      clearInterval(tickInterval);
     };
   }, []);
 

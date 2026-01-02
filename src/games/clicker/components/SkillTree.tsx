@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ClickerContext } from '../context/ClickerContext';
 import { getSkillTree, createSkillTrees, canUnlockSkill } from '../config/skill-trees';
 import { getCurrentEvolution } from '../config/helpers';
+import { formatNumberCompact } from '../utils/formatNumber';
 import type { PokemonHelper } from '../types/game';
 import '../styles/SkillTree.css';
 
@@ -107,10 +108,7 @@ export const SkillTree: React.FC<SkillTreeProps> = ({ helper, onClose }) => {
     dispatch({ type: 'UNLOCK_SKILL', payload: { helperId: helper.id, skillId } });
   };
 
-  const formatNum = (num: number) => {
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-    return Math.floor(num).toLocaleString();
-  };
+  const formatNum = formatNumberCompact;
 
   // Get skill icon based on type
   const getSkillIcon = (skill: typeof skillTree.skills[0]) => {

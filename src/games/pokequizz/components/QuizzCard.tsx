@@ -27,18 +27,27 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
   onGuess,
   onGiveUp
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [closeCallMessage, setCloseCallMessage] = useState<string | null>(null);
+  const [showSparkles, setShowSparkles] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (status === 'playing') {
       setInputValue('');
       setCloseCallMessage(null);
+      setShowSparkles(false);
       inputRef.current?.focus();
     }
   }, [status, pokemon]);
+
+  useEffect(() => {
+    if (isCorrect === true) {
+      setShowSparkles(true);
+      setTimeout(() => setShowSparkles(false), 1000);
+    }
+  }, [isCorrect]);
 
   const playCry = () => {
     if (!pokemon || !pokemon.cries) return;
@@ -67,7 +76,6 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
     // Check for close match
     if (isCloseMatch(guess, targetName)) {
       setCloseCallMessage(t('quizz.closeCall'));
-      // Optional: Shake animation or visual cue specifically for close call
       return;
     }
 
@@ -77,14 +85,59 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
 
   const isRevealed = status === 'revealed';
 
+  // Get title based on state
+  const getTitle = () => {
+    if (isRevealed) {
+      return isCorrect 
+        ? t('quizz.correct', 'Bravo !') 
+        : t('quizz.wrong', 'Dommage !');
+    }
+    return t('quizz.question', 'Quel est ce Pokémon ?');
+  };
+
+  const getTitleClass = () => {
+    if (!isRevealed) return '';
+    return isCorrect ? 'correct' : 'wrong';
+  };
+
   return (
     <div className="quizz-card">
-      <h2 className="quizz-title">
-        {isRevealed
-          ? (isCorrect ? t('quizz.correct', 'Bravo !') : t('quizz.wrong', 'Dommage !'))
-          : t('quizz.question', 'Quel est ce Pokémon ?')}
-      </h2>
+      {/* Sparkle effects for correct answers */}
+      {showSparkles && (
+        <div className="sparkle-container">
+          {[...Array(8)].map((_, i) => (
+            <div 
+              key={i} 
+              className="sparkle"
+              style={{
+                left: `${20 + Math.random() * 60}%`,
+                top: `${20 + Math.random() * 60}%`,
+                animationDelay: `${i * 0.1}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
 
+      {/* Pokemon Info Box - like enemy Pokemon display */}
+      <div className="pokemon-info-box">
+        <h2 className={`quizz-title ${getTitleClass()}`}>
+          {getTitle()}
+        </h2>
+        {status === 'playing' && (
+          <div className="progress-bar-container">
+            <span className="progress-label">???</span>
+            <div className="progress-bar">
+              <div 
+                className="progress-bar-fill"
+                style={{ width: '100%' }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Pokemon Display Area */}
       <div style={{ position: 'relative', width: 'fit-content' }}>
         <PokemonDisplay
           pokemon={pokemon}
@@ -100,15 +153,14 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
             type="button"
             aria-label={t('quizz.playCry', 'Écouter le cri')}
             title={t('quizz.playCry', 'Écouter le cri')}
-          >
-            🔊
-          </button>
+          />
         )}
       </div>
 
+      {/* Answer Section */}
       {isRevealed && pokemon ? (
-        <div className="pokemon-name-reveal">
-          {pokemon.names?.fr || pokemon.name}
+        <div className={`pokemon-name-reveal ${isCorrect ? 'victory-animation' : 'defeat-animation'}`}>
+          {i18n.language === 'fr' ? (pokemon.names?.fr || pokemon.name) : (pokemon.names?.en || pokemon.name)}
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="quizz-input-container">
@@ -116,11 +168,14 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
             ref={inputRef}
             type="text"
             className={`quizz-input ${isCorrect === false ? 'wrong' : ''}`}
-            placeholder={t('quizz.placeholder', 'Entrez le nom du Pokémon...')}
+            placeholder={t('quizz.placeholder', 'Nom du Pokémon...')}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={status !== 'playing'}
             autoFocus
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck="false"
           />
           
           {closeCallMessage && (
@@ -135,7 +190,7 @@ export const QuizzCard: React.FC<QuizzCardProps> = ({
             onClick={onGiveUp}
             disabled={status !== 'playing'}
           >
-            {t('quizz.giveUp', 'Je ne sais pas !')}
+            {t('quizz.giveUp', 'Passer')}
           </button>
         </form>
       )}

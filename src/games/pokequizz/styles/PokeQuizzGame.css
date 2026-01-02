@@ -1,80 +1,358 @@
-/* ===== POKEQUIZZ GAME - WARM & FRIENDLY DESIGN ===== */
-/* Secondary color: Purple/Violet (#9b59b6, #8e44ad) */
+/* ===== POKEQUIZZ GAME - POKEMON BATTLE HUD STYLE ===== */
+/* Inspired by Pokemon game interfaces - Battle screens, menus, and HUD elements */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --poke-primary: #3b82f6;
+  --poke-secondary: #ef4444;
+  --poke-accent: #fbbf24;
+  --poke-dark: #1e293b;
+  --poke-darker: #0f172a;
+  --poke-light: #f8fafc;
+  --poke-border: #64748b;
+  --poke-hp-green: #22c55e;
+  --poke-hp-yellow: #eab308;
+  --poke-hp-red: #ef4444;
+  --poke-box-bg: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+  --poke-box-border: #475569;
+  --poke-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  --poke-text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Pokemon-style pixel font for headers */
+.pokemon-font {
+  font-family: 'Press Start 2P', cursive;
+}
 
 .pokequizz-game {
+  min-height: 100vh;
+  background: linear-gradient(180deg, 
+    #1a1a2e 0%, 
+    #16213e 50%, 
+    #0f3460 100%
+  );
+  position: relative;
+  overflow-x: hidden;
+  padding-top: 70px;
+}
+
+/* Animated background pattern - like Pokemon battle backgrounds */
+.pokequizz-game::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+  animation: battleAmbience 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes battleAmbience {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Main 3-column layout */
+.pokequizz-layout {
   display: grid;
-  grid-template-columns: 280px 1fr 280px;
-  gap: 2rem;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  padding-top: 100px;
-  min-height: calc(100vh - 60px);
-  background: linear-gradient(180deg,
-    rgba(155, 89, 182, 0.02) 0%,
-    rgba(142, 68, 173, 0.05) 50%,
-    rgba(155, 89, 182, 0.02) 100%
-  );
-}
-
-.pokequizz-sidebar {
-  background: linear-gradient(145deg,
-    rgba(45, 45, 60, 0.9) 0%,
-    rgba(35, 35, 50, 0.95) 100%
-  );
-  border-radius: 20px;
   padding: 1.5rem;
-  border: 1px solid rgba(155, 89, 182, 0.15);
-  height: fit-content;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  min-height: calc(100vh - 70px);
+  position: relative;
+  z-index: 1;
 }
 
-.pokequizz-sidebar:hover {
-  border-color: rgba(155, 89, 182, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+/* Battle arena - center column */
+.pokequizz-battle-arena {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 1rem;
 }
 
-.pokequizz-main {
+/* Top HUD - Timer/Lives display like Pokemon battle info */
+.pokequizz-top-hud {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hud-info-box {
+  background: var(--poke-box-bg);
+  border: 4px solid var(--poke-box-border);
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--poke-shadow);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  color: var(--poke-dark);
+}
+
+.hud-icon {
+  font-size: 1.2rem;
+}
+
+.hud-value {
+  color: var(--poke-secondary);
+  font-weight: bold;
+}
+
+/* Battle stage - where Pokemon appears */
+.pokequizz-battle-stage {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
   width: 100%;
 }
 
-/* Mobile: Figer l'interface avec largeur fixe */
-@media (max-width: 1024px) {
-  .pokequizz-game {
+/* Pokemon platform/shadow effect */
+.battle-platform {
+  position: absolute;
+  bottom: 10%;
+  width: 250px;
+  height: 50px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: platformPulse 2s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes platformPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.05); opacity: 0.6; }
+}
+
+/* Mobile toggle buttons */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  z-index: 100;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  border: 4px solid #1e3a8a;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-toggle:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-toggle.settings {
+  left: 1.5rem;
+}
+
+.sidebar-toggle.stats {
+  right: 1.5rem;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 90;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Pokeball decorations */
+.pokeball-decoration {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ef4444 0%, #ef4444 45%, #1e293b 45%, #1e293b 55%, #f8fafc 55%, #f8fafc 100%);
+  border: 3px solid #1e293b;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pokeball-decoration::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: #f8fafc;
+  border: 3px solid #1e293b;
+  border-radius: 50%;
+}
+
+.pokeball-decoration.top-left {
+  top: 15%;
+  left: 3%;
+  animation: floatBall 6s ease-in-out infinite;
+}
+
+.pokeball-decoration.top-right {
+  top: 20%;
+  right: 3%;
+  animation: floatBall 8s ease-in-out infinite reverse;
+}
+
+.pokeball-decoration.bottom-left {
+  bottom: 20%;
+  left: 5%;
+  animation: floatBall 7s ease-in-out infinite 1s;
+}
+
+.pokeball-decoration.bottom-right {
+  bottom: 25%;
+  right: 5%;
+  animation: floatBall 5s ease-in-out infinite 0.5s;
+}
+
+@keyframes floatBall {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1100px) {
+  .pokequizz-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    max-width: 414px;
-    width: 100%;
-    margin: 0 auto;
     padding: 1rem;
-    padding-top: 80px;
+    gap: 1rem;
   }
   
   .pokequizz-sidebar {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
+    position: fixed;
+    top: 70px;
+    bottom: 0;
+    width: 320px;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    transform: translateX(-120%);
+    transition: transform 0.3s ease;
+    z-index: 95;
+    margin: 0;
   }
   
-  .pokequizz-main {
-    width: 100%;
+  .pokequizz-sidebar.settings-sidebar {
+    left: 0;
+  }
+  
+  .pokequizz-sidebar.stats-sidebar {
+    right: 0;
+    left: auto;
+    transform: translateX(120%);
+  }
+  
+  .pokequizz-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-toggle {
+    display: flex;
+  }
+  
+  .pokeball-decoration {
+    display: none;
   }
 }
 
 @media (max-width: 600px) {
   .pokequizz-game {
-    max-width: 100%;
-    gap: 1rem;
-    padding: 0.75rem;
-    padding-top: 70px;
+    padding-top: 60px;
   }
   
-  .pokequizz-sidebar {
-    padding: 1rem;
+  .pokequizz-layout {
+    padding: 0.75rem;
   }
+  
+  .hud-info-box {
+    padding: 0.5rem 1rem;
+    font-size: 0.55rem;
+  }
+  
+  .sidebar-toggle {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+    bottom: 1rem;
+  }
+  
+  .sidebar-toggle.settings {
+    left: 1rem;
+  }
+  
+  .sidebar-toggle.stats {
+    right: 1rem;
+  }
+}
+
+/* Streak fire animation */
+.streak-fire {
+  display: inline-block;
+  animation: fireFlicker 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes fireFlicker {
+  from { transform: scale(1) rotate(-5deg); }
+  to { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Victory/Defeat animations */
+@keyframes victoryBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes defeatShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.victory-animation {
+  animation: victoryBounce 0.5s ease-in-out 3;
+}
+
+.defeat-animation {
+  animation: defeatShake 0.3s ease-in-out 3;
 }

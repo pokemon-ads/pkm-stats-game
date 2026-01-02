@@ -1,12 +1,28 @@
-import React, { useContext, useState, useMemo, useCallback, useRef } from 'react';
+import React, { useContext, useState, useMemo, useCallback, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { ClickerContext, getHelperEffectiveBase, calculateShinyCost, calculateHelperProduction } from '../context/ClickerContext';
 import { getCurrentEvolution, getNextEvolution, calculateHelperCost, calculateBulkHelperCost, calculateMaxAffordable } from '../config/helpers';
 import { getSkillTree, getSkill, createSkillTrees } from '../config/skill-trees';
 import { SkillTree } from './SkillTree';
+import { formatNumberCompact as formatNumber } from '../utils/formatNumber';
 import type { PokemonHelper } from '../types/game';
 import '../styles/PokemonList.css';
+
+// Cache for skill trees to avoid recreating on every render
+let cachedSkillTrees: ReturnType<typeof createSkillTrees> | null = null;
+let cachedHelperIdsForSkills: string[] = [];
+
+const getCachedSkillTreesForList = (helperIds: string[]) => {
+  const idsMatch = cachedHelperIdsForSkills.length === helperIds.length &&
+    cachedHelperIdsForSkills.every((id, i) => id === helperIds[i]);
+  
+  if (!cachedSkillTrees || !idsMatch) {
+    cachedHelperIdsForSkills = helperIds;
+    cachedSkillTrees = createSkillTrees(helperIds);
+  }
+  return cachedSkillTrees;
+};
 
 const getAnimatedSprite = (pokemonId: number, isShiny: boolean = false): string => {
   if (isShiny) {
@@ -20,17 +36,6 @@ const getStaticSprite = (pokemonId: number, isShiny: boolean = false): string =>
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
   }
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
-};
-
-const formatNumber = (num: number): string => {
-  if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qi';
-  if (num >= 1e15) return (num / 1e15).toFixed(1) + 'Qa';
-  if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
-  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-  if (num < 10 && num % 1 !== 0) return num.toFixed(1);
-  return Math.floor(num).toLocaleString();
 };
 
 interface TooltipPosition {
@@ -68,9 +73,11 @@ export const PokemonList: React.FC = () => {
     dispatch({ type: 'MAKE_SHINY', payload: { helperId } });
   }, [dispatch]);
 
+  // Memoize helper IDs to avoid recreating skill trees
+  const helperIds = useMemo(() => state.helpers.map(h => h.id), [state.helpers]);
+  
   const calculateSkillEffectsForHelper = useCallback((helper: PokemonHelper) => {
-    const allHelperIds = state.helpers.map(h => h.id);
-    const skillTrees = createSkillTrees(allHelperIds);
+    const skillTrees = getCachedSkillTreesForList(helperIds);
     const skillTree = getSkillTree(helper.id, skillTrees);
     if (!skillTree) return { productionBonus: 0, productionMultiplier: 1 };
 
@@ -84,11 +91,10 @@ export const PokemonList: React.FC = () => {
       else if (skill.type === 'PRODUCTION_MULTIPLIER' || skill.type === 'SPECIAL') productionMultiplier *= skill.value;
     }
     return { productionBonus, productionMultiplier };
-  }, [state]);
+  }, [helperIds]);
 
   const calculateRemainingEV = useCallback((helper: PokemonHelper) => {
-    const allHelperIds = state.helpers.map(h => h.id);
-    const skillTrees = createSkillTrees(allHelperIds);
+    const skillTrees = getCachedSkillTreesForList(helperIds);
     const skillTree = getSkillTree(helper.id, skillTrees);
     if (!skillTree) return helper.ev;
 
@@ -98,18 +104,21 @@ export const PokemonList: React.FC = () => {
       if (skill) evSpent += skill.cost;
     }
     return Math.max(0, helper.ev - evSpent);
-  }, [state]);
+  }, [helperIds]);
 
+  // Memoize purchased upgrades to avoid filtering on every call
+  const purchasedUpgrades = useMemo(() => state.upgrades.filter(u => u.purchased), [state.upgrades]);
+  
   // Calculate production for a helper
   const getHelperProduction = useCallback((helper: PokemonHelper) => {
-    const effectiveBase = getHelperEffectiveBase(helper, state.upgrades);
+    const effectiveBase = getHelperEffectiveBase(helper, purchasedUpgrades);
     const shinyMultiplier = helper.isShiny ? 10 : 1;
-    const helperMultiplier = state.upgrades
-      .filter(u => u.purchased && u.type === 'HELPER_MULTIPLIER' && u.targetId === helper.id)
+    const helperMultiplier = purchasedUpgrades
+      .filter(u => u.type === 'HELPER_MULTIPLIER' && u.targetId === helper.id)
       .reduce((acc, u) => acc * u.value, 1);
     const skillEffects = calculateSkillEffectsForHelper(helper);
     return calculateHelperProduction(effectiveBase, helper.count, helperMultiplier, shinyMultiplier, skillEffects.productionBonus, skillEffects.productionMultiplier);
-  }, [state.upgrades, calculateSkillEffectsForHelper]);
+  }, [purchasedUpgrades, calculateSkillEffectsForHelper]);
 
   // Stats for header
   const totalOwned = useMemo(() => state.helpers.filter(h => h.count > 0).length, [state.helpers]);
@@ -165,16 +174,16 @@ export const PokemonList: React.FC = () => {
     };
   }, [hoveredHelper, state.helpers, state.energyPerSecond, getHelperProduction]);
 
-  // Selected helper data
+  // Selected helper data - optimized to reduce recalculations
   const selectedHelperData = useMemo(() => {
     if (!selectedHelper) return null;
     const helper = state.helpers.find(h => h.id === selectedHelper);
     if (!helper) return null;
 
-    const effectiveBase = getHelperEffectiveBase(helper, state.upgrades);
+    const effectiveBase = getHelperEffectiveBase(helper, purchasedUpgrades);
     const shinyMultiplier = helper.isShiny ? 10 : 1;
-    const helperMultiplier = state.upgrades
-      .filter(u => u.purchased && u.type === 'HELPER_MULTIPLIER' && u.targetId === helper.id)
+    const helperMultiplier = purchasedUpgrades
+      .filter(u => u.type === 'HELPER_MULTIPLIER' && u.targetId === helper.id)
       .reduce((acc, u) => acc * u.value, 1);
     const skillEffects = calculateSkillEffectsForHelper(helper);
     const production = calculateHelperProduction(effectiveBase, helper.count, helperMultiplier, shinyMultiplier, skillEffects.productionBonus, skillEffects.productionMultiplier);

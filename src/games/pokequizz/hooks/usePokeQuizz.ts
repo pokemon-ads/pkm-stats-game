@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pokemonService } from '../../../services/pokemon.service';
 import { GENERATIONS, type Pokemon } from '../../../types/pokemon';
-import { DEFAULT_SETTINGS, INITIAL_STATS, TIME_ATTACK_DURATION } from '../config/constants';
+import { DEFAULT_SETTINGS, INITIAL_STATS, TIME_ATTACK_DURATION, REVEAL_DURATION_CORRECT, REVEAL_DURATION_WRONG } from '../config/constants';
 import { normalizeText } from '../utils/textNormalization';
 import type { GameState, GameSettings, GameStats, Difficulty } from '../types/game';
 
@@ -12,6 +12,9 @@ export const usePokeQuizz = () => {
   const [stats, setStats] = useState<GameStats>(INITIAL_STATS);
   const requestRef = useRef(0);
   const nextPokemonRef = useRef<{ pokemon: Pokemon; image: HTMLImageElement } | null>(null);
+  // Store the revealed pokemon to prevent it from changing during reveal phase
+  const revealedPokemonRef = useRef<Pokemon | null>(null);
+  const isProcessingRef = useRef(false);
   const [gameState, setGameState] = useState<GameState>({
     status: 'loading',
     currentPokemon: null,
@@ -78,24 +81,18 @@ export const usePokeQuizz = () => {
   }, [getRandomPokemonId]);
 
   const fetchNextPokemon = useCallback(async () => {
-    // #region agent log
-    const fetchStart = Date.now();
-    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:80',message:'fetchNextPokemon called',data:{requestId:requestRef.current+1,hasPreloaded:!!nextPokemonRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     requestRef.current += 1;
     const requestId = requestRef.current;
 
     const applyPokemon = (pokemon: Pokemon) => {
       if (requestId !== requestRef.current) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:85',message:'applyPokemon cancelled',data:{requestId,currentRequestId:requestRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         return;
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:87',message:'applyPokemon success',data:{requestId,pokemonId:pokemon.id,fetchTime:Date.now()-fetchStart},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
+      // Clear the revealed pokemon ref when starting a new round
+      revealedPokemonRef.current = null;
+      isProcessingRef.current = false;
+      
       setGameState(prev => ({
         ...prev,
         status: 'playing',
@@ -128,9 +125,6 @@ export const usePokeQuizz = () => {
         applyPokemon(pokemon);
       };
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:119',message:'fetchNextPokemon error',data:{requestId,error:error instanceof Error?error.message:'unknown',willRetry:requestId===requestRef.current},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       console.error('Error fetching pokemon:', error);
       if (requestId === requestRef.current) {
         setTimeout(fetchNextPokemon, 1000);
@@ -140,17 +134,15 @@ export const usePokeQuizz = () => {
 
   // Initial fetch
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:127',message:'Initial fetch effect triggered',data:{hasCurrentPokemon:!!gameState.currentPokemon,status:gameState.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     if (!gameState.currentPokemon) {
       fetchNextPokemon();
     }
   }, [fetchNextPokemon, gameState.currentPokemon]);
 
   const handleGuess = useCallback((guess: string) => {
-    if (gameState.status !== 'playing' || !gameState.currentPokemon) return;
+    if (gameState.status !== 'playing' || !gameState.currentPokemon || isProcessingRef.current) return;
 
+    isProcessingRef.current = true;
     const normalizedGuess = normalizeText(guess);
     
     // Check against both English and French names
@@ -164,6 +156,9 @@ export const usePokeQuizz = () => {
       normalizedGuess === normalizedApiName;
 
     if (isCorrect) {
+      // Store the current pokemon for the reveal phase
+      revealedPokemonRef.current = gameState.currentPokemon;
+      
       if (settings.soundEnabled && gameState.currentPokemon?.cries?.latest) {
         const audio = new Audio(gameState.currentPokemon.cries.latest);
         audio.volume = settings.cryVolume;
@@ -203,10 +198,10 @@ export const usePokeQuizz = () => {
         userGuess: guess
       }));
 
-      // Auto next after delay
+      // Auto next after delay - longer to let user see the answer
       setTimeout(() => {
         fetchNextPokemon();
-      }, 2000);
+      }, REVEAL_DURATION_CORRECT);
 
     } else {
       if (settings.mode === 'survival') {
@@ -225,20 +220,25 @@ export const usePokeQuizz = () => {
           totalCount: prev.totalCount + 1
         }));
 
-        // Auto next (restart) after delay? Or show Game Over screen?
-        // For now, just reveal and next.
+        // Auto next (restart) after delay
         setTimeout(() => {
           fetchNextPokemon();
-        }, 3000);
+        }, REVEAL_DURATION_WRONG);
       } else {
         // Normal mode: unlimited tries
         setGameState(prev => ({ ...prev, userGuess: guess }));
+        isProcessingRef.current = false;
       }
     }
   }, [gameState.status, gameState.currentPokemon, gameState.startTime, fetchNextPokemon, settings]);
 
   const handleGiveUp = useCallback(() => {
-    if (gameState.status !== 'playing') return;
+    if (gameState.status !== 'playing' || isProcessingRef.current) return;
+
+    isProcessingRef.current = true;
+
+    // Store the current pokemon for the reveal phase
+    revealedPokemonRef.current = gameState.currentPokemon;
 
     if (settings.soundEnabled && gameState.currentPokemon?.cries?.latest) {
       const audio = new Audio(gameState.currentPokemon.cries.latest);
@@ -258,10 +258,10 @@ export const usePokeQuizz = () => {
       isCorrect: false
     }));
 
-    // Auto next after delay
+    // Auto next after delay - longer to let user see the answer
     setTimeout(() => {
       fetchNextPokemon();
-    }, 3000);
+    }, REVEAL_DURATION_WRONG);
   }, [gameState.status, fetchNextPokemon, settings.soundEnabled, i18n.language, t]);
 
   const updateSettings = useCallback((newSettings: Partial<GameSettings>) => {
@@ -290,29 +290,37 @@ export const usePokeQuizz = () => {
 
   // Effect to handle generation or mode changes
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/9a77cddd-fb46-4bc0-be08-45e0027b17d2',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePokeQuizz.ts:274',message:'Generation/mode change effect triggered',data:{generation:settings.generation,mode:settings.mode,status:gameState.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     // Only fetch if we are not already loading (to avoid double fetch on mount)
     // and if the generation actually changed (handled by dependency array)
     if (gameState.status !== 'loading') {
       fetchNextPokemon();
     }
-  }, [settings.generation, settings.mode, fetchNextPokemon, gameState.status]);
+  }, [settings.generation, settings.mode, fetchNextPokemon]);
+
+  // Get the pokemon to display - use revealed pokemon during reveal phase, otherwise current
+  const displayPokemon = gameState.status === 'revealed' && revealedPokemonRef.current
+    ? revealedPokemonRef.current
+    : gameState.currentPokemon;
 
   return {
-    gameState,
+    gameState: {
+      ...gameState,
+      // Override currentPokemon with the stable revealed pokemon during reveal phase
+      currentPokemon: displayPokemon
+    },
     settings,
     stats,
     handleGuess,
     handleGiveUp,
     updateSettings,
     playCry: useCallback(() => {
-      if (gameState.currentPokemon?.cries?.latest) {
-        const audio = new Audio(gameState.currentPokemon.cries.latest);
+      // Use the displayed pokemon (which is stable during reveal)
+      const pokemonToPlay = displayPokemon;
+      if (pokemonToPlay?.cries?.latest) {
+        const audio = new Audio(pokemonToPlay.cries.latest);
         audio.volume = settings.cryVolume;
         audio.play().catch(e => console.error('Error playing cry:', e));
       }
-    }, [gameState.currentPokemon, settings.cryVolume])
+    }, [displayPokemon, settings.cryVolume])
   };
 };

@@ -190,12 +190,30 @@ const createBaseSkillTree = (helperId: string): Skill[] => {
   return skills;
 };
 
-// Create skill trees for all helpers
+// Cache for skill trees to avoid recreating them on every calculation
+const skillTreeCache = new Map<string, SkillTree>();
+
+// Get or create a skill tree for a helper (cached)
+const getOrCreateSkillTree = (helperId: string): SkillTree => {
+  let tree = skillTreeCache.get(helperId);
+  if (!tree) {
+    tree = {
+      helperId,
+      skills: createBaseSkillTree(helperId),
+    };
+    skillTreeCache.set(helperId, tree);
+  }
+  return tree;
+};
+
+// Create skill trees for all helpers (uses cache)
 export const createSkillTrees = (helperIds: string[]): SkillTree[] => {
-  return helperIds.map(helperId => ({
-    helperId,
-    skills: createBaseSkillTree(helperId),
-  }));
+  return helperIds.map(helperId => getOrCreateSkillTree(helperId));
+};
+
+// Clear the skill tree cache (useful for testing or reset)
+export const clearSkillTreeCache = (): void => {
+  skillTreeCache.clear();
 };
 
 // Get skill tree for a specific helper

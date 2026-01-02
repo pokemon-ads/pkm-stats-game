@@ -13,6 +13,7 @@
     "gamesTitle": "Choose your adventure",
     "popular": "Popular",
     "new": "New",
+    "classic": "Classic",
     "pokestatsDesc": "Think you know your Pokémon stats? Guess which stat is the highest and prove you're a true expert!",
     "pokequizzDesc": "Who's that Pokémon? Test your knowledge by identifying Pokémon from their silhouettes!",
     "pokeclickerDesc": "Click to collect energy and recruit Pokémon helpers! Watch them evolve as you progress!",
@@ -24,9 +25,55 @@
     "featureEvolution": "Evolution",
     "letsPlay": "Let's Play!",
     "continue": "Continue",
+    "playNow": "Play Now",
     "mysteryGame": "Mystery Game",
     "comingSoonDesc": "Something exciting is brewing... A new challenge awaits patient trainers!",
     "inDevelopment": "In development",
+    "hero": {
+      "welcomeTo": "Welcome to",
+      "brand": "PKM Games",
+      "subtitle": "Your ultimate Pokemon gaming portal. Challenge yourself with stats, quizzes, and idle adventures!",
+      "games": "Games",
+      "pokemon": "Pokémon",
+      "free": "Free"
+    },
+    "library": {
+      "title": "Game Library",
+      "subtitle": "Choose your adventure"
+    },
+    "games": {
+      "pokestats": {
+        "subtitle": "The Stats Challenge",
+        "description": "Test your knowledge of Pokemon stats! Compare base stats and guess which Pokemon has the highest value.",
+        "features": {
+          "compareStats": "Compare Stats",
+          "leaderboard": "Leaderboard",
+          "allGenerations": "All Generations"
+        }
+      },
+      "pokequizz": {
+        "subtitle": "Who's That Pokémon?",
+        "description": "The classic guessing game! Identify Pokemon from their silhouettes and prove your mastery.",
+        "features": {
+          "silhouetteMode": "Silhouette Mode",
+          "speedChallenge": "Speed Challenge",
+          "hintsSystem": "Hints System"
+        }
+      },
+      "pokeclicker": {
+        "subtitle": "Catch & Collect",
+        "description": "An idle clicker adventure! Click to catch Pokemon, unlock upgrades, and build your ultimate collection.",
+        "features": {
+          "idleProgress": "Idle Progress",
+          "upgrades": "Upgrades",
+          "pokemonCollection": "Pokemon Collection"
+        }
+      }
+    },
+    "progress": {
+      "energy": "Energy",
+      "perSecond": "Per Second"
+    },
     "about": {
       "title": "About PKM Stats",
       "intro": "Welcome to PKM Stats, your ultimate destination for Pokémon trivia and strategy games. Whether you're a casual fan or a competitive master, our mini-games are designed to test your knowledge and sharpen your skills.",
@@ -230,6 +277,7 @@
     "question": "Who's that Pokémon?",
     "correct": "Correct!",
     "wrong": "Too bad!",
+    "closeCall": "Close call!",
     "placeholder": "Enter Pokémon name...",
     "giveUp": "I don't know!",
     "playCry": "Play Cry"
