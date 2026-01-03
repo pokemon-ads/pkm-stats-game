@@ -9,46 +9,37 @@ interface SettingsSidebarProps {
   settings: GameSettings;
   onUpdateSettings: (settings: Partial<GameSettings>) => void;
   onPlayCry: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUpdateSettings, onPlayCry }) => {
+export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ 
+  settings, 
+  onUpdateSettings, 
+  onPlayCry,
+  isOpen = false,
+  onClose 
+}) => {
   const { t } = useTranslation();
   const showCryButton = settings.difficulty === 'facile';
 
   return (
-    <aside className="pokequizz-sidebar">
+    <aside className={`pokequizz-sidebar settings-sidebar ${isOpen ? 'open' : ''}`}>
+      {/* Close button for mobile */}
+      {onClose && (
+        <button 
+          className="sidebar-close-btn"
+          onClick={onClose}
+          aria-label={t('common.close', 'Fermer')}
+        >
+          ✕
+        </button>
+      )}
+
       <div className="sidebar-section">
         <h3 className="sidebar-title">{t('settings.title', 'Paramètres')}</h3>
 
-        {showCryButton && (
-          <div className="setting-row">
-            <button
-              className="play-cry-btn-sidebar"
-              onClick={onPlayCry}
-              title={t('quizz.playCry', 'Écouter le cri')}
-              type="button"
-            >
-              🔊 {t('quizz.playCry', 'Écouter le cri')}
-            </button>
-          </div>
-        )}
-
-        <div className="setting-row">
-          <label className="setting-label">
-            {t('settings.cryVolume', 'Volume du cri')}: {Math.round(settings.cryVolume * 100)}%
-          </label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={settings.cryVolume}
-            onChange={(e) => onUpdateSettings({ cryVolume: parseFloat(e.target.value) })}
-            className="volume-slider"
-            title={t('settings.cryVolume', 'Volume du cri')}
-          />
-        </div>
-        
+        {/* Game Mode Selection */}
         <div className="setting-row">
           <label className="setting-label">{t('settings.mode', 'Mode de jeu')}</label>
           <select
@@ -67,6 +58,7 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
           </div>
         </div>
 
+        {/* Generation Selection */}
         <div className="setting-row">
           <label className="setting-label">{t('settings.generation', 'Génération')}</label>
           <select
@@ -74,15 +66,16 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
             value={settings.generation}
             onChange={(e) => onUpdateSettings({ generation: Number(e.target.value) })}
           >
-            <option value={0}>{t('settings.allGenerations', 'Toutes les générations')}</option>
+            <option value={0}>{t('settings.allGenerations', 'Toutes')}</option>
             {Object.entries(GENERATIONS).map(([key, gen]) => (
               <option key={key} value={key}>
-                {gen.name}
+                Gen {key} - {gen.name}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Difficulty Selection */}
         <div className="setting-row">
           <label className="setting-label">{t('settings.difficulty', 'Difficulté')}</label>
           <select
@@ -98,6 +91,38 @@ export const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ settings, onUp
           </select>
         </div>
 
+        {/* Volume Control */}
+        <div className="setting-row">
+          <label className="setting-label">
+            {t('settings.cryVolume', 'Volume')} - {Math.round(settings.cryVolume * 100)}%
+          </label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={settings.cryVolume}
+            onChange={(e) => onUpdateSettings({ cryVolume: parseFloat(e.target.value) })}
+            className="volume-slider"
+            title={t('settings.cryVolume', 'Volume du cri')}
+          />
+        </div>
+
+        {/* Play Cry Button (only in easy mode) */}
+        {showCryButton && (
+          <div className="setting-row">
+            <button
+              className="play-cry-btn-sidebar"
+              onClick={onPlayCry}
+              title={t('quizz.playCry', 'Écouter le cri')}
+              type="button"
+            >
+              <span style={{ position: 'relative', zIndex: 2 }}>
+                🔊 {t('quizz.playCry', 'Écouter')}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );

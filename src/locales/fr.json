@@ -13,6 +13,7 @@
     "gamesTitle": "Choisis ton aventure",
     "popular": "Populaire",
     "new": "Nouveau",
+    "classic": "Classique",
     "pokestatsDesc": "Tu penses connaître les stats de tes Pokémon ? Devine quelle stat est la plus haute et prouve que tu es un vrai expert !",
     "pokequizzDesc": "Quel est ce Pokémon ? Teste tes connaissances en identifiant les Pokémon à partir de leur silhouette !",
     "pokeclickerDesc": "Clique pour collecter de l'énergie et recrute des Pokémon assistants ! Regarde-les évoluer au fil de ta progression !",
@@ -24,9 +25,55 @@
     "featureEvolution": "Évolution",
     "letsPlay": "C'est parti !",
     "continue": "Continuer",
+    "playNow": "Jouer",
     "mysteryGame": "Jeu Mystère",
     "comingSoonDesc": "Quelque chose de passionnant se prépare... Un nouveau défi attend les dresseurs patients !",
     "inDevelopment": "En développement",
+    "hero": {
+      "welcomeTo": "Bienvenue sur",
+      "brand": "PKM Games",
+      "subtitle": "Votre portail ultime de jeux Pokémon. Défiez-vous avec des stats, des quiz et des aventures idle !",
+      "games": "Jeux",
+      "pokemon": "Pokémon",
+      "free": "Gratuit"
+    },
+    "library": {
+      "title": "Bibliothèque de Jeux",
+      "subtitle": "Choisis ton aventure"
+    },
+    "games": {
+      "pokestats": {
+        "subtitle": "Le Défi des Stats",
+        "description": "Testez vos connaissances des stats Pokémon ! Comparez les stats de base et devinez quel Pokémon a la valeur la plus élevée.",
+        "features": {
+          "compareStats": "Comparer les Stats",
+          "leaderboard": "Classement",
+          "allGenerations": "Toutes Générations"
+        }
+      },
+      "pokequizz": {
+        "subtitle": "Quel est ce Pokémon ?",
+        "description": "Le jeu de devinettes classique ! Identifiez les Pokémon à partir de leur silhouette et prouvez votre maîtrise.",
+        "features": {
+          "silhouetteMode": "Mode Silhouette",
+          "speedChallenge": "Défi Vitesse",
+          "hintsSystem": "Système d'Indices"
+        }
+      },
+      "pokeclicker": {
+        "subtitle": "Attrape & Collectionne",
+        "description": "Une aventure idle clicker ! Cliquez pour attraper des Pokémon, débloquez des améliorations et construisez votre collection ultime.",
+        "features": {
+          "idleProgress": "Progression Idle",
+          "upgrades": "Améliorations",
+          "pokemonCollection": "Collection Pokémon"
+        }
+      }
+    },
+    "progress": {
+      "energy": "Énergie",
+      "perSecond": "Par Seconde"
+    },
     "about": {
       "title": "À propos de PKM Stats",
       "intro": "Bienvenue sur PKM Stats, votre destination ultime pour les jeux de stratégie et de quiz Pokémon. Que vous soyez un fan occasionnel ou un maître compétitif, nos mini-jeux sont conçus pour tester vos connaissances et affûter vos compétences.",
@@ -230,6 +277,7 @@
     "question": "Quel est ce Pokémon ?",
     "correct": "Bravo !",
     "wrong": "Dommage !",
+    "closeCall": "C'est presque ça !",
     "placeholder": "Entrez le nom du Pokémon...",
     "giveUp": "Je ne sais pas !",
     "playCry": "Écouter le cri"

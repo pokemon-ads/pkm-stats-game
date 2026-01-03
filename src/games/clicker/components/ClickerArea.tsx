@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
 import { useClickerGame } from '../hooks/useClickerGame';
 import { getCurrentEvolution, getNextEvolution } from '../config/helpers';
+import { formatNumberCompact as formatNumber } from '../utils/formatNumber';
 import type { PokemonHelper } from '../types/game';
 import '../styles/ClickerArea.css';
 
@@ -9,7 +10,6 @@ interface FloatingTextItem {
   x: number;
   y: number;
   text: string;
-  amount: number;
 }
 
 interface Particle {
@@ -19,17 +19,16 @@ interface Particle {
   color: string;
   tx: number;
   ty: number;
-  type: 'star' | 'sparkle' | 'energy';
 }
 
 // Default Pokemon (Pikachu) if no helpers unlocked
 const DEFAULT_POKEMON_ID = 25;
 
-// Performance limits
-const MAX_FLOATING_TEXTS = 5;
-const MAX_PARTICLES = 20;
-const CLICK_BATCH_INTERVAL = 100;
-const MIN_EFFECT_INTERVAL = 50;
+// Performance limits - reduced for better performance
+const MAX_FLOATING_TEXTS = 3;
+const MAX_PARTICLES = 10;
+const CLICK_BATCH_INTERVAL = 150;
+const MIN_EFFECT_INTERVAL = 100;
 
 // Get animated sprite URL for a Pokemon (with shiny support)
 const getAnimatedSprite = (pokemonId: number, isShiny: boolean = false) => {
@@ -50,14 +49,6 @@ const getMiniSprite = (pokemonId: number, isShiny: boolean = false) => {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
   }
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${pokemonId}.png`;
-};
-
-// Format large numbers with K/M/B suffixes
-const formatNumber = (num: number): string => {
-  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-  return num.toFixed(num >= 10 ? 0 : 1);
 };
 
 // Get type color based on Pokemon
@@ -173,16 +164,16 @@ export const ClickerArea: React.FC = () => {
   }, []);
 
   const createParticles = useCallback((centerX: number, centerY: number, intensity: number = 1) => {
-    const particleCount = Math.min(Math.ceil(8 * intensity), 15);
+    // Reduce particle count for better performance
+    const particleCount = Math.min(Math.ceil(4 * intensity), 8);
     const newParticles: Particle[] = [];
     const baseId = Date.now();
     
-    const types: Array<'star' | 'sparkle' | 'energy'> = ['star', 'sparkle', 'energy'];
-    const colors = [typeColor, '#ffcb05', '#ffffff', '#ff6b6b', '#4ecdc4'];
+    const colors = [typeColor, '#ffcb05', '#ffffff'];
     
     for (let i = 0; i < particleCount; i++) {
       const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
-      const distance = 50 + Math.random() * 80 * intensity;
+      const distance = 40 + Math.random() * 60 * intensity;
       
       newParticles.push({
         id: baseId + i,
@@ -191,7 +182,6 @@ export const ClickerArea: React.FC = () => {
         color: colors[Math.floor(Math.random() * colors.length)],
         tx: Math.cos(angle) * distance,
         ty: Math.sin(angle) * distance,
-        type: types[Math.floor(Math.random() * types.length)],
       });
     }
     
@@ -200,10 +190,10 @@ export const ClickerArea: React.FC = () => {
       return combined.slice(-MAX_PARTICLES);
     });
     
-    const particleIds = new Set(newParticles.map(p => p.id));
+    // Use a single timeout for cleanup
     setTimeout(() => {
-      setParticles(prev => prev.filter(p => !particleIds.has(p.id)));
-    }, 1000);
+      setParticles(prev => prev.filter(p => p.id < baseId || p.id >= baseId + particleCount));
+    }, 800);
   }, [typeColor]);
 
   const showVisualEffects = useCallback((clickCount: number, x: number, y: number) => {
@@ -222,7 +212,7 @@ export const ClickerArea: React.FC = () => {
     }
     
     const totalAmount = state.energyPerClick * clickCount;
-    const displayText = clickCount > 1 
+    const displayText = clickCount > 1
       ? `+${formatNumber(totalAmount)} (x${clickCount})`
       : `+${formatNumber(totalAmount)}`;
     
@@ -231,7 +221,6 @@ export const ClickerArea: React.FC = () => {
       x,
       y,
       text: displayText,
-      amount: totalAmount
     };
     
     setFloatingTexts(prev => [...prev, newText].slice(-MAX_FLOATING_TEXTS));
@@ -383,30 +372,6 @@ export const ClickerArea: React.FC = () => {
         </div>
       </div>
 
-      {/* Player stats box - Floating right */}
-      <div className="pokemon-info-box player-box">
-        <div className="info-box-inner">
-          <div className="pokemon-name-row">
-            <span className="pokemon-name">Dresseur</span>
-          </div>
-          <div className="hp-bar-container">
-            <span className="hp-label">EP</span>
-            <div className="hp-bar-bg energy-bar">
-              <div 
-                className="hp-bar-fill energy-fill" 
-                style={{ width: '100%' }}
-              />
-            </div>
-          </div>
-          <div className="energy-display">
-            <span className="energy-current">{formatNumber(state.energy)}</span>
-            <span className="energy-label">ÉNERGIE</span>
-          </div>
-          <div className="click-power-display">
-            <span className="click-power-value">⚡{formatNumber(state.energyPerClick)}/clic</span>
-          </div>
-        </div>
-      </div>
 
       {/* Pokemon Selector Overlay */}
       {showPokemonSelector && (
@@ -464,11 +429,11 @@ export const ClickerArea: React.FC = () => {
         </div>
       ))}
       
-      {/* Particles */}
-      {particles.map(particle => (
+      {/* Particles - only render if there are particles */}
+      {particles.length > 0 && particles.map(particle => (
         <div
           key={particle.id}
-          className={`battle-particle particle-${particle.type}`}
+          className="battle-particle"
           style={{
             left: particle.x,
             top: particle.y,

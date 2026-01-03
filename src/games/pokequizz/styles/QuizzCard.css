@@ -1,67 +1,104 @@
-/* ===== QUIZZ CARD - WARM & FRIENDLY DESIGN ===== */
-/* Using purple/violet as secondary color */
 
+/* ===== QUIZZ CARD - POKEMON BATTLE STYLE ===== */
+/* Inspired by Pokemon battle screens with info boxes and HP bars */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Main battle card container */
 .quizz-card {
-  background: linear-gradient(145deg,
-    rgba(45, 45, 60, 0.9) 0%,
-    rgba(35, 35, 50, 0.95) 100%
-  );
-  border-radius: 24px;
-  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
   width: 100%;
-  max-width: 550px;
-  border: 2px solid rgba(155, 89, 182, 0.2);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 60px rgba(155, 89, 182, 0.05);
+  max-width: 500px;
   position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.quizz-card::before {
+/* Pokemon info box - like the enemy Pokemon info in battles */
+.pokemon-info-box {
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 4px solid #475569;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  width: 100%;
+  max-width: 320px;
+  position: relative;
+}
+
+.pokemon-info-box::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle at center,
-    rgba(155, 89, 182, 0.08) 0%,
-    transparent 50%
-  );
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  border-radius: 8px 8px 0 0;
 }
 
-.quizz-card:hover::before {
-  opacity: 1;
-}
-
-.quizz-card:hover {
-  border-color: rgba(155, 89, 182, 0.4);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.35),
-    0 0 80px rgba(155, 89, 182, 0.1);
-}
-
+/* Question title - styled like Pokemon name display */
 .quizz-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #9b59b6 0%, #e74c3c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #1e293b;
+  margin: 0 0 0.75rem 0;
+  text-align: left;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
 }
 
+.quizz-title.correct {
+  color: #16a34a;
+}
+
+.quizz-title.wrong {
+  color: #dc2626;
+}
+
+/* HP bar style progress indicator */
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.progress-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.5rem;
+  color: #fbbf24;
+  text-shadow: 1px 1px 0 #92400e;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid #475569;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.progress-bar-fill.medium {
+  background: linear-gradient(180deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
+}
+
+.progress-bar-fill.low {
+  background: linear-gradient(180deg, #fca5a5 0%, #ef4444 50%, #dc2626 100%);
+}
+
+/* Pokemon display area - battle stage */
 .quizz-image-container {
   width: 280px;
   height: 280px;
@@ -69,44 +106,87 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
-  border: 1px solid rgba(155, 89, 182, 0.15);
-  padding: 1rem;
+  margin: 1rem 0;
 }
 
-.play-cry-btn {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: linear-gradient(135deg, rgba(155, 89, 182, 0.3) 0%, rgba(142, 68, 173, 0.3) 100%);
-  border: 1px solid rgba(155, 89, 182, 0.5);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);
-}
-
-.play-cry-btn:hover {
-  background: linear-gradient(135deg, rgba(155, 89, 182, 0.5) 0%, rgba(142, 68, 173, 0.5) 100%);
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
-}
-
+/* Pokemon sprite with battle effects */
 .quizz-canvas {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+  transition: all 0.3s ease;
 }
 
+.quizz-canvas.hidden {
+  filter: brightness(0) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+}
+
+.quizz-canvas.reveal-flash {
+  animation: pokemonReveal 0.8s ease-out forwards;
+}
+
+@keyframes pokemonReveal {
+  0% {
+    filter: brightness(3) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8));
+    transform: scale(1.1);
+  }
+  50% {
+    filter: brightness(1.5) drop-shadow(0 0 20px rgba(251, 191, 36, 0.6));
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+    transform: scale(1);
+  }
+}
+
+/* Cry button - styled like a Pokeball button */
+.play-cry-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ef4444 0%, #ef4444 45%, #1e293b 45%, #1e293b 55%, #f8fafc 55%, #f8fafc 100%);
+  border: 3px solid #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.play-cry-btn::after {
+  content: '🔊';
+  font-size: 1rem;
+  position: absolute;
+}
+
+.play-cry-btn::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #f8fafc;
+  border: 3px solid #1e293b;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.play-cry-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+}
+
+.play-cry-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Input container - styled like Pokemon text input */
 .quizz-input-container {
   width: 100%;
   display: flex;
@@ -115,153 +195,361 @@
   align-items: center;
 }
 
+/* Text input - Pokemon dialogue box style */
 .quizz-input {
   width: 100%;
+  max-width: 400px;
   padding: 1rem 1.5rem;
-  font-size: 1.2rem;
-  border-radius: 14px;
-  border: 2px solid rgba(155, 89, 182, 0.4);
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  border-radius: 12px;
+  border: 4px solid #475569;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
   text-align: center;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .quizz-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: #94a3b8;
+  font-size: 0.55rem;
 }
 
 .quizz-input:focus {
   outline: none;
-  border-color: #9b59b6;
-  background: rgba(155, 89, 182, 0.1);
-  box-shadow: 0 0 20px rgba(155, 89, 182, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 4px rgba(59, 130, 246, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .quizz-input.correct {
-  border-color: #4caf50;
-  background: rgba(76, 175, 80, 0.2);
-  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+  border-color: #22c55e;
+  background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 100%);
+  animation: correctPulse 0.5s ease;
+}
+
+@keyframes correctPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 .quizz-input.wrong {
-  border-color: #e74c3c;
-  background: rgba(231, 76, 60, 0.2);
-  animation: shake 0.5s ease-in-out;
+  border-color: #ef4444;
+  background: linear-gradient(180deg, #fef2f2 0%, #fecaca 100%);
+  animation: wrongShake 0.4s ease;
 }
 
-@keyframes shake {
+@keyframes wrongShake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-8px); }
   40% { transform: translateX(8px); }
-  60% { transform: translateX(-8px); }
-  80% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
 }
 
+/* Close call message - warning style */
 .close-call-message {
-  color: #f39c12;
-  font-weight: 600;
-  font-size: 1rem;
-  animation: pulse 1.5s infinite;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #f59e0b;
+  text-shadow: 1px 1px 0 #92400e;
+  animation: closeCallBlink 0.8s ease-in-out infinite;
   text-align: center;
+  padding: 0.5rem 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 8px;
+  border: 2px dashed #f59e0b;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.7; transform: scale(0.98); }
-  50% { opacity: 1; transform: scale(1.02); }
-  100% { opacity: 0.7; transform: scale(0.98); }
+@keyframes closeCallBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
+/* Give up button - styled like Pokemon menu option */
 .give-up-btn {
-  padding: 0.75rem 2rem;
-  border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.55rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: 3px solid #475569;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #64748b;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
 }
 
 .give-up-btn:hover {
-  background: rgba(231, 76, 60, 0.15);
-  border-color: rgba(231, 76, 60, 0.4);
-  color: #e74c3c;
+  background: linear-gradient(180deg, #fef2f2 0%, #fecaca 100%);
+  border-color: #ef4444;
+  color: #dc2626;
   transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2);
+}
+
+.give-up-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .give-up-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
+/* Pokemon name reveal - victory style */
 .pokemon-name-reveal {
-  font-size: 2.2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: none;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  text-transform: capitalize;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.2rem;
+  color: #fbbf24;
+  text-shadow: 
+    2px 2px 0 #92400e,
+    -1px -1px 0 #fef3c7;
+  animation: nameReveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-radius: 12px;
+  border: 3px solid #fbbf24;
 }
 
-@keyframes popIn {
-  from {
-    transform: scale(0.5);
+@keyframes nameReveal {
+  0% {
+    transform: scale(0) rotate(-10deg);
     opacity: 0;
   }
-  to {
-    transform: scale(1);
+  50% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
 
-.quizz-canvas.reveal-flash {
-  animation: flashReveal 0.6s ease-out forwards;
+/* Battle message box */
+.battle-message {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  color: #1e293b;
+  line-height: 1.8;
+  text-align: left;
 }
 
-@keyframes flashReveal {
-  0% {
-    filter: brightness(1) blur(0);
-    transform: scale(1);
-  }
-  20% {
-    filter: brightness(2) blur(0);
-    transform: scale(1.05);
-  }
-  100% {
-    filter: brightness(1) blur(0);
-    transform: scale(1);
-  }
+.battle-message .pokemon-name {
+  color: #3b82f6;
+}
+
+.battle-message .action {
+  color: #ef4444;
+}
+
+/* Type indicator badges */
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.45rem;
+  text-transform: uppercase;
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+  margin: 0.25rem;
 }
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-  .quizz-card {
-    padding: 1.5rem;
-    border-radius: 20px;
-  }
-  
-  .quizz-title {
-    font-size: 1.25rem;
-  }
-  
   .quizz-image-container {
     width: 220px;
     height: 220px;
   }
   
+  .pokemon-info-box {
+    padding: 0.75rem 1rem;
+    max-width: 280px;
+  }
+  
+  .quizz-title {
+    font-size: 0.6rem;
+  }
+  
   .quizz-input {
-    font-size: 1rem;
-    padding: 0.875rem 1.25rem;
+    font-size: 0.6rem;
+    padding: 0.875rem 1rem;
+  }
+  
+  .quizz-input::placeholder {
+    font-size: 0.45rem;
   }
   
   .pokemon-name-reveal {
-    font-size: 1.75rem;
+    font-size: 0.9rem;
+    padding: 0.75rem;
   }
+  
+  .play-cry-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .give-up-btn {
+    font-size: 0.5rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
+
+/* Sparkle effect for correct answers */
+.sparkle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fbbf24;
+  border-radius: 50%;
+  animation: sparkleAnim 1s ease-out forwards;
+}
+
+@keyframes sparkleAnim {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(180deg) translateY(-100px);
+    opacity: 0;
+  }
+}
+
+/* Loading Pokeball spinner */
+.loading-pokeball {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.pokeball-spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ef4444 0%, #ef4444 45%, #1e293b 45%, #1e293b 55%, #f8fafc 55%, #f8fafc 100%);
+  border: 4px solid #1e293b;
+  animation: pokeballSpin 1s linear infinite;
+  position: relative;
+}
+
+.pokeball-spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  background: #f8fafc;
+  border: 4px solid #1e293b;
+  border-radius: 50%;
+}
+
+@keyframes pokeballSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.quizz-canvas.loading {
+  opacity: 0.3;
+}
+
+/* Reveal overlay effect */
+.reveal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, transparent 0%, rgba(251, 191, 36, 0.1) 100%);
+  pointer-events: none;
+  animation: revealPulse 0.5s ease-out;
+}
+
+@keyframes revealPulse {
+  0% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* Victory and defeat animations */
+.victory-animation {
+  animation: victoryBounce 0.5s ease-in-out 3;
+}
+
+.defeat-animation {
+  animation: defeatShake 0.3s ease-in-out 2;
+}
+
+@keyframes victoryBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.05); }
+}
+
+@keyframes defeatShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Image container enhancements */
+.quizz-image-container {
+  background: linear-gradient(180deg,
+    rgba(30, 41, 59, 0.8) 0%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+  border: 4px solid #475569;
+  border-radius: 16px;
+  padding: 1rem;
+  position: relative;
+  box-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Battle grass effect at bottom */
+.quizz-image-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(34, 197, 94, 0.1) 50%,
+    rgba(22, 163, 74, 0.2) 100%
+  );
+  border-radius: 0 0 12px 12px;
+  pointer-events: none;
 }

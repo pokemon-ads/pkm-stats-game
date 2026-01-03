@@ -27,6 +27,10 @@ export const TIME_ATTACK_DURATION = 60; // seconds
 export const BLUR_STEPS = 5; // Number of steps to unblur
 export const MAX_BLUR = 20; // Max blur in px
 
+// Reveal duration in milliseconds
+export const REVEAL_DURATION_CORRECT = 2000; // 2 seconds for correct answers
+export const REVEAL_DURATION_WRONG = 2000; // 2 seconds for wrong answers / give up
+
 export const INITIAL_STATS = {
   currentStreak: 0,
   bestStreak: 0,

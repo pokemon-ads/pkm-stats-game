@@ -1,35 +1,93 @@
-import React, { useContext, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useContext, useMemo, useCallback, useState, useEffect, useRef, memo } from 'react';
 import { ClickerContext } from '../context/ClickerContext';
 import { AVAILABLE_BOOSTS, calculateBoostCost } from '../config/boosts';
 import { ITEM_CATEGORIES, CATEGORY_INFO, type ItemCategory } from '../utils/itemSprites';
+import { formatNumberCompact as formatNumber, formatTimeCompact as formatTime } from '../utils/formatNumber';
 import type { Boost, Upgrade } from '../types/game';
 import '../styles/Shop.css';
 
-// Format large numbers
-const formatNumber = (num: number): string => {
-  if (num >= 1e18) return (num / 1e18).toFixed(1) + 'Qi';
-  if (num >= 1e15) return (num / 1e15).toFixed(1) + 'Qa';
-  if (num >= 1e12) return (num / 1e12).toFixed(1) + 'T';
-  if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-  return Math.floor(num).toLocaleString();
-};
+// Memoized slot component to prevent unnecessary re-renders
+const ShopSlot = memo(({
+  item,
+  index,
+  isSelected,
+  isPurchasing,
+  canAfford,
+  onSelect,
+  onDoubleClick,
+  onMouseEnter,
+  onMouseLeave
+}: {
+  item: ShopItem | null;
+  index: number;
+  isSelected: boolean;
+  isPurchasing: boolean;
+  canAfford: boolean;
+  onSelect: () => void;
+  onDoubleClick: () => void;
+  onMouseEnter: (e: React.MouseEvent) => void;
+  onMouseLeave: () => void;
+}) => {
+  const category = item ? getItemCategory(item.icon) : null;
+  const categoryInfo = category ? CATEGORY_INFO[category] : null;
+  const hasPokemon = item?.targetPokemonId;
+  
+  return (
+    <div
+      className={`box-slot ${item ? 'has-item' : 'empty'} ${isSelected ? 'selected' : ''} ${isPurchasing ? 'purchasing' : ''} ${item?.isActive ? 'active-boost' : ''} ${canAfford ? 'affordable' : ''} ${hasPokemon ? 'has-pokemon' : ''}`}
+      onClick={onSelect}
+      onDoubleClick={onDoubleClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={categoryInfo ? { '--slot-color': categoryInfo.color } as React.CSSProperties : undefined}
+    >
+      {item ? (
+        <>
+          <div className="slot-bg" style={{ borderColor: categoryInfo?.color }}></div>
+          
+          {/* Pokemon sprite in background */}
+          {item.targetPokemonId && (
+            <img
+              src={getPokemonSpriteUrl(item.targetPokemonId)}
+              alt=""
+              className="slot-pokemon-bg"
+              loading="lazy"
+            />
+          )}
+          
+          {/* Item sprite */}
+          {item.icon && (
+            <img
+              src={item.icon}
+              alt={item.name}
+              className={`slot-sprite ${item.targetPokemonId ? 'with-pokemon' : ''}`}
+              loading="lazy"
+            />
+          )}
+          
+          {/* Status indicators */}
+          {item.isActive && (
+            <div className="slot-status active">
+              <span>{formatTime(item.activeRemaining || 0)}</span>
+            </div>
+          )}
+          {!item.isActive && (item.cooldownRemaining ?? 0) > 0 && (
+            <div className="slot-status cooldown">
+              <span>⏳</span>
+            </div>
+          )}
+          {canAfford && !item.isActive && !(item.cooldownRemaining ?? 0) && (
+            <div className="slot-indicator available"></div>
+          )}
+        </>
+      ) : (
+        <div className="slot-empty-bg"></div>
+      )}
+    </div>
+  );
+});
 
-// Format time remaining
-const formatTime = (seconds: number): string => {
-  if (seconds >= 3600) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h${m}m`;
-  }
-  if (seconds >= 60) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  }
-  return `0:${seconds.toString().padStart(2, '0')}`;
-};
+ShopSlot.displayName = 'ShopSlot';
 
 // Get item category for styling
 const getItemCategory = (iconUrl?: string): ItemCategory => {
@@ -62,18 +120,20 @@ type ShopItem = {
 
 export const Shop: React.FC = () => {
   const { state, dispatch } = useContext(ClickerContext);
-  const [selectedBox, setSelectedBox] = useState<'consumables' | 'equipment' | 'special'>('consumables');
+  const [selectedBox, setSelectedBox] = useState<'consumables' | 'equipment' | 'special'>('equipment');
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [hoveredItem, setHoveredItem] = useState<{ item: ShopItem; slotIndex: number; rect: DOMRect } | null>(null);
   const [purchaseEffect, setPurchaseEffect] = useState<string | null>(null);
   
-  // Force update for timers
-  const [, setForceUpdate] = useState(0);
+  // Force update for timers - only update if there are active boosts or cooldowns
+  const [timerTick, setTimerTick] = useState(0);
+  const hasActiveTimers = state.activeBoosts.length > 0 || state.boostCooldowns.some(c => Date.now() < c.availableAt);
 
   useEffect(() => {
-    const timer = setInterval(() => setForceUpdate(n => n + 1), 1000);
+    if (!hasActiveTimers) return;
+    const timer = setInterval(() => setTimerTick(n => n + 1), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [hasActiveTimers]);
 
   // Map helper IDs to Pokemon IDs
   const helperPokemonMap = useMemo(() => {
@@ -84,6 +144,11 @@ export const Shop: React.FC = () => {
       }
     });
     return map;
+  }, [state.helpers]);
+
+  // Get unlocked helper IDs
+  const unlockedHelperIds = useMemo(() => {
+    return new Set(state.helpers.filter(h => h.unlocked).map(h => h.id));
   }, [state.helpers]);
 
   // --- ACTIONS ---
@@ -130,12 +195,26 @@ export const Shop: React.FC = () => {
   }, [state.activeBoosts]);
 
   // --- DATA PREP ---
+  // Memoize energyPerSecond to avoid recalculating boost costs too often
+  const energyPerSecondRef = useRef(state.energyPerSecond);
+  const [stableEnergyPerSecond, setStableEnergyPerSecond] = useState(state.energyPerSecond);
+  
+  // Only update stable energy per second when it changes significantly (>10%)
+  useEffect(() => {
+    const diff = Math.abs(state.energyPerSecond - energyPerSecondRef.current);
+    const threshold = energyPerSecondRef.current * 0.1;
+    if (diff > threshold || energyPerSecondRef.current === 0) {
+      energyPerSecondRef.current = state.energyPerSecond;
+      setStableEnergyPerSecond(state.energyPerSecond);
+    }
+  }, [state.energyPerSecond]);
+
   const boostItems: ShopItem[] = useMemo(() => {
     return AVAILABLE_BOOSTS.map(boost => ({
       id: boost.id,
       name: boost.name,
       description: boost.description,
-      cost: calculateBoostCost(boost, state.energyPerSecond),
+      cost: calculateBoostCost(boost, stableEnergyPerSecond),
       icon: boost.icon,
       type: 'boost' as const,
       category: boost.type,
@@ -144,11 +223,13 @@ export const Shop: React.FC = () => {
       cooldownRemaining: getCooldownRemaining(boost),
       activeRemaining: getActiveBoostRemaining(boost.id),
     }));
-  }, [state.energyPerSecond, getCooldownRemaining, getActiveBoostRemaining]);
+  }, [stableEnergyPerSecond, getCooldownRemaining, getActiveBoostRemaining, timerTick]);
 
   const upgradeItems: ShopItem[] = useMemo(() => {
     return state.upgrades
       .filter(u => !u.purchased)
+      // Filter: Show if no targetId (global/click) OR if targetId is in unlocked helpers
+      .filter(u => !u.targetId || unlockedHelperIds.has(u.targetId))
       .slice(0, 30)
       .map(upgrade => {
         const targetHelper = upgrade.targetId ? helperPokemonMap[upgrade.targetId] : null;
@@ -185,7 +266,7 @@ export const Shop: React.FC = () => {
           targetPokemonName: targetHelper?.name,
         };
       });
-  }, [state.upgrades, helperPokemonMap]);
+  }, [state.upgrades, helperPokemonMap, unlockedHelperIds]);
 
   const activeBoosts = useMemo(() => {
     return state.activeBoosts
@@ -313,68 +394,20 @@ export const Shop: React.FC = () => {
         {/* Main Grid Area - PC Box Style */}
         <div className="pc-box">
           <div className="box-grid">
-            {gridItems.map((item, index) => {
-              const category = item ? getItemCategory(item.icon) : null;
-              const categoryInfo = category ? CATEGORY_INFO[category] : null;
-              const isSelected = selectedItem?.id === item?.id;
-              const isPurchasing = purchaseEffect === item?.id;
-              const itemCanAfford = item ? state.energy >= item.cost : false;
-              const hasPokemon = item?.targetPokemonId;
-              
-              return (
-                <div
-                  key={item?.id || `empty-${index}`}
-                  className={`box-slot ${item ? 'has-item' : 'empty'} ${isSelected ? 'selected' : ''} ${isPurchasing ? 'purchasing' : ''} ${item?.isActive ? 'active-boost' : ''} ${item && itemCanAfford ? 'affordable' : ''} ${hasPokemon ? 'has-pokemon' : ''}`}
-                  onClick={() => item && setSelectedItem(item)}
-                  onDoubleClick={() => handleDoubleClick(item)}
-                  onMouseEnter={(e) => item && handleMouseEnter(item, index, e)}
-                  onMouseLeave={handleMouseLeave}
-                  style={categoryInfo ? { '--slot-color': categoryInfo.color } as React.CSSProperties : undefined}
-                >
-                  {item ? (
-                    <>
-                      <div className="slot-bg" style={{ borderColor: categoryInfo?.color }}></div>
-                      
-                      {/* Pokemon sprite in background */}
-                      {item.targetPokemonId && (
-                        <img 
-                          src={getPokemonSpriteUrl(item.targetPokemonId)} 
-                          alt="" 
-                          className="slot-pokemon-bg"
-                        />
-                      )}
-                      
-                      {/* Item sprite */}
-                      {item.icon && (
-                        <img 
-                          src={item.icon} 
-                          alt={item.name} 
-                          className={`slot-sprite ${item.targetPokemonId ? 'with-pokemon' : ''}`}
-                        />
-                      )}
-                      
-                      {/* Status indicators */}
-                      {item.isActive && (
-                        <div className="slot-status active">
-                          <span>{formatTime(item.activeRemaining || 0)}</span>
-                        </div>
-                      )}
-                      {!item.isActive && (item.cooldownRemaining ?? 0) > 0 && (
-                        <div className="slot-status cooldown">
-                          <span>⏳</span>
-                        </div>
-                      )}
-                      {itemCanAfford && !item.isActive && !(item.cooldownRemaining ?? 0) && (
-                        <div className="slot-indicator available"></div>
-                      )}
-
-                    </>
-                  ) : (
-                    <div className="slot-empty-bg"></div>
-                  )}
-                </div>
-              );
-            })}
+            {gridItems.map((item, index) => (
+              <ShopSlot
+                key={item?.id || `empty-${index}`}
+                item={item}
+                index={index}
+                isSelected={selectedItem?.id === item?.id}
+                isPurchasing={purchaseEffect === item?.id}
+                canAfford={item ? state.energy >= item.cost : false}
+                onSelect={() => item && setSelectedItem(item)}
+                onDoubleClick={() => handleDoubleClick(item)}
+                onMouseEnter={(e) => item && handleMouseEnter(item, index, e)}
+                onMouseLeave={handleMouseLeave}
+              />
+            ))}
           </div>
           
           {/* Box Label */}
@@ -451,15 +484,6 @@ export const Shop: React.FC = () => {
               <span className="empty-text">Sélectionnez un objet</span>
             </div>
           )}
-        </div>
-
-        {/* Energy Display */}
-        <div className="pc-energy">
-          <span className="energy-label">ÉNERGIE</span>
-          <span className="energy-value">
-            <span className="energy-bolt">⚡</span>
-            {formatNumber(state.energy)}
-          </span>
         </div>
       </div>
 

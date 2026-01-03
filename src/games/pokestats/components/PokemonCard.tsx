@@ -149,7 +149,7 @@ export const PokemonCard = ({
             } else {
               // Hidden state: show mystery cards OR already selected stats from previous rounds
               if (pokemonWithStat) {
-                // This stat was selected in a previous round - show it with sprite
+                // This stat was selected in a previous round - show it with sprite (no tooltip during game)
                 const isBestChoice = isBestStatForPokemon(pokemonWithStat.pokemon, statName)
                 return (
                   <div

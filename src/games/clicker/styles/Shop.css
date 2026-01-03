@@ -273,7 +273,6 @@
    ============================================ */
 .box-slot {
   position: relative;
-  aspect-ratio: 1;
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;

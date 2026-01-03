@@ -906,6 +906,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: visible;
 }
 
 .stats-selection-blind h3 {
@@ -1126,6 +1127,7 @@
   gap: 0.25rem;
   position: relative;
   transition: all 0.3s;
+  overflow: visible;
 }
 
 .stat-with-sprite {
@@ -1140,6 +1142,14 @@
   height: 40px;
   image-rendering: pixelated;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Ensure stat values use proper font rendering, not pixelated */
+.stat-with-sprite .stat-value {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  image-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .stat-card.stat-chosen {
@@ -1233,6 +1243,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  overflow: visible;
 }
 
 .stat-button {
@@ -1274,6 +1285,7 @@
   font-size: 1.8rem;
   font-weight: 700;
   color: #ffb347;
+  font-family: inherit;
 }
 
 /* Game Result Compact */
@@ -1299,7 +1311,6 @@
   border: 1px solid rgba(255, 179, 71, 0.3);
   background: linear-gradient(145deg, rgba(40, 40, 50, 0.95) 0%, rgba(25, 25, 35, 0.98) 100%);
   position: relative;
-  overflow: hidden;
 }
 
 .result-header-compact.victory::before {
@@ -1310,13 +1321,13 @@
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, #ffb347, #ff6b6b);
+  border-radius: 20px 20px 0 0;
 }
 
 .result-header-compact.defeat {
   border: 1px solid rgba(255, 107, 107, 0.3);
   background: linear-gradient(145deg, rgba(40, 40, 50, 0.95) 0%, rgba(25, 25, 35, 0.98) 100%);
   position: relative;
-  overflow: hidden;
 }
 
 .result-header-compact.defeat::before {
@@ -1327,6 +1338,7 @@
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, #ff6b6b, #ee5a5a);
+  border-radius: 20px 20px 0 0;
 }
 
 .result-title-row {
@@ -1569,30 +1581,40 @@
 
 .all-stats-tooltip {
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(20, 20, 20, 0.98);
-  border: 1px solid #ffb347;
-  border-radius: 12px;
-  padding: 1rem;
-  width: 200px;
-  z-index: 1000;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  width: 160px;
+  z-index: 9999;
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  margin-bottom: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 0.5rem;
   pointer-events: none;
+  text-align: left;
+}
+
+.stat-card.stat-chosen:hover .all-stats-tooltip,
+.stat-card.stat-chosen:focus .all-stats-tooltip,
+.stat-card.stat-chosen:focus-within .all-stats-tooltip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .all-stats-tooltip h5 {
   margin: 0 0 0.5rem 0;
-  color: #ffb347;
-  font-size: 0.9rem;
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 179, 71, 0.2);
-  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.4rem;
 }
 
 .all-stats-grid {
@@ -1604,21 +1626,32 @@
 .stat-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.8rem;
-  color: #aaa;
+  padding: 0.2rem 0;
 }
 
 .stat-row.max-stat {
-  color: #ffd700;
+  color: #4caf50;
   font-weight: 700;
 }
 
+.stat-row .stat-label {
+  color: #888;
+  font-weight: 600;
+}
+
 .stat-row .stat-val {
-  color: #ddd;
+  color: #333;
+  font-weight: 600;
+}
+
+.stat-row.max-stat .stat-label {
+  color: #4caf50;
 }
 
 .stat-row.max-stat .stat-val {
-  color: #ffd700;
+  color: #4caf50;
 }
 
 /* Result Buttons Compact */
